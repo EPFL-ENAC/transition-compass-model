@@ -4,6 +4,8 @@ import pandas as pd
 import faostat
 import os
 import re
+
+from fontTools.cu2qu.cu2qu import calc_intersect
 from model.common.data_matrix_class import DataMatrix
 from model.common.constant_data_matrix_class import ConstantDataMatrix
 from _database.pre_processing.api_routines_CH import get_data_api_CH
@@ -250,6 +252,7 @@ def get_crop_prod(table_id, file, years_ots):
                 "Maïs grain",
                 "Autres céréales",
                 "Maïs d'ensilage et maïs vert",
+                "Méteil et autres céréales fourragères",
             ],
             "crop-fruit": [
                 "Baies annuelles",
@@ -277,7 +280,10 @@ def get_crop_prod(table_id, file, years_ots):
                 "Soja",
             ],
             "crop-starch": ["Pommes de terre"],
-            "crop-sugarcrop": ["Betteraves sucrières"],
+            "crop-sugarcrop": [
+                "Betteraves sucrières",
+                "Betteraves fourragères",
+            ],
             "crop-veg": [
                 "Cultures maraîchères de plein champ",
                 "Cultures maraîchères sous abri",
@@ -303,14 +309,11 @@ def get_crop_prod(table_id, file, years_ots):
                 "Autres pépinières",
                 "Surfaces à litières",
                 "Haies, bosquets champêtres et berges boisées",
-                "Betteraves fourragères",
                 "Matières premières renouvelables annuelles",
                 "Matières premières renouvelables pluriannuelles",
                 "Autres SAU",
-                "Tabac",
                 "Jachère",
                 "Autres terres ouvertes",
-                "Méteil et autres céréales fourragères",
             ],
             "other": [
                 "Cultures horticoles de plein champ annuelles",
@@ -318,6 +321,7 @@ def get_crop_prod(table_id, file, years_ots):
                 "Autres cultures pérennes",
                 "Autres cultures sous abri",
                 "Cultures sous abri en général",
+                "Tabac",
             ],
         }
 
@@ -937,6 +941,65 @@ dm_feed_split.filter({"Variables": ["cal_agr_demand_feed"]}, inplace=True)
 DM_agriculture["fxa"]["cal_agr_demand_feed"] = dm_feed_split
 
 ## Land use
+
+
+cal_agr_lus_land = dm_crop_land.copy()
+cal_agr_lus_land.groupby(
+    {
+        "grassland": ["grassland"],
+        "cropland": [
+            "crop-cereal",
+            "crop-fruit",
+            "crop-oilcrop",
+            "crop-pulse",
+            "crop-starch",
+            "crop-sugarcrop",
+            "crop-veg",
+            "other",
+            "pro-bev-beer",
+            "pro-bev-wine",
+        ],
+    },
+    dim="Categories1",
+    inplace=True,
+)
+cal_agr_lus_land.rename_col("agr_land-use", "cal_agr_lus_land", dim="Variables")
+
+### Overwriting DM
+DM_agriculture["fxa"]["cal_agr_lus_land"] = cal_agr_lus_land
+
+## Fertilizer Emissions (N2O)
+dm_nitrogen = DM_agriculture["ots"]["climate-smart-crop"][
+    "climate-smart-crop_input-use"
+]
+dm_nitrogen.filter({"Categories1": ["nitrogen"]}, inplace=True)
+dm_ef_nitrogen = DM_agriculture["fxa"]["agr_emission_fertilizer"]
+dm_ef_nitrogen.filter({"Years": years_ots}, inplace=True)
+dm_land = cal_agr_lus_land.copy()
+dm_land.groupby(
+    {
+        "agriculture-land": ["grassland", "cropland"],
+    },
+    dim="Categories1",
+    inplace=True,
+)
+
+arr_n_emission = (
+    dm_nitrogen[:, :, "agr_climate-smart-crop_input-use", :]
+    * dm_ef_nitrogen[:, :, np.newaxis, "fxa_agr_emission_fertilizer"]
+    * dm_land[:, :, "cal_agr_lus_land", :]
+)
+dm_nitrogen.add(arr_n_emission, dim="Categories1", col_label=["emissions"], unit=["t"])
+
+dm_nitrogen.filter({"Categories1": ["emissions"]}, inplace=True)
+dm_nitrogen = dm_nitrogen.flatten()
+dm_nitrogen.rename_col(
+    "agr_climate-smart-crop_input-use_emissions",
+    "cal_agr_crop_emission_N2O-emission_fertilizer",
+    dim="Variables",
+)
+
+DM_agriculture["fxa"]["cal_agr_crop_emission_N2O-emission_fertilizer"] = dm_nitrogen
 
 
 print("Hello")
