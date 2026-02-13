@@ -511,6 +511,8 @@ def difference_with_data_graph(dm_model, dm_data, title):
     dm_data.rename_col(dm_data.col_labels["Variables"][0],'data',"Variables")
     dm_graph = dm_model.copy()
     dm_graph.append(dm_data, "Variables")
+    if len(dm_graph.dim_labels) == 4:
+        dm_graph.datamatrix_plot(title=title)
     if len(dm_graph.dim_labels) == 5:
         dm_graph.flatten().datamatrix_plot(title=title)
     if len(dm_graph.dim_labels) == 6:
