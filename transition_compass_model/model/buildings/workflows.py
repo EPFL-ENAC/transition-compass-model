@@ -327,37 +327,37 @@ def bld_floor_area_workflow(DM_floor_area, dm_lfs, cdm_const, years_ots, years_f
     DM_industry = {}
     DM_industry["floor-area"] = dm_industry.copy()
 
-    # make dummy domapp
-    dm_domapp = dm_industry.filter(
-        {
-            "Variables": [
-                "bld_floor-area_new",
-                "bld_floor-area_waste",
-                "bld_floor-area_stock",
-            ]
-        }
-    )
-    dm_domapp.rename_col_regex("floor-area", "domapp", "Variables")
-    dm_domapp.rename_col("residential", "fridge", "Categories1")
-    missing = ["freezer", "dishwasher", "wmachine", "dryer"]
-    for m in missing:
-        dm_domapp.add(np.nan, "Categories1", m, "number", True)
-    dm_domapp.sort("Categories1")
-    dm_domapp[...] = 100
-    for v in dm_domapp.col_labels["Variables"]:
-        dm_domapp.units[v] = "number"
-    DM_industry["domapp"] = dm_domapp.copy()
+    # # make dummy domapp
+    # dm_domapp = dm_industry.filter(
+    #     {
+    #         "Variables": [
+    #             "bld_floor-area_new",
+    #             "bld_floor-area_waste",
+    #             "bld_floor-area_stock",
+    #         ]
+    #     }
+    # )
+    # dm_domapp.rename_col_regex("floor-area", "domapp", "Variables")
+    # dm_domapp.rename_col("residential", "fridge", "Categories1")
+    # missing = ["freezer", "dishwasher", "wmachine", "dryer"]
+    # for m in missing:
+    #     dm_domapp.add(np.nan, "Categories1", m, "number", True)
+    # dm_domapp.sort("Categories1")
+    # dm_domapp[...] = 100
+    # for v in dm_domapp.col_labels["Variables"]:
+    #     dm_domapp.units[v] = "number"
+    # DM_industry["domapp"] = dm_domapp.copy()
 
-    # make dummy electronics
-    dm_elec = dm_domapp.filter({"Categories1": ["dishwasher"]})
-    dm_elec.rename_col_regex("domapp", "electronics", "Variables")
-    dm_elec.rename_col("dishwasher", "phone", "Categories1")
-    missing = ["computer", "tv"]
-    for m in missing:
-        dm_elec.add(np.nan, "Categories1", m, "number", True)
-    dm_elec.sort("Categories1")
-    dm_elec[...] = 100
-    DM_industry["electronics"] = dm_elec.copy()
+    # # make dummy electronics
+    # dm_elec = dm_domapp.filter({"Categories1": ["dishwasher"]})
+    # dm_elec.rename_col_regex("domapp", "electronics", "Variables")
+    # dm_elec.rename_col("dishwasher", "phone", "Categories1")
+    # missing = ["computer", "tv"]
+    # for m in missing:
+    #     dm_elec.add(np.nan, "Categories1", m, "number", True)
+    # dm_elec.sort("Categories1")
+    # dm_elec[...] = 100
+    # DM_industry["electronics"] = dm_elec.copy()
 
     dm_stock = dm_bld_tot.filter({"Variables": ["bld_floor-area_stock"]})
     dm_stock.array = np.maximum(dm_stock.array, 0)
@@ -719,7 +719,7 @@ def bld_appliances_workflow(DM_appliances, dm_pop):
     DM_appliance_out = {
         "power": dm_elec_tot,
         "industry": dm_appliance.filter(
-            {"Variables": ["bld_appliances_new", "bld_appliances_waste"]}
+            {"Variables": ["bld_appliances_stock", "bld_appliances_new", "bld_appliances_waste"]}
         ),
     }
 
