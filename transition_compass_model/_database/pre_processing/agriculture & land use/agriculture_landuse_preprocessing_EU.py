@@ -3017,7 +3017,7 @@ def climate_smart_livestock_processing(
         "Amount excreted in manure (N content)",
         "Manure left on pasture (N content)",
         "Manure applied to soils (N content)",
-        "Losses from manure treated (N content)",
+        "Manure management (manure treated, N content)",
     ]
 
     list_items = ["All Animals > (List)"]
@@ -3178,7 +3178,7 @@ def climate_smart_livestock_processing(
         / pivot_df["Amount excreted in manure (N content)"]
     )
     pivot_df["Manure treated [%]"] = (
-        pivot_df["Losses from manure treated (N content)"]
+        pivot_df["Manure management (manure treated, N content)"]
         / pivot_df["Amount excreted in manure (N content)"]
     )
     pivot_df["Manure pasture [%]"] = (
@@ -3197,7 +3197,7 @@ def climate_smart_livestock_processing(
     pivot_df = pivot_df.drop(
         columns=[
             "Manure applied to soils (N content)",
-            "Losses from manure treated (N content)",
+            "Manure management (manure treated, N content)",
             "Manure left on pasture (N content)",
             "Amount excreted in manure (N content)",
             "Value",
@@ -7281,8 +7281,8 @@ def land_calibration(list_countries):
 
     list_items = [
         "-- Cropland",
-        "--- Temporary crops",
-        "--- Temporary fallow",
+        "---- Temporary crops",
+        "---- Temporary fallow",
         "-- Permanent meadows and pastures",
     ]
 
@@ -7969,14 +7969,14 @@ def manure_fxa(list_countries, df_liv_emissions, df_manure_n_fxa, df_manure_ch4_
             "Aggregation",
             "Manure left on pasture (N content)",
             "Manure applied to soils (N content)",
-            "Losses from manure treated (N content)",
+            "Manure management (manure treated, N content)",
         ]
     ]
     df_manure_n_fxa.rename(
         columns={
             "Manure left on pasture (N content)": "N2O Pasture",
             "Manure applied to soils (N content)": "N2O Applied",
-            "Losses from manure treated (N content)": "N2O Treated",
+            "Manure management (manure treated, N content)": "N2O Treated",
         },
         inplace=True,
     )
