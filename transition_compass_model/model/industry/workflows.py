@@ -873,32 +873,30 @@ def energy_demand(dm_material_production_bytech, CDM_const):
         dm_temp.change_unit('material-production', factor=1e-3, old_unit='kt', new_unit='Mt')
         dm_energy_demand.array = dm_energy_demand.array * dm_temp.array[...,np.newaxis]
         dm_energy_demand.units["energy-demand-" + f] = "TWh"
-        DM_energy_demand[f] = dm_energy_demand
+        DM_energy_demand[f + "_bytechcarr"] = dm_energy_demand
 
-    # get overall energy demand
-    dm_energy_demand_temp = DM_energy_demand["excl-feedstock"].copy()
-    dm_energy_demand_temp.append(DM_energy_demand["feedstock"], dim = "Variables")
-    dm_energy_demand_bytechcarr = DM_energy_demand["excl-feedstock"].copy()
-    dm_energy_demand_bytechcarr.array = np.nansum(dm_energy_demand_temp.array, axis = -3, keepdims= True) # here we are summing feedstock and excluding feedstock together
-    dm_energy_demand_bytechcarr.rename_col(col_in = 'energy-demand-excl-feedstock', col_out = "energy-demand", dim = "Variables")
-    dm_energy_demand_feedstock_bytechcarr = DM_energy_demand["feedstock"]
-
-    DM_energy_demand = {"bytechcarr" : dm_energy_demand_bytechcarr, 
-                        "feedstock_bytechcarr" : dm_energy_demand_feedstock_bytechcarr}
+    # # get overall energy demand
+    # dm_energy_demand_temp = DM_energy_demand["excl-feedstock_bytechcarr"].copy()
+    # dm_energy_demand_temp.append(DM_energy_demand["feedstock_bytechcarr"], dim = "Variables")
+    # dm_energy_demand_bytechcarr = DM_energy_demand["excl-feedstock_bytechcarr"].copy()
+    # dm_energy_demand_bytechcarr.array = np.nansum(dm_energy_demand_temp.array, axis = -3, keepdims= True) # here we are summing feedstock and excluding feedstock together
+    # dm_energy_demand_bytechcarr.rename_col(col_in = 'energy-demand-excl-feedstock', col_out = "energy-demand", dim = "Variables")
+    # DM_energy_demand["total_bytechcarr"] = dm_energy_demand_bytechcarr.copy()
+    # DM_energy_demand["total_bycarr"] = DM_energy_demand["total_bytechcarr"].group_all(dim='Categories1', inplace=False)
     
     # aggregate energy demand by energy carrier
-    DM_energy_demand["bycarr"] = DM_energy_demand["bytechcarr"].group_all(dim='Categories1', inplace=False)
+    DM_energy_demand["excl-feedstock_bycarr"] = DM_energy_demand["excl-feedstock_bytechcarr"].group_all(dim='Categories1', inplace=False)
 
     # return
     return DM_energy_demand
 
-def calibration_energy_demand(DM_cal, dm_energy_demand_bycarr, dm_energy_demand_bytechcarr, 
+def calibration_energy_demand(DM_cal, dm_energy_demand_exclfeedstock_bycarr, dm_energy_demand_exclfeedstock_bytechcarr, 
                               DM_energy_demand, years_setting):
     
     # this is by material-technology and carrier
 
     # get calibration rates
-    dm_energy_demand_calib_rates_bycarr = calibration_rates(dm = dm_energy_demand_bycarr.copy(), 
+    dm_energy_demand_calib_rates_bycarr = calibration_rates(dm = dm_energy_demand_exclfeedstock_bycarr.copy(), 
                                                             dm_cal = DM_cal["energy-demand"].copy(), 
                                                             calibration_start_year = 2000, calibration_end_year = 2021,
                                                             years_setting=years_setting)
@@ -910,26 +908,24 @@ def calibration_energy_demand(DM_cal, dm_energy_demand_bycarr, dm_energy_demand_
     #     dm_energy_demand_calib_rates_bycarr.array[:,idx[i],...] = dm_energy_demand_calib_rates_bycarr.array[:,idx[2000],...]
 
     # store dm_energy_demand_calib_rates_bycarr
-    DM_energy_demand["calib_rates_bycarr"] = dm_energy_demand_calib_rates_bycarr
+    DM_energy_demand["calib_rates_bycarr"] = dm_energy_demand_calib_rates_bycarr.copy()
 
     # do calibration
-    dm_energy_demand_bycarr.array = dm_energy_demand_bycarr.array * dm_energy_demand_calib_rates_bycarr.array
+    dm_energy_demand_exclfeedstock_bycarr.array = dm_energy_demand_exclfeedstock_bycarr.array * dm_energy_demand_calib_rates_bycarr.array
 
     # do calibration for each technology (by applying aggregate calibration rates)
-    dm_energy_demand_bytechcarr.array = dm_energy_demand_bytechcarr.array * dm_energy_demand_calib_rates_bycarr.array[:,:,:,np.newaxis,:]
+    dm_energy_demand_exclfeedstock_bytechcarr.array = dm_energy_demand_exclfeedstock_bytechcarr.array * dm_energy_demand_calib_rates_bycarr.array[:,:,:,np.newaxis,:]
         
     # return
     return
 
 def technology_development(dm_technology_development, dm_energy_demand_bytechcarr):
-    
-    dm_temp = dm_energy_demand_bytechcarr.copy()
 
     # get energy demand after technology development (tech dev improves energy efficiency)
-    dm_temp.array = dm_temp.array * (1 - dm_technology_development.array[...,np.newaxis])
+    dm_energy_demand_bytechcarr.array = dm_energy_demand_bytechcarr.array * (1 - dm_technology_development.array[...,np.newaxis])
 
     # return
-    return dm_temp
+    return
 
 def apply_energy_switch(dm_energy_carrier_mix, dm_energy_demand_bytechcarr):
     
@@ -1003,13 +999,18 @@ def apply_energy_switch(dm_energy_carrier_mix, dm_energy_demand_bytechcarr):
     # return
     return
 
-def add_specific_energy_demands(dm_energy_demand_bytechcarr, 
+def add_specific_energy_demands(dm_energy_demand_exclfeedstock_bytechcarr, 
                                 dm_energy_demand_feedstock_bytechcarr, DM_energy_demand, dict_groupby):
 
     # get demand for biomaterial from feedstock
     dm_energy_demand_feedstock_bycarr = dm_energy_demand_feedstock_bytechcarr.group_all("Categories1", inplace = False)
     dm_energy_demand_feedstock_bybiomat = \
         dm_energy_demand_feedstock_bycarr.filter({"Categories1" : ["solid-bio", 'gas-bio', 'liquid-bio']})
+        
+    # get total energy demand
+    dm_energy_demand_bytechcarr = dm_energy_demand_exclfeedstock_bytechcarr.copy()
+    dm_energy_demand_bytechcarr.append(dm_energy_demand_feedstock_bytechcarr, "Variables")
+    dm_energy_demand_bytechcarr.groupby({"energy-demand" : ['energy-demand-excl-feedstock','energy-demand-feedstock']}, "Variables", inplace=True)
 
     # get demand for industrial waste
     dm_energy_demand_bycarr = dm_energy_demand_bytechcarr.group_all("Categories1", inplace = False)
@@ -1043,16 +1044,11 @@ def add_specific_energy_demands(dm_energy_demand_bytechcarr,
     DM_energy_demand["bycarr"] = dm_energy_demand_bycarr
     DM_energy_demand["bytech"] = dm_energy_demand_bytech
 
-    # clean
-    del dm_energy_demand_bymatcarr, dm_energy_demand_feedstock_bybiomat, dm_energy_demand_indwaste, \
-        dm_energy_demand_bioener, dm_energy_demand_bymat, dm_energy_demand_bioener_bybiomat, \
-        dm_energy_demand_bycarr, dm_energy_demand_feedstock_bycarr
-
     # return
     return
 
 def emissions(cdm_const_emission_factor_process, cdm_const_emission_factor, 
-              dm_energy_demand_bytechcarr, dm_material_production_bytech):
+              dm_energy_demand_exclfeedstock_bytechcarr, dm_material_production_bytech):
     
     # get emission factors
     cdm_temp1 = cdm_const_emission_factor_process
@@ -1061,8 +1057,8 @@ def emissions(cdm_const_emission_factor_process, cdm_const_emission_factor,
     # emissions = energy demand * emission factor
 
     # combustion
-    dm_emissions_combustion = dm_energy_demand_bytechcarr.copy()
-    dm_emissions_combustion.rename_col('energy-demand', "emissions", "Variables")
+    dm_emissions_combustion = dm_energy_demand_exclfeedstock_bytechcarr.copy()
+    dm_emissions_combustion.rename_col('energy-demand-excl-feedstock', "emissions", "Variables")
     dm_emissions_combustion.units["emissions"] = "Mt"
     dm_emissions_combustion.rename_col("emissions", "emissions_CH4", "Variables")
     dm_emissions_combustion.deepen("_", based_on = "Variables")
@@ -1099,7 +1095,9 @@ def emissions(cdm_const_emission_factor_process, cdm_const_emission_factor,
     dm_emissions_bygastech.switch_categories_order("Categories1","Categories2")
 
     # put in dict
-    DM_emissions = {"bygastech" : dm_emissions_bygastech,
+    DM_emissions = {"combustion" : dm_emissions_combustion,
+                    "process" : dm_emissions_process,
+                    "bygastech" : dm_emissions_bygastech,
                     "combustion_bio" : dm_emissions_combustion_bio,
                     "bygastech_beforecc" : dm_emissions_bygastech}
     

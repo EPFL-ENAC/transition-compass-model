@@ -20,71 +20,79 @@ def get_interface(current_file_directory, interface, from_sector, to_sector, cou
             DM.filter({'Country': country_list}, inplace=True)
     return DM
 
-def variables_for_tpe(dm_cost_material_production_capex, dm_cost_CO2_capt_w_cc_capex,
-                      dm_emissions_bygas, 
-                      dm_material_production_bytech, dm_material_production_bymat,
-                      dm_energy_demand_bymat, dm_energy_demand_bymatcarr, 
-                      dm_energy_demand_bioener):
+# def variables_for_tpe(dm_cost_material_production_capex, dm_cost_CO2_capt_w_cc_capex,
+#                       dm_emissions_bygas, 
+#                       dm_material_production_bytech, dm_material_production_bymat,
+#                       dm_energy_demand_bymat, dm_energy_demand_bymatcarr, 
+#                       dm_energy_demand_bioener
+#                       ):
     
-    # TODO: recheck variables' names compared to TPE (while running TPE)
+#     # TODO: recheck variables' names compared to TPE (while running TPE)
     
-    # adjust variables' names
-    dm_cost_material_production_capex.rename_col_regex("material-production_capex", "investment", "Variables")
-    dm_cost_CO2_capt_w_cc_capex.rename_col_regex("CO2-capt-w-cc_capex", "investment_CC", "Variables")
-    dm_emissions_bygas = dm_emissions_bygas.flatten()
-    dm_emissions_bygas.rename_col_regex("_","-","Variables")
-    # variables = dm_material_production_bytech.col_labels["Categories1"]
-    # variables_new = [rename_tech_fordeepen(i) for i in variables]
-    # for i in range(len(variables)):
-    #     dm_material_production_bytech.rename_col(variables[i], variables_new[i], dim = "Categories1")
+#     # adjust variables' names
+#     dm_cost_material_production_capex.rename_col_regex("material-production_capex", "investment", "Variables")
+#     dm_cost_CO2_capt_w_cc_capex.rename_col_regex("CO2-capt-w-cc_capex", "investment_CC", "Variables")
+#     dm_emissions_bygas = dm_emissions_bygas.flatten()
+#     dm_emissions_bygas.rename_col_regex("_","-","Variables")
+#     # variables = dm_material_production_bytech.col_labels["Categories1"]
+#     # variables_new = [rename_tech_fordeepen(i) for i in variables]
+#     # for i in range(len(variables)):
+#     #     dm_material_production_bytech.rename_col(variables[i], variables_new[i], dim = "Categories1")
         
-    # convert kt to mt
-    dm_material_production_bytech.change_unit('material-production', factor=1e-3, old_unit='kt', new_unit='Mt')
-    dm_material_production_bymat.change_unit('material-production', factor=1e-3, old_unit='kt', new_unit='Mt')
+#     # convert kt to mt
+#     dm_material_production_bytech.change_unit('material-production', factor=1e-3, old_unit='kt', new_unit='Mt')
+#     dm_material_production_bymat.change_unit('material-production', factor=1e-3, old_unit='kt', new_unit='Mt')
 
-    # material production total (chemicals done in ammonia)
-    dm_mat_prod = dm_material_production_bymat.filter({"Categories1" : ["aluminium","cement","copper",
-                                                                      "glass","lime","paper","steel"]})
-    dm_mat_prod.rename_col('material-production', 'ind_material-production', 'Variables')
+#     # material production total (chemicals done in ammonia)
+#     dm_mat_prod = dm_material_production_bymat.filter({"Categories1" : ["aluminium","cement","copper",
+#                                                                       "glass","lime","paper","steel"]})
+#     dm_mat_prod.rename_col('material-production', 'ind_material-production', 'Variables')
     
-    # energy demand by material
-    dm_energy_by_mat = dm_energy_demand_bymat.copy()
-    dm_energy_by_mat.rename_col('energy-demand', 'ind_energy-demand', 'Variables')
+#     # energy demand by material
+#     dm_energy_by_mat = dm_energy_demand_bymat.copy()
+#     dm_energy_by_mat.rename_col('energy-demand', 'ind_energy-demand', 'Variables')
     
-    # emissions (done in emissions)
+#     # emissions (done in emissions)
     
-    # production technologies (aluminium, cement, paper, steel)
-    dm_prod_tech = dm_material_production_bytech.copy()
-    # dm_temp.groupby({'aluminium_sec': 'aluminium_sec.*',
-    #                  'steel_scrap-EAF': 'steel_scrap-EAF-precons.*|teel_sec-postcons'}, 
-    #                 dim='Categories1', regex=True, inplace=True)
-    # dm_prod_tech = dm_temp.filter({"Categories1" : ['aluminium_prim', 'aluminium_sec',
-    #                                                 'cement_dry-kiln', 'cement_geopolym',
-    #                                                 'cement_wet-kiln','paper_recycled',
-    #                                                 'paper_woodpulp', 'steel_BF-BOF',
-    #                                                 'steel_hisarna', 'steel_hydrog-DRI',
-    #                                                 'steel_scrap-EAF']})
-    dm_prod_tech.rename_col('material-production', 'ind_material-production', 'Variables')
+#     # production technologies (aluminium, cement, paper, steel)
+#     dm_prod_tech = dm_material_production_bytech.copy()
+#     # dm_temp.groupby({'aluminium_sec': 'aluminium_sec.*',
+#     #                  'steel_scrap-EAF': 'steel_scrap-EAF-precons.*|teel_sec-postcons'}, 
+#     #                 dim='Categories1', regex=True, inplace=True)
+#     # dm_prod_tech = dm_temp.filter({"Categories1" : ['aluminium_prim', 'aluminium_sec',
+#     #                                                 'cement_dry-kiln', 'cement_geopolym',
+#     #                                                 'cement_wet-kiln','paper_recycled',
+#     #                                                 'paper_woodpulp', 'steel_BF-BOF',
+#     #                                                 'steel_hisarna', 'steel_hydrog-DRI',
+#     #                                                 'steel_scrap-EAF']})
+#     dm_prod_tech.rename_col('material-production', 'ind_material-production', 'Variables')
     
-    # energy demand for material production by ener carrier (aluminium, cement, chem, glass, lime, paper, steel)
-    dm_energy_by_carrier = dm_energy_demand_bymatcarr.filter({"Categories1": ['aluminium', 'cement', 'glass',
-                                                                              'lime', 'paper', 'steel']})
-    dm_energy_by_carrier.rename_col('energy-demand', 'ind_energy-demand', 'Variables')
+#     # energy demand for material production by ener carrier (aluminium, cement, chem, glass, lime, paper, steel)
+#     dm_energy_by_carrier = dm_energy_demand_bymatcarr.filter({"Categories1": ['aluminium', 'cement', 'glass',
+#                                                                               'lime', 'paper', 'steel']})
+#     dm_energy_by_carrier.rename_col('energy-demand', 'ind_energy-demand', 'Variables')
     
 
-    # dm_tpe
-    # TODO: check if you need to pass emissions in MtCO2eq (rather than in Mt, so if CH4 and N2O should be weighted up)
-    dm_tpe = dm_emissions_bygas.copy()
-    dm_tpe.append(dm_energy_by_mat.flatten(), "Variables")
-    dm_tpe.append(dm_energy_by_carrier.flatten().flatten(), "Variables")
-    dm_tpe.append(dm_energy_demand_bioener, "Variables")
-    dm_tpe.append(dm_cost_CO2_capt_w_cc_capex.flatten(), "Variables")
-    dm_tpe.append(dm_cost_material_production_capex.flatten(), "Variables")
-    dm_tpe.append(dm_mat_prod.flatten(), "Variables")
-    dm_tpe.append(dm_prod_tech.flatten(), "Variables")
+#     # dm_tpe
+#     # TODO: check if you need to pass emissions in MtCO2eq (rather than in Mt, so if CH4 and N2O should be weighted up)
+#     dm_tpe = dm_emissions_bygas.copy()
+#     dm_tpe.append(dm_energy_by_mat.flatten(), "Variables")
+#     dm_tpe.append(dm_energy_by_carrier.flatten().flatten(), "Variables")
+#     dm_tpe.append(dm_energy_demand_bioener, "Variables")
+#     dm_tpe.append(dm_cost_CO2_capt_w_cc_capex.flatten(), "Variables")
+#     dm_tpe.append(dm_cost_material_production_capex.flatten(), "Variables")
+#     dm_tpe.append(dm_mat_prod.flatten(), "Variables")
+#     dm_tpe.append(dm_prod_tech.flatten(), "Variables")
 
-    # return
-    return dm_tpe
+#     # return
+#     return dm_tpe
+
+def variables_for_tpe(dm_matprod, dm_emi_bygas):
+    
+    dm_out = dm_matprod.flatten()
+    dm_out.append(dm_emi_bygas.flatten(), "Variables")
+    
+    return dm_out
 
 def industry_agriculture_interface(DM_material_production, DM_energy_demand, write_pickle = False):
     
@@ -110,7 +118,7 @@ def industry_agriculture_interface(DM_material_production, DM_energy_demand, wri
     # if write_pickle is True, write pickle
     if write_pickle is True:
         current_file_directory = os.path.dirname(os.path.abspath(__file__))
-        f = os.path.join(current_file_directory, '../_database/data/interface/industry_to_agriculture.pickle')
+        f = os.path.join(current_file_directory, '../../_database/data/interface/industry_to_agriculture.pickle')
         with open(f, 'wb') as handle:
             pickle.dump(DM_agr, handle, protocol=pickle.HIGHEST_PROTOCOL)
     
@@ -126,7 +134,7 @@ def industry_ammonia_interface(DM_material_production, DM_energy_demand, write_p
     # of write_pickle is True, write pickle
     if write_pickle is True:
         current_file_directory = os.path.dirname(os.path.abspath(__file__))
-        f = os.path.join(current_file_directory, '../_database/data/interface/industry_to_ammonia.pickle')
+        f = os.path.join(current_file_directory, '../../_database/data/interface/industry_to_ammonia.pickle')
         with open(f, 'wb') as handle:
             pickle.dump(DM_amm, handle, protocol=pickle.HIGHEST_PROTOCOL)
     
@@ -144,8 +152,9 @@ def industry_landuse_interface(DM_material_production, DM_energy_demand, write_p
     
     # woodpuplp
     dm_woodpulp = DM_material_production["bytech"].filter({"Categories1" : ['pulp-tech']})
-    dm_woodpulp.rename_col("material-production", "ind_material-production", "Variables")
-    DM_lus["woodpulp"] = dm_woodpulp.flatten()
+    dm_woodpulp = dm_woodpulp.flatten()
+    dm_woodpulp.rename_col("material-production_pulp-tech", "ind_material-production_paper_woodpulp", "Variables")
+    DM_lus["woodpulp"] = dm_woodpulp.copy()
     
     # biomaterial solid bio
     dm_temp = DM_energy_demand["feedstock_bybiomat"].copy()
@@ -156,7 +165,7 @@ def industry_landuse_interface(DM_material_production, DM_energy_demand, write_p
     # of write_pickle is True, write pickle
     if write_pickle is True:
         current_file_directory = os.path.dirname(os.path.abspath(__file__))
-        f = os.path.join(current_file_directory, '../_database/data/interface/industry_to_land-use.pickle')
+        f = os.path.join(current_file_directory, '../../_database/data/interface/industry_to_land-use.pickle')
         with open(f, 'wb') as handle:
             pickle.dump(DM_lus, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -247,7 +256,7 @@ def industry_energy_interface(dm_energy_demand_by_carr, cdm_split, cdm_eneff, wr
     # of write_pickle is True, write pickle
     if write_pickle is True:
         current_file_directory = os.path.dirname(os.path.abspath(__file__))
-        f = os.path.join(current_file_directory, '../_database/data/interface/industry_to_energy.pickle')
+        f = os.path.join(current_file_directory, '../../_database/data/interface/industry_to_energy.pickle')
         with open(f, 'wb') as handle:
             pickle.dump(DM_ene, handle, protocol=pickle.HIGHEST_PROTOCOL)
         
@@ -294,29 +303,42 @@ def industry_district_heating_interface(DM_energy_demand, write_pickle = False):
 
 def industry_emissions_interface(DM_emissions, write_pickle = False):
     
-    # adjust variables' names
-    dm_temp = DM_emissions["bygasmat"].flatten().flatten()
+    # emissions by gas
+    dm_ems = DM_emissions["bygas"].copy()
+    dm_ems.rename_col("emissions","industry","Variables")
+    
+    # negative emissions
+    # TODO: invert here if positive
+    dm_temp = DM_emissions["capt_w_cc_bytech"].group_all("Categories1", inplace=False)
+    dm_temp.rename_col("CO2-capt-w-cc","industry-captured-emissions_CO2", "Variables")
     dm_temp.deepen()
-    dm_temp.rename_col_regex("_","-","Variables")
-    DM_emissions["combustion_bio_capt_w_cc_neg_bymat"].rename_col("emissions-biogenic_CO2-capt-w-cc-negative","emissions-CO2_biogenic","Variables")
-    dm_temp1 = DM_emissions["combustion_bio_capt_w_cc_neg_bymat"].flatten()
-    # TODO: re-check what it's doing here above. In principle, it would make sense
-    # to gather negative emissions, to then be put together with other emissions below ...
-    # but why only gater biogenic negative emissions, and not all negative emissions?
-    # to be re-checked
+    dm_temp.add(0, "Categories1", "CH4", dummy=True)
+    dm_temp.add(0, "Categories1", "N2O", dummy=True)
+    dm_ems.append(dm_temp, "Variables")
+    
+    # # adjust variables' names
+    # dm_temp = DM_emissions["bygasmat"].flatten().flatten()
+    # dm_temp.deepen()
+    # dm_temp.rename_col_regex("_","-","Variables")
+    # DM_emissions["combustion_bio_capt_w_cc_neg_bymat"].rename_col("emissions-biogenic_CO2-capt-w-cc-negative","emissions-CO2_biogenic","Variables")
+    # dm_temp1 = DM_emissions["combustion_bio_capt_w_cc_neg_bymat"].flatten()
+    # # TODO: re-check what it's doing here above. In principle, it would make sense
+    # # to gather negative emissions, to then be put together with other emissions below ...
+    # # but why only gater biogenic negative emissions, and not all negative emissions?
+    # # to be re-checked
 
-    # dm_ems
-    dm_ems = dm_temp.flatten()
-    dm_ems.append(dm_temp1, "Variables")
-    variables = dm_ems.col_labels["Variables"]
-    for i in variables:
-        dm_ems.rename_col(i, "ind_" + i, "Variables")
-    dm_ems.sort("Variables")
+    # # dm_ems
+    # dm_ems = dm_temp.flatten()
+    # dm_ems.append(dm_temp1, "Variables")
+    # variables = dm_ems.col_labels["Variables"]
+    # for i in variables:
+    #     dm_ems.rename_col(i, "ind_" + i, "Variables")
+    # dm_ems.sort("Variables")
 
     # of write_pickle is True, write pickle
     if write_pickle is True:
         current_file_directory = os.path.dirname(os.path.abspath(__file__))
-        f = os.path.join(current_file_directory, '../_database/data/interface/industry_to_emissions.pickle')
+        f = os.path.join(current_file_directory, '../../_database/data/interface/industry_to_emissions.pickle')
         with open(f, 'wb') as handle:
             pickle.dump(dm_ems, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -548,7 +570,7 @@ def industry_airpollution_interface(DM_material_production, DM_energy_demand, wr
     # return
     return dm_airpoll
 
-def industry_forestry_interface(dm_material_demand, dm_fxa_demand_wwp):
+def industry_forestry_interface(dm_material_demand, dm_fxa_demand_wwp, write_pickle = False):
     
     # get pulp and timber
     dm_temp = dm_material_demand.group_all("Categories1",inplace=False)
@@ -563,6 +585,14 @@ def industry_forestry_interface(dm_material_demand, dm_fxa_demand_wwp):
     dm_temp.rename_col("wwp", "other-industrial", "Categories1")
     dm_temp.rename_col("material-decomp", "ind_wood", "Variables")
     dm_temp.sort("Categories1")
+    
+    # of write_pickle is True, write pickle
+    if write_pickle is True:
+        current_file_directory = os.path.dirname(os.path.abspath(__file__))
+        f = os.path.join(current_file_directory, '../../_database/data/interface/industry_to_forestry.pickle')
+        with open(f, 'wb') as handle:
+            pickle.dump(dm_temp, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    
     
     return dm_temp
     
