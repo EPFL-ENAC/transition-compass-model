@@ -469,6 +469,8 @@ def make_material_production(current_file_directory, dm_io, dm_wwp_demand, df_pr
     dm_out_calib.sort("Years")
     # TODO: some of this maybe too low (cement, steel, lime, glass) and some too high (wwp, other),
     # consider what to do for calibration.
+    # note: for the moment I put all missing, as raw production data for Switzerland does not exist
+    dm_out_calib[...] = np.nan
 
     # make material demand wwp (fxa)
     # dm_wwp_demand.flatten().datamatrix_plot()
@@ -498,7 +500,7 @@ def make_material_production(current_file_directory, dm_io, dm_wwp_demand, df_pr
     # with open(f, 'wb') as handle:
     #     pickle.dump(dm_out_calib, handle, protocol=pickle.HIGHEST_PROTOCOL)
     
-    return dm_out_notmodelled, dm_wwp_demand
+    return dm_out_notmodelled, dm_wwp_demand, dm_out_calib
 
 def run(years_ots, years_fts):
     
@@ -535,9 +537,9 @@ def run(years_ots, years_fts):
     dm_netimp_materials = make_material_net_import_share(current_file_directory, dm_netimp, years_ots)
     
     # get fxa for not modelled production
-    dm_matprod_notmodelled, dm_wwp_demand = make_material_production(current_file_directory, dm_io, dm_wwp_demand, df_price_ts, years_ots, years_fts)
+    dm_matprod_notmodelled, dm_wwp_demand, dm_matprod_calib = make_material_production(current_file_directory, dm_io, dm_wwp_demand, df_price_ts, years_ots, years_fts)
     
-    return dm_netimp_goods, dm_wwp_demand, dm_netimp_materials, dm_matprod_notmodelled
+    return dm_netimp_goods, dm_wwp_demand, dm_netimp_materials, dm_matprod_notmodelled, dm_matprod_calib
 
 if __name__ == "__main__":
 

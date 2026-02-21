@@ -20,7 +20,7 @@ dm_pop_ots = load_pop(country_list, years_list=years_ots)
 
 # net import share of goods, materials, product production of not modelled sectors, and demand of wwp
 print("Net import share and material production")
-dm_netimp_goods, dm_wwp_demand, dm_netimp_materials, dm_matprod_notmodelled = net_import_share_run(years_ots, years_fts)
+dm_netimp_goods, dm_wwp_demand, dm_netimp_materials, dm_matprod_notmodelled, dm_matprod_calib = net_import_share_run(years_ots, years_fts)
 
 # packaging per capita
 print("Packaging per capita")
@@ -48,6 +48,7 @@ DM_input = {"product-net-import" : dm_netimp_goods,
             "material-production-not-modelled" : dm_matprod_notmodelled,
             "packaging" : dm_pack,
             "waste-management" : dm_waste,
+            "calib-matprod" : dm_matprod_calib,
             "calib-emissions" : dm_emissions,
             "calib-energy" : dm_energy,
             "fert-product-net-import" : dm_amm_prod_net_import,
