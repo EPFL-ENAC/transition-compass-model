@@ -413,4 +413,4 @@ def local_forestry_run():
     return results_run
 
 
-#local_forestry_run()
+if __name__ == "__main__": results_run = local_forestry_run()
