@@ -233,14 +233,14 @@ def buildings(lever_setting, years_setting, DM_input, interface=Interface()):
         "services_all": DM_services_out["energy"],
     }
 
-    write_pickle = False
-    if write_pickle is True:
-        current_file_directory = os.path.dirname(os.path.abspath(__file__))
-        f = os.path.join(
-            current_file_directory,
-            "../_database/data/interface/buildings_to_energy.pickle",
-        )
-        my_pickle_dump(DM_inter_energy, f)
+    # write_pickle = False
+    # if write_pickle is True:
+    #     current_file_directory = os.path.dirname(os.path.abspath(__file__))
+    #     f = os.path.join(
+    #         current_file_directory,
+    #         "../_database/data/interface/buildings_to_energy.pickle",
+    #     )
+    #     my_pickle_dump(DM_inter_energy, f)
 
     interface.add_link(from_sector="buildings", to_sector="energy", dm=DM_inter_energy)
 
@@ -249,10 +249,12 @@ def buildings(lever_setting, years_setting, DM_input, interface=Interface()):
     # with open(file, "wb") as handle:
     #     pickle.dump(DM_industry, handle, protocol=pickle.HIGHEST_PROTOCOL )
 
+    # emission interface
+    dm_emi = inter.bld_emissions_interface(DM_energy_out["TPE"]["emissions"])
     interface.add_link(
         from_sector="buildings",
         to_sector="emissions",
-        dm=DM_energy_out["TPE"]["emissions"],
+        dm=dm_emi,
     )
 
     # industry interface
