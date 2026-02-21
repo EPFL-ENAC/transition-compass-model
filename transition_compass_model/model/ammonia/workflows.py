@@ -104,7 +104,6 @@ def energy_demand(dm_material_production_bytech, CDM_const):
     
     # this is by material-technology and carrier
 
-    # get energy demand for material production by technology both without and with feedstock
     feedstock = ["excl-feedstock", "feedstock"]
     DM_energy_demand = {}
 
@@ -123,21 +122,20 @@ def energy_demand(dm_material_production_bytech, CDM_const):
         dm_temp.change_unit('material-production', factor=1e-3, old_unit='kt', new_unit='Mt')
         dm_energy_demand.array = dm_energy_demand.array * dm_temp.array[...,np.newaxis]
         dm_energy_demand.units["energy-demand-" + f] = "TWh"
-        DM_energy_demand[f] = dm_energy_demand
+        DM_energy_demand[f + "_bytechcarr"] = dm_energy_demand
 
-    # get overall energy demand
-    dm_energy_demand_temp = DM_energy_demand["excl-feedstock"].copy()
-    dm_energy_demand_temp.append(DM_energy_demand["feedstock"], dim = "Variables")
-    dm_energy_demand_bytechcarr = DM_energy_demand["excl-feedstock"].copy()
-    dm_energy_demand_bytechcarr.array = np.nansum(dm_energy_demand_temp.array, axis = -3, keepdims= True)
-    dm_energy_demand_bytechcarr.rename_col(col_in = 'energy-demand-excl-feedstock', col_out = "energy-demand", dim = "Variables")
-    dm_energy_demand_feedstock_bytechcarr = DM_energy_demand["feedstock"]
-
-    DM_energy_demand = {"bytechcarr" : dm_energy_demand_bytechcarr, 
-                        "feedstock_bytechcarr" : dm_energy_demand_feedstock_bytechcarr}
+    # # get overall energy demand
+    # dm_energy_demand_temp = DM_energy_demand["excl-feedstock_bytechcarr"].copy()
+    # dm_energy_demand_temp.append(DM_energy_demand["feedstock_bytechcarr"], dim = "Variables")
+    # dm_energy_demand_bytechcarr = DM_energy_demand["excl-feedstock_bytechcarr"].copy()
+    # dm_energy_demand_bytechcarr.array = np.nansum(dm_energy_demand_temp.array, axis = -3, keepdims= True) # here we are summing feedstock and excluding feedstock together
+    # dm_energy_demand_bytechcarr.rename_col(col_in = 'energy-demand-excl-feedstock', col_out = "energy-demand", dim = "Variables")
+    # DM_energy_demand["total_bytechcarr"] = dm_energy_demand_bytechcarr.copy()
+    # DM_energy_demand["total_bycarr"] = DM_energy_demand["total_bytechcarr"].group_all(dim='Categories1', inplace=False)
     
     # aggregate energy demand by energy carrier
-    DM_energy_demand["bycarr"] = DM_energy_demand["bytechcarr"].group_all(dim='Categories1', inplace=False)
+    DM_energy_demand["excl-feedstock_bycarr"] = DM_energy_demand["excl-feedstock_bytechcarr"].group_all(dim='Categories1', inplace=False)
+
 
     # return
     return DM_energy_demand
@@ -175,14 +173,12 @@ def calibration_energy_demand(DM_cal, dm_energy_demand_bycarr, dm_energy_demand_
     return
 
 def technology_development(dm_technology_development, dm_energy_demand_bytechcarr):
-    
-    dm_temp = dm_energy_demand_bytechcarr.copy()
 
     # get energy demand after technology development (tech dev improves energy efficiency)
-    dm_temp.array = dm_temp.array * (1 - dm_technology_development.array[...,np.newaxis])
+    dm_energy_demand_bytechcarr.array = dm_energy_demand_bytechcarr.array * (1 - dm_technology_development.array[...,np.newaxis])
 
     # return
-    return dm_temp
+    return
 
 def apply_energy_switch(dm_energy_carrier_mix, dm_energy_demand_bytechcarr):
     
@@ -256,13 +252,18 @@ def apply_energy_switch(dm_energy_carrier_mix, dm_energy_demand_bytechcarr):
     # return
     return
 
-def add_specific_energy_demands(dm_energy_demand_bytechcarr, 
+def add_specific_energy_demands(dm_energy_demand_exclfeedstock_bytechcarr, 
                                 dm_energy_demand_feedstock_bytechcarr, DM_energy_demand, dict_groupby):
 
     # get demand for biomaterial from feedstock
     dm_energy_demand_feedstock_bycarr = dm_energy_demand_feedstock_bytechcarr.group_all("Categories1", inplace = False)
     dm_energy_demand_feedstock_bybiomat = \
         dm_energy_demand_feedstock_bycarr.filter({"Categories1" : ["solid-bio", 'gas-bio', 'liquid-bio']})
+        
+    # get total energy demand
+    dm_energy_demand_bytechcarr = dm_energy_demand_exclfeedstock_bytechcarr.copy()
+    dm_energy_demand_bytechcarr.append(dm_energy_demand_feedstock_bytechcarr, "Variables")
+    dm_energy_demand_bytechcarr.groupby({"energy-demand" : ['energy-demand-excl-feedstock','energy-demand-feedstock']}, "Variables", inplace=True)
 
     # get demand for industrial waste
     dm_energy_demand_bycarr = dm_energy_demand_bytechcarr.group_all("Categories1", inplace = False)
@@ -305,7 +306,7 @@ def add_specific_energy_demands(dm_energy_demand_bytechcarr,
     return
 
 def emissions(cdm_const_emission_factor_process, cdm_const_emission_factor, 
-              dm_energy_demand_bytechcarr, dm_material_production_bytech):
+              dm_energy_demand_exclfeedstock_bytechcarr, dm_material_production_bytech):
     
     # get emission factors
     cdm_temp1 = cdm_const_emission_factor_process
@@ -314,8 +315,8 @@ def emissions(cdm_const_emission_factor_process, cdm_const_emission_factor,
     # emissions = energy demand * emission factor
 
     # combustion
-    dm_emissions_combustion = dm_energy_demand_bytechcarr.copy()
-    dm_emissions_combustion.rename_col('energy-demand', "emissions", "Variables")
+    dm_emissions_combustion = dm_energy_demand_exclfeedstock_bytechcarr.copy()
+    dm_emissions_combustion.rename_col('energy-demand-excl-feedstock', "emissions", "Variables")
     dm_emissions_combustion.units["emissions"] = "Mt"
     dm_emissions_combustion.rename_col("emissions", "emissions_CH4", "Variables")
     dm_emissions_combustion.deepen("_", based_on = "Variables")
@@ -352,7 +353,9 @@ def emissions(cdm_const_emission_factor_process, cdm_const_emission_factor,
     dm_emissions_bygastech.switch_categories_order("Categories1","Categories2")
 
     # put in dict
-    DM_emissions = {"bygastech" : dm_emissions_bygastech,
+    DM_emissions = {"combustion" : dm_emissions_combustion,
+                    "process" : dm_emissions_process,
+                    "bygastech" : dm_emissions_bygastech,
                     "combustion_bio" : dm_emissions_combustion_bio,
                     "bygastech_beforecc" : dm_emissions_bygastech}
     
@@ -499,68 +502,3 @@ def compute_costs(dm_fxa_cost_matprod, dm_fxa_cost_cc, dm_material_production_by
 
     # return
     return DM_cost
-
-def variables_for_tpe(dm_material_production_bymat, dm_ind_material_production, dm_energy_demand_bymat,
-                      dm_ind_energy_demand, dm_energy_demand_bymatcarr):
-    
-    # production of chemicals (chem in ind + chem in ammonia)
-    dm_tpe = dm_material_production_bymat.copy()
-    dm_tpe.change_unit('material-production', factor=1e-3, old_unit='kt', new_unit='Mt')
-    dm_tpe.append(dm_ind_material_production.copy(), "Categories1")
-    dm_tpe.group_all("Categories1")
-    dm_tpe.rename_col("material-production", "ind_material-production_chemicals", "Variables")
-    
-    # energy demand chemicals
-    dm_temp = dm_energy_demand_bymat.copy()
-    dm_temp.append(dm_ind_energy_demand.group_all("Categories2", inplace=False), "Categories1")
-    dm_temp.group_all("Categories1")
-    dm_temp.rename_col("energy-demand", "ind_energy-demand_chemicals", "Variables")
-    dm_tpe.append(dm_temp, "Variables")
-    
-    # energy demand chemicals by energy carriers
-    dm_temp = dm_energy_demand_bymatcarr.copy()
-    dm_temp.append(dm_ind_energy_demand, "Categories1")
-    dm_temp.group_all("Categories1")
-    dm_temp.rename_col("energy-demand", "ind_energy-demand_chemicals", "Variables")
-    dm_tpe.append(dm_temp.flatten(), "Variables")
-    
-    # # NOTE: FOR THE MOMENT THE CODE BELOW IS COMMENTED OUT, TO KEEP UNTIL WE FINALIZE THE TPE
-    # # adjust variables' names
-    # DM_cost["material-production_capex"].rename_col_regex("capex", "investment", "Variables")
-    # DM_cost["material-production_capex"].rename_col('ammonia-amm-tech','amm-tech',"Categories1")
-    # DM_cost["CO2-capt-w-cc_capex"].rename_col_regex("capex", "investment_CC", "Variables")
-    # DM_cost["CO2-capt-w-cc_capex"].rename_col_regex("ammonia-amm-tech", "amm-tech", "Categories1")
-    # DM_cost["material-production_opex"].rename_col_regex("opex", "operating-costs", "Variables")
-    # DM_cost["material-production_opex"].rename_col('ammonia-amm-tech','amm-tech',"Categories1")
-    # DM_cost["CO2-capt-w-cc_opex"].rename_col_regex("opex", "operating-costs_CC", "Variables")
-    # DM_cost["CO2-capt-w-cc_opex"].rename_col_regex("ammonia-amm-tech", "amm-tech", "Categories1")
-    # DM_emissions["bygas"] = DM_emissions["bygas"].flatten()
-    # DM_emissions["bygas"].rename_col_regex("_","-","Variables")
-    # variables = DM_material_production["bytech"].col_labels["Categories1"]
-    # variables_new = [rename_tech_fordeepen(i) for i in variables]
-    # for i in range(len(variables)):
-    #     DM_material_production["bytech"].rename_col(variables[i], variables_new[i], dim = "Categories1")
-    # DM_material_production["bymat"].array = DM_material_production["bymat"].array / 1000
-    # DM_material_production["bymat"].units["material-production"] = "Mt"
-
-    # # dm_tpe
-    # dm_tpe = DM_emissions["bygas"].copy()
-    # dm_tpe.append(DM_energy_demand["bymat"].flatten(), "Variables")
-    # dm_tpe.append(DM_energy_demand["bycarr"].flatten(), "Variables")
-    # dm_tpe.append(DM_cost["CO2-capt-w-cc_capex"].filter({"Variables" : ["investment_CC"]}).flatten(), "Variables")
-    # dm_tpe.append(DM_cost["material-production_capex"].filter({"Variables" : ["investment"]}).flatten(), "Variables")
-    # dm_tpe.append(DM_cost["CO2-capt-w-cc_opex"].filter({"Variables" : ["operating-costs_CC"]}).flatten(), "Variables")
-    # dm_tpe.append(DM_cost["material-production_opex"].filter({"Variables" : ["operating-costs"]}).flatten(), "Variables")
-    # dm_tpe.append(DM_material_production["bymat"].flatten(), "Variables")
-    # variables = dm_tpe.col_labels["Variables"]
-    # for i in variables:
-    #     dm_tpe.rename_col(i, "amm_" + i, "Variables")
-    # variables = ['amm_investment_CC_amm-tech', 'amm_investment_amm-tech', 
-    #              'amm_operating-costs_CC_amm-tech', 'amm_operating-costs_amm-tech']
-    # variables_new = ['ind_investment_CC_amm-tech', 'ind_investment_amm-tech', 
-    #                  'ind_operating-costs_CC_amm-tech', 'ind_operating-costs_amm-tech']
-    # for i in range(len(variables)):
-    #     dm_tpe.rename_col(variables[i], variables_new[i], "Variables")
-    # dm_tpe.sort("Variables")
-    
-    return dm_tpe

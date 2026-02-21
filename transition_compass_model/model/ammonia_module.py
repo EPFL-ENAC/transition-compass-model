@@ -80,24 +80,24 @@ def ammonia(lever_setting, years_setting, DM_input, interface = Interface(), cal
     #                               DM_energy_demand, years_setting)
         
     # compute energy demand for material production after taking into account technology development (writes in DM_energy_demand)
-    wkf.technology_development(DM_ots_fts['technology-development'], DM_energy_demand["bytechcarr"])
+    wkf.technology_development(DM_ots_fts['technology-development'], DM_energy_demand["excl-feedstock_bytechcarr"])
     
     # do energy switch (writes in DM_energy_demand["bytechcarr"])
-    wkf.apply_energy_switch(DM_ots_fts['energy-carrier-mix'], DM_energy_demand["bytechcarr"])
+    wkf.apply_energy_switch(DM_ots_fts['energy-carrier-mix'], DM_energy_demand["excl-feedstock_bytechcarr"])
     
     # do dictionary to sum across technologies by materials
-    materials = [i.split("-")[0] for i in DM_energy_demand["bytechcarr"].col_labels["Categories1"]]
+    materials = [i.split("-")[0] for i in DM_energy_demand["excl-feedstock_bytechcarr"].col_labels["Categories1"]]
     materials = list(dict.fromkeys(materials))
     dict_groupby = {}
     for m in materials: dict_groupby[m] = ".*" + m + ".*"
     
     # compute specific energy demands that will be used for tpe (writes in DM_energy_demand)
-    wkf.add_specific_energy_demands(DM_energy_demand["bytechcarr"], 
+    wkf.add_specific_energy_demands(DM_energy_demand["excl-feedstock_bytechcarr"], 
                                 DM_energy_demand["feedstock_bytechcarr"], DM_energy_demand, dict_groupby)
     
     # get emissions
     DM_emissions = wkf.emissions(CDM_const["emission-factor-process"], CDM_const["emission-factor"], 
-                             DM_energy_demand["bytechcarr"], DM_material_production["bytech"])
+                             DM_energy_demand["excl-feedstock_bytechcarr"], DM_material_production["bytech"])
     
     # compute captured carbon (writes in DM_emissions)
     wkf.carbon_capture(DM_ots_fts['cc'], DM_emissions["bygastech"], DM_emissions["combustion_bio"], 
@@ -122,9 +122,7 @@ def ammonia(lever_setting, years_setting, DM_input, interface = Interface(), cal
                             DM_material_production["bytech"], DM_emissions["capt_w_cc_bytech"])
     
     # get variables for tpe (also writes in DM_cost, dm_bld_matswitch_savings_bymat, DM_emissions and DM_material_production for renaming)
-    results_run = wkf.variables_for_tpe(DM_material_production["bymat"], DM_industry["material-production"],  
-                                    DM_energy_demand["bymat"],
-                                    DM_industry["energy-demand"], DM_energy_demand["bymatcarr"])
+    results_run = inter.variables_for_tpe(DM_material_production["bymat"], DM_emissions["bygas"])
     
     # interface energy
     DM_ene = inter.ammonia_energy_interface(DM_energy_demand["bycarr"], 
