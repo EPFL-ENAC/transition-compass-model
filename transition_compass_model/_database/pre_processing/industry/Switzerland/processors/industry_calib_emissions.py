@@ -14,8 +14,9 @@ def emissions_calib(current_file_directory, years_ots, years_fts):
 
     # make dm
     df["ghg_new"] = np.nan
-    df.loc[df["ghg"] == "CO2","ghg_new"] = df.loc[df["ghg"] == "CO2","ghg"] + "[Mt]"
-    for gas in ["CH4","N2O"]: df.loc[df["ghg"] == gas,"ghg_new"] = df.loc[df["ghg"] == gas,"ghg"] + "[kt]"
+    df.loc[df["ghg"] == "CO2","ghg_new"] = df.loc[df["ghg"] == "CO2","emissions"] + "_" + df.loc[df["ghg"] == "CO2","ghg"] + "[Mt]"
+    for gas in ["CH4","N2O"]: 
+        df.loc[df["ghg"] == gas,"ghg_new"] = df.loc[df["ghg"] == gas,"emissions"] + "_" + df.loc[df["ghg"] == gas,"ghg"] + "[kt]"
     df = df.loc[:,["Years","value","ghg_new"]]
     df = df.pivot(index=["Years"], columns="ghg_new", values='value').reset_index()
     df["Country"] = "Switzerland"
@@ -23,8 +24,14 @@ def emissions_calib(current_file_directory, years_ots, years_fts):
     # dm.datamatrix_plot()
     
     # kt to Mt for CH4 and N2O
-    dm.change_unit("CH4", 1e-3, "kt", "Mt")
-    dm.change_unit("N2O", 1e-3, "kt", "Mt")
+    dm.change_unit("combustion-emissions_CH4", 1e-3, "kt", "Mt")
+    dm.change_unit("combustion-emissions_N2O", 1e-3, "kt", "Mt")
+    dm.change_unit("process-emissions_CH4", 1e-3, "kt", "Mt")
+    dm.change_unit("process-emissions_N2O", 1e-3, "kt", "Mt")
+    dm.deepen()
+    
+    # for now put together (keep them separate later in case)
+    dm.groupby({"calib-emissions" : ['combustion-emissions', 'process-emissions']}, "Variables", inplace=True)
 
     # add missing years as nan
     years = years_ots + years_fts
@@ -32,9 +39,9 @@ def emissions_calib(current_file_directory, years_ots, years_fts):
     dm.add(np.nan, "Years", missing, dummy=True)
     dm.sort("Years")
 
-    # format and save
-    for v in dm.col_labels["Variables"]: dm.rename_col(v, 'calib-emissions_' + v, "Variables")
-    dm.deepen()
+    # # format and save
+    # for v in dm.col_labels["Variables"]: dm.rename_col(v, 'calib-emissions_' + v, "Variables")
+    # dm.deepen()
     
     return dm
 
