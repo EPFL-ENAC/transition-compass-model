@@ -130,10 +130,10 @@ def run(country_list, years_ots, years_fts):
     #####     EMISSION FACTORS    ######
     ####################################
     # Obtained dividing emission by energy demand in file file = '../Europe/data/JRC-IDEES-2021_Residential_EU27.xlsx'
-    JRC_emissions_fact = {
+    OFEV_emissions_fact = {
         "coal": 350,
-        "heating-oil": 267,
-        "gas": 200,
+        "heating-oil": 265.32,
+        "gas": 203.04,
         "wood": 0,
         "solar": 0,
     }
@@ -152,7 +152,7 @@ def run(country_list, years_ots, years_fts):
         )
     )
     idx = cdm_emission_fact.idx
-    for key, value in JRC_emissions_fact.items():
+    for key, value in OFEV_emissions_fact.items():
         cdm_emission_fact.array[0, idx[key]] = value
 
     cdm_emission_fact.sort("Categories1")
