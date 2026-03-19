@@ -7,7 +7,6 @@ from transition_compass_model.model.common.auxiliary_functions import calibratio
 from transition_compass_model.model.common.auxiliary_functions import (
     read_level_data,
     filter_country_and_load_data_from_pickles,
-    compat_pickle_load,
 )
 from transition_compass_model.model.common.config_loader import load_lever_config
 import pickle
@@ -297,7 +296,7 @@ def simulate_lifestyles_to_agriculture_input_new():
         "../_database/data/interface/lifestyles_to_agriculture.pickle",
     )
     with open(f, "rb") as handle:
-        DM_lfs = compat_pickle_load(handle)
+        DM_lfs = pickle.load(handle)
 
     return DM_lfs
 
@@ -392,7 +391,7 @@ def simulate_buildings_to_agriculture_input():
         "../_database/data/interface/buildings_to_agriculture.pickle",
     )
     with open(f, "rb") as handle:
-        dm_bld = compat_pickle_load(handle)
+        dm_bld = pickle.load(handle)
 
     return dm_bld
 
@@ -404,7 +403,7 @@ def simulate_industry_to_agriculture_input():
         "../_database/data/interface/industry_to_agriculture.pickle",
     )
     with open(f, "rb") as handle:
-        DM_ind = compat_pickle_load(handle)
+        DM_ind = pickle.load(handle)
     return DM_ind
 
 
@@ -416,7 +415,7 @@ def simulate_transport_to_agriculture_input():
         "../_database/data/interface/transport_to_agriculture.pickle",
     )
     with open(f, "rb") as handle:
-        dm_tra = compat_pickle_load(handle)
+        dm_tra = pickle.load(handle)
     return dm_tra
 
 

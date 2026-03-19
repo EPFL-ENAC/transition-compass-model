@@ -16,7 +16,7 @@ from transition_compass_model.model.common.io_database import (
     read_database_to_ots_fts_dict,
     read_database_to_ots_fts_dict_w_groups,
 )
-from transition_compass_model.model.common.auxiliary_functions import read_level_data, cost, compat_pickle_load
+from transition_compass_model.model.common.auxiliary_functions import read_level_data, cost
 from transition_compass_model.model.common.config_loader import load_lever_config
 
 warnings.simplefilter("ignore")
@@ -213,7 +213,7 @@ def database_from_csv_to_datamatrix():
 def read_data(data_file, lever_setting):
 
     with open(data_file, "rb") as handle:
-        DM_district_heating = compat_pickle_load(handle)
+        DM_district_heating = pickle.load(handle)
 
     dm_rr = DM_district_heating["fxa"]["dhg-replacement-rate"]
     dm_capacity = DM_district_heating["fxa"]["dhg-capacity"]

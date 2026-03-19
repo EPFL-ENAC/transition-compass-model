@@ -18,7 +18,7 @@ from transition_compass_model.model.common.interface_class import Interface
 from transition_compass_model.model.common.io_database import (
     read_database_fxa,
 )  # read functions for levers & fixed assumptions
-from transition_compass_model.model.common.auxiliary_functions import filter_geoscale, simulate_input, compat_pickle_load
+from transition_compass_model.model.common.auxiliary_functions import filter_geoscale, simulate_input
 from transition_compass_model.model.common.config_loader import load_lever_config
 
 warnings.simplefilter("ignore")
@@ -452,7 +452,7 @@ def refinery(lever_setting, years_setting, interface=Interface()):
         "../_database/data/datamatrix/geoscale/oil-refinery.pickle",
     )
     with open(refinery_data_file, "rb") as handle:  # read binary (rb)
-        DM_refinery = compat_pickle_load(handle)
+        DM_refinery = pickle.load(handle)
 
     # Country filter setting (based on fxa, because their is no read data function / no levers)
 

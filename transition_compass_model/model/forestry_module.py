@@ -2,7 +2,6 @@ from transition_compass_model.model.common.interface_class import Interface
 from transition_compass_model.model.common.auxiliary_functions import (
     read_level_data,
     filter_country_and_load_data_from_pickles,
-    compat_pickle_load,
 )
 from transition_compass_model.model.common.config_loader import load_lever_config
 import pickle
@@ -422,7 +421,7 @@ def forestry(lever_setting, years_setting, DM_input, interface=Interface()):
             "../_database/data/interface/energy_to_forestry.pickle",
         )
         with open(lfs_interface_data_file, "rb") as handle:
-            dm_fuelwood_demand = compat_pickle_load(handle)
+            dm_fuelwood_demand = pickle.load(handle)
         dm_fuelwood_demand.filter({"Country": cntr_list}, inplace=True)
     ####################################################################################################################
     # Interface - Industry to Forestry:
@@ -440,7 +439,7 @@ def forestry(lever_setting, years_setting, DM_input, interface=Interface()):
             "../_database/data/interface/industry_to_forestry.pickle",
         )
         with open(lfs_interface_data_file, "rb") as handle:
-            dm_wood_demand = compat_pickle_load(handle)
+            dm_wood_demand = pickle.load(handle)
         dm_wood_demand.filter({"Country": cntr_list}, inplace=True)
 
     ####################################################################################################################
@@ -457,7 +456,7 @@ def forestry(lever_setting, years_setting, DM_input, interface=Interface()):
             "../_database/data/interface/land_to_forestry.pickle",
         )
         with open(lfs_interface_data_file, "rb") as handle:
-            dm_forest_area = compat_pickle_load(handle)
+            dm_forest_area = pickle.load(handle)
         dm_forest_area.filter({"Country": cntr_list}, inplace=True)
 
     ####################################################################################################################

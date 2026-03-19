@@ -13,7 +13,7 @@ from transition_compass_model.model.common.io_database import (
     dm_to_database,
 )
 from transition_compass_model.model.common.interface_class import Interface
-from transition_compass_model.model.common.auxiliary_functions import filter_geoscale, calibration_rates, compat_pickle_load
+from transition_compass_model.model.common.auxiliary_functions import filter_geoscale, calibration_rates
 from transition_compass_model.model.common.auxiliary_functions import read_level_data, simulate_input
 from transition_compass_model.model.common.config_loader import load_lever_config
 from scipy.optimize import linprog
@@ -251,7 +251,7 @@ def database_from_csv_to_datamatrix():
 def read_data(data_file, lever_setting):
 
     with open(data_file, "rb") as handle:
-        DM_landuse = compat_pickle_load(handle)
+        DM_landuse = pickle.load(handle)
 
     # Read fts based on lever_setting
     DM_ots_fts = read_level_data(DM_landuse, lever_setting)

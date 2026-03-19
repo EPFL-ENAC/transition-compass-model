@@ -3,7 +3,6 @@ from transition_compass_model.model.common.interface_class import Interface
 from transition_compass_model.model.common.auxiliary_functions import (
     read_level_data,
     filter_country_and_load_data_from_pickles,
-    compat_pickle_load,
 )
 import pickle
 import os
@@ -97,7 +96,7 @@ def transport(lever_setting, years_setting, DM_input, interface=Interface()):
             "../_database/data/interface/lifestyles_to_transport.pickle",
         )
         with open(lfs_interface_data_file, "rb") as handle:
-            DM_lfs = compat_pickle_load(handle)
+            DM_lfs = pickle.load(handle)
         dm_lfs = DM_lfs["pop"]
         dm_lfs.filter({"Country": cntr_list}, inplace=True)
 

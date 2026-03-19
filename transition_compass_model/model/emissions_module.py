@@ -9,7 +9,7 @@ Created on Thu May 30 15:55:39 2024
 from transition_compass_model.model.common.data_matrix_class import DataMatrix
 from transition_compass_model.model.common.io_database import read_database_fxa, read_database_to_ots_fts_dict
 from transition_compass_model.model.common.interface_class import Interface
-from transition_compass_model.model.common.auxiliary_functions import filter_geoscale, simulate_input, compat_pickle_load
+from transition_compass_model.model.common.auxiliary_functions import filter_geoscale, simulate_input
 from transition_compass_model.model.common.config_loader import load_lever_config
 import pickle
 import os
@@ -172,7 +172,7 @@ def read_data(data_file, lever_setting):
 
     # load dm
     with open(data_file, "rb") as handle:
-        DM_emissions = compat_pickle_load(handle)
+        DM_emissions = pickle.load(handle)
 
     # get fxa
     DM_fxa = DM_emissions["fxa"]

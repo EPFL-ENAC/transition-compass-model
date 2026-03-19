@@ -5,7 +5,6 @@ from transition_compass_model.model.common.auxiliary_functions import (
     filter_country_and_load_data_from_pickles,
     create_years_list,
     dm_add_missing_variables,
-    compat_pickle_load,
 )
 import pickle
 import os
@@ -104,7 +103,7 @@ def buildings(lever_setting, years_setting, DM_input, interface=Interface()):
             "../_database/data/interface/lifestyles_to_buildings.pickle",
         )
         with open(data_file, "rb") as handle:
-            DM_lfs = compat_pickle_load(handle)
+            DM_lfs = pickle.load(handle)
         dm_lfs = DM_lfs["pop"]
         cntr_list = DM_floor_area["floor-intensity"].col_labels["Country"]
         dm_lfs.filter({"Country": cntr_list}, inplace=True)
@@ -119,7 +118,7 @@ def buildings(lever_setting, years_setting, DM_input, interface=Interface()):
             "../_database/data/interface/climate_to_buildings.pickle",
         )
         with open(data_file, "rb") as handle:
-            DM_clm = compat_pickle_load(handle)
+            DM_clm = pickle.load(handle)
         dm_clm = DM_clm["cdd-hdd"]
         cntr_list = DM_floor_area["floor-intensity"].col_labels["Country"]
         dm_clm.filter({"Country": cntr_list}, inplace=True)

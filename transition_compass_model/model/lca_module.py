@@ -1,5 +1,5 @@
 from transition_compass_model.model.common.interface_class import Interface
-from transition_compass_model.model.common.auxiliary_functions import read_level_data, compat_pickle_load
+from transition_compass_model.model.common.auxiliary_functions import read_level_data
 from transition_compass_model.model.common.auxiliary_functions import filter_country_and_load_data_from_pickles
 from transition_compass_model.model.common.config_loader import load_lever_config
 import os
@@ -49,7 +49,7 @@ def get_interface(
             + ".pickle",
         )
         with open(filepath, "rb") as handle:
-            DM = compat_pickle_load(handle)
+            DM = pickle.load(handle)
         if type(DM) is dict:
             for key in DM.keys():
                 if "Country" in list(DM[key].col_labels.keys()):

@@ -1,5 +1,5 @@
 from transition_compass_model.model.common.interface_class import Interface
-from transition_compass_model.model.common.auxiliary_functions import cdm_to_dm, read_level_data, compat_pickle_load
+from transition_compass_model.model.common.auxiliary_functions import cdm_to_dm, read_level_data
 from transition_compass_model.model.common.auxiliary_functions import calibration_rates, cost
 from transition_compass_model.model.common.auxiliary_functions import energy_switch
 import pickle
@@ -52,7 +52,7 @@ def get_interface(
             + ".pickle",
         )
         with open(filepath, "rb") as handle:
-            DM = compat_pickle_load(handle)
+            DM = pickle.load(handle)
         if type(DM) is dict:
             for key in DM.keys():
                 DM[key].filter({"Country": country_list}, inplace=True)

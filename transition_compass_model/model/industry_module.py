@@ -1,6 +1,6 @@
 from transition_compass_model.model.common.data_matrix_class import DataMatrix
 from transition_compass_model.model.common.interface_class import Interface
-from transition_compass_model.model.common.auxiliary_functions import cdm_to_dm, read_level_data, compat_pickle_load
+from transition_compass_model.model.common.auxiliary_functions import cdm_to_dm, read_level_data
 from transition_compass_model.model.common.auxiliary_functions import calibration_rates, cost
 from transition_compass_model.model.common.auxiliary_functions import material_switch, energy_switch
 import pickle
@@ -53,7 +53,7 @@ def get_interface(
             + ".pickle",
         )
         with open(filepath, "rb") as handle:
-            DM = compat_pickle_load(handle)
+            DM = pickle.load(handle)
         if type(DM) is dict:
             for key in DM.keys():
                 DM[key].filter({"Country": country_list}, inplace=True)
@@ -3195,7 +3195,7 @@ def local_industry_run():
 
     # run
     results_run = industry(lever_setting, years_setting, DM_input["industry"])
-
+    
     # return
     return results_run
 

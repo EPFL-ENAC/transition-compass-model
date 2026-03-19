@@ -12,7 +12,7 @@ from transition_compass_model.model.common.data_matrix_class import DataMatrix  
 from transition_compass_model.model.common.constant_data_matrix_class import (
     ConstantDataMatrix,
 )  # Class for the constant inputs
-from transition_compass_model.model.common.auxiliary_functions import read_level_data, filter_geoscale, simulate_input, compat_pickle_load
+from transition_compass_model.model.common.auxiliary_functions import read_level_data, filter_geoscale, simulate_input
 
 # ImportFunctions
 from transition_compass_model.model.common.io_database import read_database_to_ots_fts_dict
@@ -393,7 +393,7 @@ def database_from_csv_to_datamatrix():
 
 def read_data(data_file, lever_setting):
     with open(data_file, "rb") as handle:
-        DM_power = compat_pickle_load(handle)
+        DM_power = pickle.load(handle)
 
     # FXA data matrix
     DM_ots_fts = read_level_data(DM_power, lever_setting)

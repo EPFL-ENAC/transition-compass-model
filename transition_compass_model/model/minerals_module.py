@@ -15,7 +15,6 @@ from transition_compass_model.model.common.auxiliary_functions import (
     cdm_to_dm,
     simulate_input,
     calibration_rates,
-    compat_pickle_load,
 )
 from transition_compass_model.model.common.auxiliary_functions import material_decomposition
 import pandas as pd
@@ -389,7 +388,7 @@ def database_from_csv_to_datamatrix():
 def read_data(data_file):
     # load datamatrixes
     with open(data_file, "rb") as handle:
-        DM_minerals = compat_pickle_load(handle)
+        DM_minerals = pickle.load(handle)
 
     # get constants
     CDM_const = DM_minerals["constant"].copy()
