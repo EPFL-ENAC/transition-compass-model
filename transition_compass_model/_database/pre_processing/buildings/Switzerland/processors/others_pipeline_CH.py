@@ -137,12 +137,20 @@ def run(country_list, years_ots, years_fts):
         "gas": 203.04,
         "wood": 0,
         "solar": 0,
+        "district-heating": 160.92,
     }
 
     cdm_emission_fact = ConstantDataMatrix(
         col_labels={
             "Variables": ["bld_CO2-factors"],
-            "Categories1": ["coal", "heating-oil", "gas", "wood", "solar"],
+            "Categories1": [
+                "coal",
+                "heating-oil",
+                "gas",
+                "wood",
+                "solar",
+                "district-heating",
+            ],
         },
         units={"bld_CO2-factors": "kt/TWh"},
     )
