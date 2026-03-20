@@ -236,18 +236,41 @@ def bld_TPE_interface(
 
     KPI = []
     yr = 2050
-    # Emissions by class
-    dm_tot_emi = DM_energy["energy-emissions-by-class"].filter(
-        {"Variables": ["bld_CO2-emissions_heating"]}
-    )
-    dm_tot_emi.group_all("Categories1", inplace=True)
-    value = dm_tot_emi[0, yr, "bld_CO2-emissions_heating"]
-    KPI.append({"title": "CO2 emissions", "value": value, "unit": "Mt"})
 
     # Emissions global
     dm_emission_global = DM_services["services_emissions"].copy()
     dm_emission_global.append(DM_hotwater["hotwater_emissions"], dim="Variables")
-    # dm_emission_global.append(DM_energy['emissions'], dim="Variables")
+    dm_energy_emissions_scope1 = DM_energy["emissions"].filter(
+        {
+            "Categories1": [
+                "coal",
+                "district-heating",
+                "gas",
+                "heating-oil",
+                "solar",
+                "wood",
+            ]
+        }
+    )  # only keep scope 1 emissions emetter
+    dm_emission_global.append(dm_energy_emissions_scope1, dim="Variables")
+    dm_emission_global.groupby(
+        {
+            "Variables": [
+                "services_CO2-emissions_heating",
+                "bld_hotwater_CO2-emissions",
+                "bld_CO2-emissions_heating",
+            ]
+        },
+        dim="Variables",
+        inplace=True,
+    )
+    dm_emission_global.rename_col("Variables", "bld_CO2-emissions", "Variables")
+    dm_tpe.append(dm_emission_global.flattest(), dim="Variables")
+
+    dm_emission_global.group_all("Categories1", inplace=True)
+    value = dm_emission_global[0, yr, "bld_CO2-emissions"]
+
+    KPI.append({"title": "CO2 emissions", "value": value, "unit": "Mt"})
 
     # Energy demand in TWh
     dm_tot_enr = DM_energy["energy-demand-heating"].filter(

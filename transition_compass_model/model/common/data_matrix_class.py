@@ -1,3 +1,5 @@
+from ast import Dict
+
 import numpy as np
 import re
 import pandas as pd
@@ -969,7 +971,7 @@ class DataMatrix:
         return
 
     def groupby(
-        self, group_cols={}, dim=str, aggregation="sum", regex=False, inplace=False
+        self, group_cols: dict, dim: str, aggregation="sum", regex=False, inplace=False
     ):
         # Sum values in group, e.g.
         # dm.groupby({'road': ['LDV', '2W']}, dim='Categories1') sums LDV and 2W and calls it road
