@@ -135,7 +135,7 @@ def run(country_list, years_ots, years_fts):
         "coal": 350,
         "heating-oil": 265.32,
         "gas": 203.04,
-        "wood": 0,
+        "wood": 359.64,
         "solar": 0,
         "district-heating": 160.92,
     }

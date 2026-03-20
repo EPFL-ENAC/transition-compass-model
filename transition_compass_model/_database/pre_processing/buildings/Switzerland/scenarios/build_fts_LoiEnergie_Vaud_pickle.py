@@ -198,6 +198,25 @@ def run(DM_buildings, dm_pop, global_var, country_list, lev=4):
         4
     ] = dm_rr_fts_2
 
+    # Chauffage de l'eau chaude
+
+    dm_hot_water_fxa = DM_buildings["fxa"]["hot-water"]["hw-tech-mix"].copy()
+
+    idx_hot_water = dm_hot_water_fxa.idx
+    dm_hot_water_fxa.array[
+        idx_hot_water["Vaud"],
+        idx_hot_water[2025] : idx_hot_water[2035],
+        idx_hot_water["bld_hw_tech-mix"],
+        idx_hot_water["electricity"],
+    ] = np.nan
+    dm_hot_water_fxa.array[
+        idx_hot_water["Vaud"],
+        idx_hot_water[2035] :,
+        idx_hot_water["bld_hw_tech-mix"],
+        idx_hot_water["electricity"],
+    ] = 0
+    DM_buildings["fxa"]["hot-water"]["hw-tech-mix"] = dm_hot_water_fxa
+
     # SECTION: Loi energy - Heating tech
     # Plus de gaz, mazout, charbon dans les prochain 15-20 ans. Pas de gaz, mazout, charbon dans les nouvelles constructions
     dm_heating_cat_fts_2 = DM_buildings["fts"]["heating-technology-fuel"][
@@ -205,15 +224,18 @@ def run(DM_buildings, dm_pop, global_var, country_list, lev=4):
     ][1].copy()
 
     idx = dm_heating_cat_fts_2.idx
+
     # Electricity
+    # DÉCRET 730.051  sur l'assainissement des chauffages et chauffe-eau  électriques  (DACCE)
     idx_old_cat = [idx["E"], idx["F"]]
     idx_new_cat = [idx["B"], idx["C"], idx["D"]]
     dm_heating_cat_fts_2.array[
-        idx["Vaud"], idx[2035] :, :, :, idx_old_cat, idx["electricity"]
-    ] = 0
+        idx["Vaud"], 1 : idx[2035], idx["bld_heating-mix"], :, :, idx["electricity"]
+    ] = np.nan
     dm_heating_cat_fts_2.array[
-        idx["Vaud"], idx[2040] :, :, :, idx_new_cat, idx["electricity"]
+        idx["Vaud"], idx[2035] :, idx["bld_heating-mix"], :, :, idx["electricity"]
     ] = 0
+
     # Fossil heating
     idx_fossil = [idx["coal"], idx["heating-oil"], idx["gas"]]
     dm_heating_cat_fts_2.array[
