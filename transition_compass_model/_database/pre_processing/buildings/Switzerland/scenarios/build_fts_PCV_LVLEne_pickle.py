@@ -354,10 +354,10 @@ def run(
     renov_distrib_fts_3.array[
         idx["Vaud"], :, idx["bld_renovation-redistribution-in"], idx["E"]
     ] = 0
-
-    DM_buildings["fts"]["building-renovation-rate"]["bld_renovation-redistribution"][
-        3
-    ] = renov_distrib_fts_3
+    for lever in range(3, 4 + 1):
+        DM_buildings["fts"]["building-renovation-rate"][
+            "bld_renovation-redistribution"
+        ][lever] = renov_distrib_fts_3.copy()
 
     # SECTION: Loi energy - Heating tech
     # Plus de gaz, mazout, charbon dans les prochain 15-20 ans. Pas de gaz, mazout, charbon dans les nouvelles constructions
@@ -382,10 +382,11 @@ def run(
 
     dm_heating_cat_fts_1.normalise("Categories3")
     dm_heating_cat_fts_1.fill_nans("Years")
-    # Electricity is set to lever 1 because it is in a decree from 2022
-    DM_buildings["fts"]["heating-technology-fuel"]["bld_heating-technology"][
-        1
-    ] = dm_heating_cat_fts_1
+    # Electricity is set for all levers because it is in a decree from 2022
+    for lever in range(1, 4 + 1):
+        DM_buildings["fts"]["heating-technology-fuel"]["bld_heating-technology"][
+            lever
+        ] = dm_heating_cat_fts_1.copy()
 
     dm_heating_cat_fts_2 = dm_heating_cat_fts_1.copy()
     # Fossil heating
@@ -435,9 +436,10 @@ def run(
 
     dm_heating_cat_fts_2.normalise("Categories3")
     dm_heating_cat_fts_2.fill_nans("Years")
+    # for lever in range(lev,4+1):
     DM_buildings["fts"]["heating-technology-fuel"]["bld_heating-technology"][
         lev
-    ] = dm_heating_cat_fts_2
+    ] = dm_heating_cat_fts_2.copy()
 
     this_dir = os.path.dirname(os.path.abspath(__file__))
     # !FIXME: use the actual values and not the calibration factor
