@@ -231,7 +231,8 @@ def get_energy_intensity(filepath, techs_code, techs, techs_calc, dict_subtechs_
             id_var = df_temp.columns[0]
             df_temp = df_temp.loc[df_temp[id_var].isin(enercarr_jrc + dict_subtechs_elec[techs[i]]),:]
             mysubset = dict_subtechs_elec[techs[i]].copy()
-            mysubset.remove('Lighting')
+            for l in ['Lighting', 'Air compressors', 'Motor drives', 'Fans and pumps']:
+                mysubset.remove(l)
             df_temp.loc[df_temp[id_var].isin(mysubset),id_var] = "Electricity"
             df_temp = df_temp.groupby([id_var], as_index=False).agg(sum)
             
@@ -269,6 +270,8 @@ def get_energy_intensity(filepath, techs_code, techs, techs_calc, dict_subtechs_
                 df_temp.loc[df_temp["energy_carrier"] == enercarr_jrc_agg[idx],"energy_carrier"] = enercarr_calc_map[idx]
             df_temp = df_temp.groupby(["energy_carrier"], as_index=False).agg(sum)
             df_temp.loc[df_temp["energy_carrier"] == "Lighting","energy_carrier"] = "lighting"
+            df_temp.loc[df_temp["energy_carrier"].isin(['Air compressors', 'Motor drives', 'Fans and pumps']),"energy_carrier"] = "electricity-else"
+            df_temp = df_temp.groupby(["energy_carrier"], as_index=False).agg(sum)
             
             # split biomass and waste
             for key in dict_adj_biomass_waste.keys():
@@ -1303,15 +1306,17 @@ def create_constant(df, variables):
 
 # reshape for efficiency ratios
 def reshape_energy_constant(cdm):
+    
     cdm_temp = cdm.copy()
     cdm_temp.drop("Categories2","lighting")
+    cdm_temp.drop("Categories2","electricity-else")
     for c in cdm_temp.col_labels["Categories1"]:
         cdm_temp.rename_col(c, c + "_process-heat", "Categories1")
     cdm_temp.deepen("_","Categories1")
     cdm_temp.switch_categories_order("Categories2","Categories3")
-    cdm_temp[:,:,:,"electricity"] = 0
-    cdm_temp1 = cdm.filter({"Categories2" : ["lighting","electricity"]})
-    cdm_temp1.rename_col(["lighting","electricity"], ["lighting_electricity","elec_electricity"], "Categories2")
+
+    cdm_temp1 = cdm.filter({"Categories2" : ["lighting","electricity-else"]})
+    cdm_temp1.rename_col(["lighting","electricity-else"], ["lighting_electricity","elec_electricity"], "Categories2")
     cdm_temp1.deepen()
     missing = cdm_temp.col_labels["Categories3"].copy()
     missing.remove("electricity")
@@ -1337,14 +1342,17 @@ cdm_enerdem_exclfeed.deepen_twice()
 
 # reshape to be used for efficiency ratios
 cdm_enerdem_exclfeed_reshaped = reshape_energy_constant(cdm_enerdem_exclfeed)
+# cdm_temp = cdm_enerdem_exclfeed_reshaped.filter({"Categories1" : ['steel-BF-BOF']})
+# df_temp = cdm_temp.write_df()
 
-# aggregate lighting and electricity, and get split
-cdm_temp = cdm_enerdem_exclfeed.filter({"Categories2" : ["lighting","electricity"]})
-cdm_enerdem_exclfeed.groupby({"electricity" : ["lighting","electricity"]}, "Categories2", inplace=True)
-cdm_temp.append(cdm_temp.groupby({"total" : ["lighting","electricity"]}, "Categories2"),"Categories2")
+# aggregate lighting, electricity (from process heat) and electricity-else, and get split
+cdm_temp = cdm_enerdem_exclfeed.filter({"Categories2" : ["lighting","electricity","electricity-else"]})
+cdm_enerdem_exclfeed.groupby({"electricity" : ["lighting","electricity","electricity-else"]}, "Categories2", inplace=True)
+cdm_temp.append(cdm_temp.groupby({"total" : ["lighting","electricity","electricity-else"]}, "Categories2"),"Categories2")
 cdm_temp.group_all("Categories1")
 cdm_temp[...,"lighting"] = cdm_temp[...,"lighting"]/cdm_temp[...,"total"]
 cdm_temp[...,"electricity"] = cdm_temp[...,"electricity"]/cdm_temp[...,"total"]
+cdm_temp[...,"electricity-else"] = cdm_temp[...,"electricity-else"]/cdm_temp[...,"total"]
 cdm_temp.drop("Categories1","total")
 cdm_temp.units["energy-demand-excl-feedstock"] = "%"
 df_check = cdm_temp.write_df()
@@ -1366,12 +1374,14 @@ for v in variabs:
     cdm_enerdem_feedstock.rename_col(v, "energy-demand-feedstock_" + v, "Variables")
 cdm_enerdem_feedstock.deepen_twice()
 cdm_enerdem_feedstock.units["energy-demand-feedstock"] = 'TWh/Mt'
+cdm_enerdem_feedstock.add(0, "Categories2", "electricity-else", dummy=True)
+cdm_enerdem_feedstock.sort("Categories2")
 
 # reshape to be used for efficiency ratios
 cdm_enerdem_feedstock_reshaped = reshape_energy_constant(cdm_enerdem_feedstock)
 
-# aggregate lighting and electricity
-cdm_enerdem_feedstock.groupby({"electricity" : ["lighting","electricity"]}, "Categories2", inplace=True)
+# aggregate lighting, electricity and electricity-else
+cdm_enerdem_feedstock.groupby({"electricity" : ["lighting","electricity","electricity-else"]}, "Categories2", inplace=True)
 
 # put together excl feedstock and feedstock (to be used for efficiency rations)
 cdm_enerdem_fec = cdm_enerdem_exclfeed_reshaped.copy()
@@ -1419,6 +1429,8 @@ for v in variabs:
     cdm_enerdem_feedstock.rename_col(v, "energy-demand-feedstock_" + v, "Variables")
 cdm_enerdem_feedstock.deepen_twice()
 cdm_enerdem_feedstock.units["energy-demand-feedstock"] = 'TWh/Mt'
+cdm_enerdem_feedstock.add(0, "Categories2", "electricity-else", dummy=True)
+cdm_enerdem_feedstock.sort("Categories2")
 
 # reshape to be used for efficiency ratios
 cdm_enerdem_feedstock_reshaped = reshape_energy_constant(cdm_enerdem_feedstock)
