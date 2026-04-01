@@ -1,6 +1,6 @@
 import os
 
-from ......model.common.auxiliary_functions import (
+from transition_compass_model.model.common.auxiliary_functions import (
     create_years_list,
     save_url_to_file,
     load_pop,
@@ -13,6 +13,7 @@ import _database.pre_processing.buildings.Switzerland.get_data_functions.hot_wat
 from _database.pre_processing.buildings.Switzerland.get_data_functions.floor_area_CH import (
     extract_nb_of_apartments_per_building_type,
 )
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 
 def adjust_tech_mix(dm_tech_mix, dm_apt):
@@ -228,7 +229,7 @@ def run(country_list, years_ots):
     # Get Hot water fuel split at household level per canton
     table_id = "px-x-0902010000_102"
     file_hw = os.path.join(this_dir, "../data/bld_hotwater_technology_2021-2023.pickle")
-    # Extract water tech share based on number of buildings
+    # Extract the number of buildings, disaggregated by hot water heating technology and building type in 2021-2023
     # It only has data for the last 3 years
     #!FIXME extract 2000 and 1990
     dm_tech_mix = hw.extract_hotwater_technologies(table_id, file_hw)
@@ -238,13 +239,14 @@ def run(country_list, years_ots):
     file_hw = os.path.join(
         this_dir, "../data/bld_hotwater_technology_1990_2000_old.pickle"
     )
+    # Extract the number of buildings, disaggregated by hot water heating technology and building type in 2021-2023
     dm_tech_mix_old = hw.extract_hotwater_technologies_old(table_id, file_hw)
     dm_tech_mix_old.drop("Categories2", "coal")
     dm_tech_mix.append(dm_tech_mix_old, dim="Years")
     # tech share
     # Add missing years
     dm_add_missing_variables(dm_tech_mix, {"Years": years_ots}, fill_nans=True)
-    # dm_tech_mix.normalise('Categories2', inplace=True, keep_original=False)
+    dm_tech_mix.normalise("Categories2", inplace=True, keep_original=False)
 
     # Extract number of apartments per building type
     table_id = "px-x-0902020200_103"

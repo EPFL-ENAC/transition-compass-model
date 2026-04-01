@@ -1,5 +1,6 @@
 # packages
-from ......model.common.auxiliary_functions import my_pickle_dump
+from transition_compass_model.model.common.auxiliary_functions import my_pickle_dump, DataMatrix
+import numpy as np
 import pickle
 import os
 import warnings

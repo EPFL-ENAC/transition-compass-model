@@ -1,9 +1,18 @@
+import pandas as pd
+
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 from transition_compass_model.model.common.interface_class import Interface
+from transition_compass_model.model.common.constant_data_matrix_class import ConstantDataMatrix
+from transition_compass_model.model.common.io_database import (
+    read_database,
+    read_database_fxa,
+    read_database_to_ots_fts_dict,
+)
+from transition_compass_model.model.common.auxiliary_functions import compute_stock, filter_geoscale
 from transition_compass_model.model.common.auxiliary_functions import (
     read_level_data,
     filter_country_and_load_data_from_pickles,
 )
-from transition_compass_model.model.common.config_loader import load_lever_config
 import pickle
 import os
 import numpy as np
@@ -514,7 +523,9 @@ def forestry(lever_setting, years_setting, DM_input, interface=Interface()):
 def local_forestry_run():
     # Function to run only transport module without converter and tpe
     years_setting = [1990, 2023, 2025, 2050, 5]
-    lever_setting = load_lever_config()
+    current_file_directory = os.path.dirname(os.path.abspath(__file__))
+    f = open(os.path.join(current_file_directory, "../config/lever_position.json"))
+    lever_setting = json.load(f)[0]
 
     # get geoscale
     country_list = ["Switzerland", "Vaud"]
@@ -527,4 +538,5 @@ def local_forestry_run():
     return results_run
 
 
-# local_forestry_run()
+if __name__ == "__main__":
+    results_run = local_forestry_run()

@@ -1,6 +1,6 @@
 import numpy as np
 
-from ......model.common.auxiliary_functions import (
+from transition_compass_model.model.common.auxiliary_functions import (
     create_years_list,
     load_pop,
     dm_add_missing_variables,
@@ -67,14 +67,8 @@ def calibrate_cantons_heating_tech_based_on_EP2050(
             dm_shares.array, axis=(0, 3), keepdims=True
         )
         dm_shares.drop("Categories3", ["solar", "coal"])
-        assert (
-            dm_heating_CH.col_labels["Categories1"]
-            == dm_shares.col_labels["Categories2"]
-        )
-        assert (
-            dm_heating_CH.col_labels["Categories2"]
-            == dm_shares.col_labels["Categories3"]
-        )
+        assert dm_cal.col_labels["Categories1"] == dm_shares.col_labels["Categories2"]
+        assert dm_cal.col_labels["Categories2"] == dm_shares.col_labels["Categories3"]
 
         arr = (
             dm_shares[:, :, "bld_heating-mix", :, :, :]
@@ -284,6 +278,8 @@ def run(global_var, dm_all, country_list, years_ots):
         dm_heating_tech, dm_heating_tech_old, years_ots
     )
 
+    # For newer constructions, use recent data for 2021 - 2023,
+    # and then set number of building by tech for A-B, C to 0 before the beginning of the construction period
     dm_heating_tech_AB = dm_heating_tech.filter({"Categories1": ["B", "C"]})
     dm_add_missing_variables(dm_heating_tech_AB, {"Years": years_ots}, fill_nans=False)
     start_B = global_var["envelope cat new"]["B"][0]
@@ -338,7 +334,6 @@ def run(global_var, dm_all, country_list, years_ots):
     # Reconstruct heating-mix for new categories using archetypes for B and C
 
     # SECTION: Heating efficiency
-    # !FIXME : USE EP2050 for the efficiencies
     #######      HEATING EFFICIENCY     ###########
     file_url = "https://www.bfe.admin.ch/bfe/de/home/politik/energieperspektiven-2050-plus.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvMTA0NDE=.html"
     zip_name = os.path.join(this_dir, "../data/EP2050_sectors.zip")

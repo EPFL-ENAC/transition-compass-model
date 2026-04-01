@@ -1,6 +1,6 @@
 import numpy as np
-from ..common.data_matrix_class import DataMatrix
-from ..common.auxiliary_functions import (
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
+from transition_compass_model.model.common.auxiliary_functions import (
     create_years_list,
     dm_add_missing_variables,
     moving_average,
@@ -327,37 +327,37 @@ def bld_floor_area_workflow(DM_floor_area, dm_lfs, cdm_const, years_ots, years_f
     DM_industry = {}
     DM_industry["floor-area"] = dm_industry.copy()
 
-    # make dummy domapp
-    dm_domapp = dm_industry.filter(
-        {
-            "Variables": [
-                "bld_floor-area_new",
-                "bld_floor-area_waste",
-                "bld_floor-area_stock",
-            ]
-        }
-    )
-    dm_domapp.rename_col_regex("floor-area", "domapp", "Variables")
-    dm_domapp.rename_col("residential", "fridge", "Categories1")
-    missing = ["freezer", "dishwasher", "wmachine", "dryer"]
-    for m in missing:
-        dm_domapp.add(np.nan, "Categories1", m, "number", True)
-    dm_domapp.sort("Categories1")
-    dm_domapp[...] = 100
-    for v in dm_domapp.col_labels["Variables"]:
-        dm_domapp.units[v] = "number"
-    DM_industry["domapp"] = dm_domapp.copy()
+    # # make dummy domapp
+    # dm_domapp = dm_industry.filter(
+    #     {
+    #         "Variables": [
+    #             "bld_floor-area_new",
+    #             "bld_floor-area_waste",
+    #             "bld_floor-area_stock",
+    #         ]
+    #     }
+    # )
+    # dm_domapp.rename_col_regex("floor-area", "domapp", "Variables")
+    # dm_domapp.rename_col("residential", "fridge", "Categories1")
+    # missing = ["freezer", "dishwasher", "wmachine", "dryer"]
+    # for m in missing:
+    #     dm_domapp.add(np.nan, "Categories1", m, "number", True)
+    # dm_domapp.sort("Categories1")
+    # dm_domapp[...] = 100
+    # for v in dm_domapp.col_labels["Variables"]:
+    #     dm_domapp.units[v] = "number"
+    # DM_industry["domapp"] = dm_domapp.copy()
 
-    # make dummy electronics
-    dm_elec = dm_domapp.filter({"Categories1": ["dishwasher"]})
-    dm_elec.rename_col_regex("domapp", "electronics", "Variables")
-    dm_elec.rename_col("dishwasher", "phone", "Categories1")
-    missing = ["computer", "tv"]
-    for m in missing:
-        dm_elec.add(np.nan, "Categories1", m, "number", True)
-    dm_elec.sort("Categories1")
-    dm_elec[...] = 100
-    DM_industry["electronics"] = dm_elec.copy()
+    # # make dummy electronics
+    # dm_elec = dm_domapp.filter({"Categories1": ["dishwasher"]})
+    # dm_elec.rename_col_regex("domapp", "electronics", "Variables")
+    # dm_elec.rename_col("dishwasher", "phone", "Categories1")
+    # missing = ["computer", "tv"]
+    # for m in missing:
+    #     dm_elec.add(np.nan, "Categories1", m, "number", True)
+    # dm_elec.sort("Categories1")
+    # dm_elec[...] = 100
+    # DM_industry["electronics"] = dm_elec.copy()
 
     dm_stock = dm_bld_tot.filter({"Variables": ["bld_floor-area_stock"]})
     dm_stock.array = np.maximum(dm_stock.array, 0)
@@ -719,7 +719,13 @@ def bld_appliances_workflow(DM_appliances, dm_pop):
     DM_appliance_out = {
         "power": dm_elec_tot,
         "industry": dm_appliance.filter(
-            {"Variables": ["bld_appliances_new", "bld_appliances_waste"]}
+            {
+                "Variables": [
+                    "bld_appliances_stock",
+                    "bld_appliances_new",
+                    "bld_appliances_waste",
+                ]
+            }
         ),
     }
 
@@ -1307,6 +1313,8 @@ def compute_tech_fts_based_on_heat_tech(
     data_smooth = moving_average(
         dm_heat_tech.array, window_size, axis=dm_heat_tech.dim_labels.index("Years")
     )
+    # Force 0 values to stay at 0 even after smoothing of values
+    data_smooth = np.where(dm_heat_tech.array[:, 1:-1, ...] == 0, 0, data_smooth)
     dm_heat_tech.array[:, 1:-1, ...] = data_smooth
 
     dm_heat_tech.normalise(dim="Categories1")
@@ -1321,13 +1329,14 @@ def compute_tech_fts_based_on_heat_tech(
     dm_heat_tech.append(dm_tech, dim="Variables")
 
     # Normalise hw and heat tech so that are comparable in 2023
+    # cette ligne la fait exploser solar presence de nan quiand lever 2 suspect
     dm_heat_tech_norm = dm_heat_tech.copy()
     baseyear = years_ots[-2]
     dm_heat_tech_norm[:, :, :, :] = (
         dm_heat_tech_norm[:, :, :, :] / dm_heat_tech_norm[:, baseyear, np.newaxis, :, :]
     )
 
-    # Normalised hot-water fts trends matchning heating trends
+    # Normalised hot-water fts trends matching heating trends
     idx = dm_heat_tech_norm.idx
     dm_heat_tech_norm[:, idx[years_fts[0]] :, var_name, :] = dm_heat_tech_norm[
         :, idx[years_fts[0]] :, "bld_heating", :
@@ -1416,7 +1425,43 @@ def compute_eff_fts_based_on_heat_eff(
     return dm_heat_eff
 
 
-def bld_hotwater_workflow(DM_hotwater, dm_heating, dm_lfs, years_ots, years_fts):
+def compute_emissions_per_fuel_type_from_energy(
+    cdm_const,
+    dm_energy_consumption,
+    energy_consumption_col,
+    fuel_category: str,
+    output_label="services_CO2-emissions_heating",
+):
+
+    # Filter fossil fuels
+    cdm_emission = cdm_const["emissions"]
+
+    dm_energy_consumption.add(np.nan, dummy=True, dim="Categories1", col_label="coal")
+    dm_emissions = dm_energy_consumption.filter(
+        {
+            fuel_category: cdm_emission.col_labels["Categories1"],
+            "Variables": [energy_consumption_col],
+        }
+    )
+
+    # Compute emissions fossil fuels
+    dm_emissions.sort(fuel_category)
+    cdm_emission.sort("Categories1")
+
+    arr = (
+        dm_emissions[:, :, energy_consumption_col, :]
+        * cdm_emission[np.newaxis, np.newaxis, "bld_CO2-factors", :]
+    )
+    dm_emissions.add(arr, dim="Variables", col_label=output_label, unit="kt")
+    dm_emissions.change_unit(output_label, 1e-3, "kt", "Mt")
+    dm_emissions.filter({"Variables": [output_label]}, inplace=True)
+
+    return dm_emissions
+
+
+def bld_hotwater_workflow(
+    DM_hotwater, dm_heating, cdm_const, dm_lfs, years_ots, years_fts
+):
 
     dm_hw_eff = DM_hotwater["efficiency"].copy()
     dm_hw_eff = compute_eff_fts_based_on_heat_eff(
@@ -1449,12 +1494,22 @@ def bld_hotwater_workflow(DM_hotwater, dm_heating, dm_lfs, years_ots, years_fts)
         unit="TWh",
     )
 
-    DM_hotwater_out = {"power": dm_hw_tech}
+    dm_emissions = compute_emissions_per_fuel_type_from_energy(
+        cdm_const,
+        dm_hw_tech,
+        "bld_hot-water_energy-demand",
+        fuel_category="Categories1",
+        output_label="bld_hotwater_CO2-emissions",
+    )
+
+    DM_hotwater_out = {
+        "TPE": {"power": dm_hw_tech, "hotwater_emissions": dm_emissions}
+    }  #
 
     return DM_hotwater_out
 
 
-def bld_services_workflow(DM_services, dm_heating, years_ots, years_fts):
+def bld_services_workflow(DM_services, dm_heating, cdm_const, years_ots, years_fts):
 
     dm_eff = DM_services["services_efficiencies"].copy()
     dm_eff = compute_eff_fts_based_on_heat_eff(
@@ -1544,8 +1599,38 @@ def bld_services_workflow(DM_services, dm_heating, years_ots, years_fts):
         unit="TWh",
     )
 
+    # Services CO2 emissions
+    cdm_emission = cdm_const["emissions"]
+    dm_emissions = dm_tech_mix.filter(
+        {
+            "Categories2": cdm_emission.col_labels["Categories1"],
+            "Categories1": ["hot-water", "space-heating"],
+            "Variables": ["bld_services_energy-consumption"],
+        }
+    )
+    # Compute emissions fossil fuels
+    dm_emissions.sort("Categories2")
+    cdm_emission.sort("Categories1")
+
+    arr = (
+        dm_emissions[:, :, "bld_services_energy-consumption", :, :]
+        * cdm_emission[np.newaxis, np.newaxis, "bld_CO2-factors", np.newaxis, :]
+    )
+    dm_emissions.add(
+        arr, dim="Variables", col_label="services_CO2-emissions_heating", unit="kt"
+    )
+    dm_emissions.change_unit("services_CO2-emissions_heating", 1e-3, "kt", "Mt")
+    dm_emissions.filter({"Variables": ["services_CO2-emissions_heating"]}, inplace=True)
+
+    dm_emissions.group_all("Categories1")
+
     DM_services_out = {
-        "TPE": dm_tech_mix.filter({"Variables": ["bld_services_energy-consumption"]}),
+        "TPE": {
+            "services_energy-consumption": dm_tech_mix.filter(
+                {"Variables": ["bld_services_energy-consumption"]}
+            ),
+            "services_emissions": dm_emissions,
+        },
         "energy": dm_tech_mix,
     }
 

@@ -1,10 +1,12 @@
 # get_transport_demand_pkm, get_transport_demand_vkm, get_travel_demand_region_microrecencement
-from ......model.common.auxiliary_functions import save_url_to_file, linear_fitting
+from transition_compass_model.model.common.auxiliary_functions import save_url_to_file, linear_fitting
 import pandas as pd
 from _database.pre_processing.transport.Switzerland.get_data_functions import utils
 import numpy as np
-from ......model.common.data_matrix_class import DataMatrix
-
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
+import pickle
+import os
+import zipfile
 
 def get_transport_demand_pkm(file_url, local_filename, years_ots):
 
@@ -158,67 +160,84 @@ def get_transport_demand_vkm(file_url, local_filename, years_ots):
 
     return dm
 
+def extract_EP2050_transport_vkm_demand(file_url, zip_name, file_pickle):
 
-def get_travel_demand_region_microrecencement(
-    file_url=None, local_filename="", year=2000
-):
-    if file_url is not None:
-        save_url_to_file(file_url, local_filename)
-    df = pd.read_excel(local_filename)
-    df = df[["Unnamed: 1", "Unnamed: 2", "Unnamed: 3", "Unnamed: 5"]]
-    df.columns = ["Variables", "Reason", "Switzerland", "Vaud"]
-    df["Variables"] = df["Variables"].ffill()
-    # Keep only the sum of all reasons to travel
-    df = df.loc[df["Reason"] == "Tous les motifs"].copy()
-    df = df[["Variables", "Switzerland", "Vaud"]]
-    df = df.dropna(subset=["Variables"])
+  try:
+    with open(file_pickle, 'rb') as handle:
+      dm = pickle.load(handle)
 
-    # Add years col
-    df["Years"] = year
+  except OSError:
 
-    # Clean names for dm
-    df["Variables"] = df["Variables"].str.replace("\n", " ")
-    df["Variables"] = df["Variables"].str.split(",").str[0]
-    df["Variables"] = df["Variables"].str.replace(r"\s*\(.*?\)\s*", "", regex=True)
+    extract_dir = os.path.splitext(zip_name)[0]  # 'data/EP2050_sectors'
+    if not os.path.exists(extract_dir):
+      save_url_to_file(file_url, zip_name)
 
-    groupby_dict = {
-        "walk": "pied",
-        "bus": "Autocar|Car|Bus",
-        "metrotram": "Tram",
-        "bike": "Vélo",
-        "rail": "Train",
-        "LDV": "Voiture|Taxi",
-        "aviation": "Avion",
-        "2W": "Motocycle|Cyclomoteur",
-    }
+      # Extract the file
+      os.makedirs(extract_dir, exist_ok=True)
+      with zipfile.ZipFile(zip_name, 'r') as zip_ref:
+        zip_ref.extractall(extract_dir)
 
-    for new_cat, old_cat in groupby_dict.items():
-        # Use word boundaries to match full words only
-        # Use str.contains to check if old_cat is in the Variables
-        mask = df["Variables"].str.contains(old_cat, regex=True)
-        # Replace entire cell with new_cat if old_cat is found
-        df.loc[mask, "Variables"] = new_cat
+    file_tra = extract_dir + '/EP2050+_Szenarienergebnisse_Details_Nachfragesektoren/EP2050+_Detailergebnisse 2020-2060_Verkehrssektor_alle Szenarien_2022-04-12.xlsx'
+    df = pd.read_excel(file_tra, sheet_name='03 Fahrleistung')
 
-    df = df[df["Variables"].isin(groupby_dict.keys())].copy()
+    df.drop(columns=[df.columns[0], df.columns[3]], inplace=True)
 
-    df_T = pd.melt(
-        df, id_vars=["Variables", "Years"], var_name="Country", value_name="values"
-    )
-    df_pivot = df_T.pivot_table(
-        index=["Country", "Years"],
-        columns=["Variables"],
-        values="values",
-        aggfunc="sum",
-    )
+    table_title = 'Tabelle 03-01: Entwicklung der Fahrleistung von Strassenfahrzeugen im Szenario ZERO Basis'
+    start_table_row = df.index[df['Unnamed: 1'] == table_title].tolist()[1]
+    df.columns = df.iloc[start_table_row + 2]
 
-    # Add variable name
-    df_pivot = df_pivot.add_suffix("[pkm/cap/day]")
-    df_pivot = df_pivot.add_prefix("tra_pkm-cap_")
-    df_pivot.reset_index(inplace=True)
-    # Convert to dm
-    dm = DataMatrix.create_from_df(df_pivot, num_cat=1)
-    dm.change_unit(
-        "tra_pkm-cap", factor=365, old_unit="pkm/cap/day", new_unit="pkm/cap"
-    )
+    df = df.iloc[start_table_row + 3:start_table_row + 37]
 
-    return dm
+    # Years as int
+    col_mode_name = df.columns[0]
+    col_tech_name = df.columns[1]
+    df.set_index([col_mode_name, col_tech_name], inplace=True)
+    df.columns = df.columns.astype(int)
+    df.reset_index(inplace=True)
+
+    # Change variables names
+    full_name = ['tra_vkm_demand_' + var for var in
+                 df[col_mode_name]]
+    df[col_mode_name] = full_name
+    df['Full_name'] = df[col_mode_name] + '_' + df[col_tech_name] + ['[mio-vkm]']
+    df.drop(columns = [col_mode_name, col_tech_name], inplace=True)
+    # Move "Full_name" column at the beginning
+    first = df['Full_name']
+    df.drop(labels=['Full_name'], axis=1, inplace=True)
+    df.insert(0, 'Full_name', first)
+    df["Full_name"] = df["Full_name"].str.replace("(", "", regex=False)
+    df["Full_name"] = df["Full_name"].str.replace(")", "", regex=False)
+
+    # Pivot
+    df_T = df.T
+    df_T.columns = df_T.iloc[0]
+    df_T = df_T.iloc[1:]
+    df_T.reset_index(inplace=True)
+    df_T.rename(columns={18: 'Years'}, inplace=True)
+    df_T['Country'] = 'Switzerland'
+
+    dm = DataMatrix.create_from_df(df_T, num_cat=2)
+
+    # Rename mode of transport
+    dm.rename_col(['HGV', 'LCV', 'motorcycle', 'pass. car'],
+                  ['HDVH', 'HDVL',  '2W', 'LDV'], dim='Categories1')
+    dm.groupby({'bus': ['coach', 'urban bus']}, dim='Categories1', inplace=True)
+    # Rename tech transport
+    dm.groupby({'BEV': ['electricity'],
+                'ICE-gas': ['CNG', 'LNG', 'bifuel CNG/petrol'], 
+                'ICE-gasoline': ['petrol 2S', 'petrol 4S', 'bifuel LPG/petrol','flex-fuel E85'],
+                'PHEV-diesel' : ['Plug-in Hybrid diesel/electric'], 
+                'PHEV-gasoline' : ['Plug-in Hybrid petrol/electric'],
+                'FCEV': ['FuelCell'], 
+                'ICE-diesel': ['diesel']}, dim='Categories2', inplace=True)
+    
+    # ['BEV', 'CEV', 'FCEV', 'H2', 'ICE-diesel', 'ICE-gas', 'ICE-gasoline', 'PHEV-diesel', 'PHEV-gasoline', 'kerosene', 'mt']
+
+    with open(file_pickle, 'wb') as handle:
+      pickle.dump(dm, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+  dm.sort('Categories1')
+  dm.sort('Categories2')
+  dm.change_unit('tra_vkm_demand', old_unit='mio-vkm', new_unit='vkm', factor=1e6, operator='*')
+
+  return dm

@@ -2,9 +2,12 @@ import numpy as np
 
 import pandas as pd
 import os
-from ....model.common.data_matrix_class import DataMatrix
+import re
+
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
+from transition_compass_model.model.common.constant_data_matrix_class import ConstantDataMatrix
 from _database.pre_processing.api_routines_CH import get_data_api_CH
-from ....model.common.auxiliary_functions import (
+from transition_compass_model.model.common.auxiliary_functions import (
     create_years_list,
     linear_fitting,
     filter_DM,
@@ -243,6 +246,7 @@ def get_crop_prod(table_id, file, years_ots):
                 "Maïs grain",
                 "Autres céréales",
                 "Maïs d'ensilage et maïs vert",
+                "Méteil et autres céréales fourragères",
             ],
             "crop-fruit": [
                 "Baies annuelles",
@@ -270,7 +274,10 @@ def get_crop_prod(table_id, file, years_ots):
                 "Soja",
             ],
             "crop-starch": ["Pommes de terre"],
-            "crop-sugarcrop": ["Betteraves sucrières"],
+            "crop-sugarcrop": [
+                "Betteraves sucrières",
+                "Betteraves fourragères",
+            ],
             "crop-veg": [
                 "Cultures maraîchères de plein champ",
                 "Cultures maraîchères sous abri",
@@ -296,14 +303,11 @@ def get_crop_prod(table_id, file, years_ots):
                 "Autres pépinières",
                 "Surfaces à litières",
                 "Haies, bosquets champêtres et berges boisées",
-                "Betteraves fourragères",
                 "Matières premières renouvelables annuelles",
                 "Matières premières renouvelables pluriannuelles",
                 "Autres SAU",
-                "Tabac",
                 "Jachère",
                 "Autres terres ouvertes",
-                "Méteil et autres céréales fourragères",
             ],
             "other": [
                 "Cultures horticoles de plein champ annuelles",
@@ -311,6 +315,7 @@ def get_crop_prod(table_id, file, years_ots):
                 "Autres cultures pérennes",
                 "Autres cultures sous abri",
                 "Cultures sous abri en général",
+                "Tabac",
             ],
         }
 
@@ -506,6 +511,24 @@ dm_demo = DM_lfs["ots"]["pop"]["lfs_demography_"].filter(
 data_file = "../../data/datamatrix/agriculture.pickle"
 with open(data_file, "rb") as handle:
     DM_agriculture = pickle.load(handle)
+with open(data_file, "rb") as handle:
+    DM_CH = pickle.load(handle)
+filter_DM(DM_CH, {"Country": ["Switzerland"]})
+
+#################################################################################
+# Fix DM[Agriculture]
+#
+#################################################################################
+
+# Fix Infinite Other animals
+# dm_fix = DM_agriculture["fxa"]["ef_liv_N2O-emission"]
+# dm_fix.switch_categories_order("Categories2", "Categories1")
+# dm_fix.drop(col_label='meat-oth-animals', dim="Categories2")
+# dm_fix.add(0.02254, "Categories2", "meat-oth-animals", dummy=True)
+# dm_fix.switch_categories_order("Categories2", "Categories1")
+
+# my_pickle_dump(DM_agriculture, data_file)
+
 filter_DM(DM_agriculture, {"Country": ["Switzerland"]})
 add_dummy_country_to_DM(DM_agriculture, "Vaud", "Switzerland")
 filter_DM(DM_agriculture, {"Country": ["Vaud"]})
@@ -545,7 +568,7 @@ dm_lsu.change_unit("agr_livestock", old_unit="animals", new_unit="lsu", factor=1
 # Slaughtered = Stock x slaughtered-rate
 dm_slaughtered_rate = DM_agriculture["ots"]["climate-smart-livestock"][
     "climate-smart-livestock_slaughtered"
-]
+].copy()
 dm_slaughtered_rate.filter_w_regex({"Categories1": "meat.*"}, inplace=True)
 dm_lsu_meat = dm_lsu.filter_w_regex({"Categories1": "meat.*"}, inplace=False)
 dm_lsu_other = dm_lsu.filter_w_regex({"Categories1": "abp.*"}, inplace=False)
@@ -566,7 +589,7 @@ dm_lsu.append(dm_lsu_meat, dim="Categories1")
 # Multiply dm_lsu by yield to obtain total kcal produced
 dm_yield = DM_agriculture["ots"]["climate-smart-livestock"][
     "climate-smart-livestock_yield"
-]
+].copy()
 if "meat-oth-animals" not in dm_yield.col_labels["Categories1"]:
     idx = dm_yield.idx
     arr_poultry = dm_yield.array[:, :, :, idx["meat-poultry"]]
@@ -589,7 +612,9 @@ file = "data/agr_crop_prod.pickle"
 # Production in *ha* / Land-Use
 dm_crop_land = get_crop_prod(table_id, file, years_ots)
 # Production in kcal = Production in ha x yield in kcal/ha
-dm_yield = DM_agriculture["ots"]["climate-smart-crop"]["climate-smart-crop_yield"]
+dm_yield = DM_agriculture["ots"]["climate-smart-crop"][
+    "climate-smart-crop_yield"
+].copy()
 linear_fitting(dm_yield, years_ots)
 # Wine production
 # The Federal Office of Agriculture, report the hl of wine produced and the ha of land dedicated to vineyards.
@@ -618,15 +643,17 @@ dm_prod.append(dm_crop_prod, dim="Categories1")
 # Demand = append( Consumer-diet,  )
 # Consumer-diet-other = ( kcal-req - sum(Consumer-diet) )*Share
 # Share
-dm_share = DM_agriculture["ots"]["diet"]["share"].normalise(
-    "Categories1", inplace=False
+dm_share = (
+    DM_agriculture["ots"]["diet"]["share"]
+    .normalise("Categories1", inplace=False)
+    .copy()
 )
 linear_fitting(dm_share, years_ots)
 # Consumer-diet
-dm_diet = DM_agriculture["ots"]["diet"]["lfs_consumers-diet"]
+dm_diet = DM_agriculture["ots"]["diet"]["lfs_consumers-diet"].copy()
 linear_fitting(dm_diet, years_ots)
 # kcal-req
-dm_kcal_req = DM_agriculture["ots"]["kcal-req"]
+dm_kcal_req = DM_agriculture["ots"]["kcal-req"].copy()
 linear_fitting(dm_kcal_req, years_ots)
 dm_kcal_req.append(dm_demo, dim="Variables")
 dm_kcal_req.operation(
@@ -655,7 +682,7 @@ dm_diet_other = dm_share.filter({"Variables": ["lfs_consumers-diet"]})
 dm_diet.append(dm_diet_other, "Categories1")
 
 # Supply = Waste + Demand
-dm_waste = DM_agriculture["ots"]["fwaste"]
+dm_waste = DM_agriculture["ots"]["fwaste"].copy()
 linear_fitting(dm_waste, years_ots)
 dm_supply = dm_waste
 # if 'rice' not in dm_supply.col_labels['Categories1']:
@@ -670,7 +697,7 @@ dm_supply.operation(
 )
 
 # Net-import = Production/Suppy ( = production/(production + import - export))
-dm_netimport_dummy = DM_agriculture["ots"]["food-net-import"]
+dm_netimport_dummy = DM_agriculture["ots"]["food-net-import"].copy()
 dm_supply.change_unit(
     "lfs_supply", old_unit="kcal/cap/day", new_unit="kcal/cap", factor=365
 )
@@ -679,6 +706,9 @@ dm_supply.array[:, :, idx["lfs_supply"], :] = (
     dm_supply.array[:, :, idx["lfs_supply"], :] * dm_pop.array[:, :, :]
 )
 dm_supply.change_unit("lfs_supply", old_unit="kcal/cap", new_unit="kcal", factor=1)
+
+dm_cal_diet = dm_supply.filter({"Variables": ["lfs_supply"]})
+
 dm_supply.rename_col(
     ["pigs", "cereals", "fruits", "oilcrops", "pulses", "afats", "sugar"],
     ["pig", "cereal", "fruit", "oilcrop", "pulse", "afat", "pro-crop-processed-sugar"],
@@ -707,6 +737,10 @@ DM_agriculture["ots"]["food-net-import"].append(
 DM_agriculture["ots"]["food-net-import"].sort("Country")
 
 # Overwrite Vaud calibration ###################################################
+dm_cal_diet.rename_col("lfs_supply", "cal_agr_diet", "Variables")
+
+DM_agriculture["fxa"]["cal_agr_diet"] = dm_cal_diet
+
 
 ## Livestock Production
 dm_prod.rename_col_regex("pro-liv-", "", dim="Categories1")
@@ -746,12 +780,17 @@ arr_n2o_cal = (
     * dm_lsu_cal[:, :, "cal_agr_liv-population", :, np.newaxis]
 )
 dm_manure_n2o.add(
-    arr_n2o_cal, dim="Variables", col_label=["cal_agr_liv_N2O-emission"], unit=["kt"]
+    arr_n2o_cal, dim="Variables", col_label=["cal_agr_liv_N2O-emission"], unit=["t"]
+)
+
+dm_manure_n2o.change_unit(
+    "cal_agr_liv_N2O-emission", old_unit="t", new_unit="kt", factor=0.001
 )
 
 dm_manure_n2o.switch_categories_order("Categories2", "Categories1")
 dm_manure_n2o.filter({"Variables": ["cal_agr_liv_N2O-emission"]}, inplace=True)
 DM_agriculture["fxa"]["cal_agr_liv_N2O-emission"] = dm_manure_n2o
+
 
 ## Livestock emission CH4 (enteric & treated)
 dm_enteric_ch4 = DM_agriculture["ots"]["climate-smart-livestock"][
@@ -771,7 +810,11 @@ arr_ch4_cal = (
     * dm_ef_ch4[:, :, "fxa_ef_liv_CH4-emission_treated", :, np.newaxis]
 )
 dm_manure_ch4.add(
-    arr_ch4_cal, dim="Variables", col_label=["cal_agr_liv_CH4-emission"], unit=["kt"]
+    arr_ch4_cal, dim="Variables", col_label=["cal_agr_liv_CH4-emission"], unit=["t"]
+)
+
+dm_manure_ch4.change_unit(
+    "cal_agr_liv_CH4-emission", old_unit="t", new_unit="kt", factor=0.001
 )
 
 dm_manure_ch4.switch_categories_order("Categories2", "Categories1")
@@ -785,11 +828,14 @@ dm_enteric_ch4.add(
     arr_enteric_cal,
     dim="Variables",
     col_label=["cal_agr_liv_CH4-emission"],
-    unit=["kt"],
+    unit=["t"],
+)
+
+dm_enteric_ch4.change_unit(
+    "cal_agr_liv_CH4-emission", old_unit="t", new_unit="kt", factor=0.001
 )
 
 ### Formating
-# dm_manure_ch4.switch_categories_order("Categories2","Categories1")
 dm_manure_ch4.filter({"Variables": ["cal_agr_liv_CH4-emission"]}, inplace=True)
 dm_enteric_ch4.filter({"Variables": ["cal_agr_liv_CH4-emission"]}, inplace=True)
 dm_enteric_ch4.deepen(based_on="Variables")
@@ -831,7 +877,7 @@ DM_agriculture["fxa"]["cal_agr_domestic-production_food"] = dm_prod_crop
 
 ## Feed Demand
 ### Extracting DM
-dm_fcr = DM_agriculture["constant"]["cdm_cp_efficiency"]
+dm_fcr = DM_agriculture["constant"]["cdm_cp_efficiency"].copy()
 dm_pasture = DM_agriculture["ots"]["ruminant-feed"]["ruminant-feed"].copy()
 dm_feed_split = DM_agriculture["ots"]["climate-smart-livestock"][
     "climate-smart-livestock_ration"
@@ -932,10 +978,405 @@ DM_agriculture["fxa"]["cal_agr_demand_feed"] = dm_feed_split
 ## Land use
 
 
+cal_agr_lus_land = dm_crop_land.copy()
+cal_agr_lus_land.groupby(
+    {
+        "grassland": ["grassland"],
+        "cropland": [
+            "crop-cereal",
+            "crop-fruit",
+            "crop-oilcrop",
+            "crop-pulse",
+            "crop-starch",
+            "crop-sugarcrop",
+            "crop-veg",
+            "other",
+            "pro-bev-beer",
+            "pro-bev-wine",
+        ],
+    },
+    dim="Categories1",
+    inplace=True,
+)
+cal_agr_lus_land.rename_col("agr_land-use", "cal_agr_lus_land", dim="Variables")
+
+### Overwriting DM
+DM_agriculture["fxa"]["cal_agr_lus_land"] = cal_agr_lus_land
+
+## Fertilizer Emissions (N2O)
+dm_nitrogen = DM_agriculture["ots"]["climate-smart-crop"][
+    "climate-smart-crop_input-use"
+].copy()
+dm_nitrogen.filter({"Categories1": ["nitrogen"]}, inplace=True)
+dm_ef_nitrogen = DM_agriculture["fxa"]["agr_emission_fertilizer"].copy()
+dm_ef_nitrogen.filter({"Years": years_ots}, inplace=True)
+dm_land = cal_agr_lus_land.copy()
+dm_land.groupby(
+    {
+        "agriculture-land": ["grassland", "cropland"],
+    },
+    dim="Categories1",
+    inplace=True,
+)
+
+arr_n_emission = (
+    dm_nitrogen[:, :, "agr_climate-smart-crop_input-use", :]
+    * dm_ef_nitrogen[:, :, np.newaxis, "fxa_agr_emission_fertilizer"]
+    * dm_land[:, :, "cal_agr_lus_land", :]
+)
+dm_nitrogen.add(arr_n_emission, dim="Categories1", col_label=["emissions"], unit=["t"])
+
+dm_nitrogen.filter({"Categories1": ["emissions"]}, inplace=True)
+dm_nitrogen = dm_nitrogen.flatten()
+dm_nitrogen.rename_col(
+    "agr_climate-smart-crop_input-use_emissions",
+    "cal_agr_crop_emission_N2O-emission_fertilizer",
+    dim="Variables",
+)
+
+dm_nitrogen.change_unit(
+    "cal_agr_crop_emission_N2O-emission_fertilizer",
+    old_unit="t/ha",
+    new_unit="Mt",
+    factor=0.000001,
+)
+
+DM_agriculture["fxa"]["cal_agr_crop_emission_N2O-emission_fertilizer"] = dm_nitrogen
+
+## Energy demand
+### Energy demand per ha
+dm_energy = DM_agriculture["ots"]["climate-smart-crop"][
+    "climate-smart-crop_energy-demand"
+].copy()
+arr_energy_split = (
+    dm_land[:, :, "cal_agr_lus_land", :]
+    * dm_energy[:, :, "agr_climate-smart-crop_energy-demand", :]
+)
+dm_energy.add(
+    arr_energy_split,
+    dim="Variables",
+    col_label=["cal_agr_energy-demand"],
+    unit=["ktoe"],
+)
+dm_energy.filter({"Variables": ["cal_agr_energy-demand"]}, inplace=True)
+
+### Overwriting DM
+DM_agriculture["fxa"]["cal_agr_energy-demand"] = dm_energy
+
+## Input use (fuel, liming, urea)
+dm_input = DM_agriculture["ots"]["climate-smart-crop"][
+    "climate-smart-crop_input-use"
+].copy()
+dm_input.filter({"Categories1": ["liming", "urea"]}, inplace=True)
+dm_ef_input = DM_agriculture["constant"]["cdm_fertilizer_co"].copy()
+
+arr_input_emission = (
+    dm_land[:, :, "cal_agr_lus_land", :]
+    * dm_input[:, :, "agr_climate-smart-crop_input-use", :]
+    * dm_ef_input[np.newaxis, np.newaxis, "cp_ef", :]
+)
+dm_input.add(
+    arr_input_emission,
+    dim="Variables",
+    col_label=["cal_agr_input-use_emissions-CO2"],
+    unit=["tCO2"],
+)
+dm_input.filter({"Variables": ["cal_agr_input-use_emissions-CO2"]}, inplace=True)
+dm_input.change_unit(
+    "cal_agr_input-use_emissions-CO2", old_unit="tCO2", new_unit="ktCO2", factor=0.001
+)
+
+### Fuel Emissions
+dm_ef_fuel = DM_agriculture["constant"]["cdm_CO2"].copy()
+arr_fuel_emission = (
+    dm_energy[:, :, "cal_agr_energy-demand", :]
+    * dm_ef_fuel[np.newaxis, np.newaxis, "cp_emission-factor_CO2", :]
+)
+
+dm_energy_buffer = dm_energy.copy()
+dm_energy_buffer.add(
+    arr_fuel_emission,
+    dim="Variables",
+    col_label=["cal_agr_input-use_emissions-CO2"],
+    unit=["MtCO2"],
+)
+
+dm_energy_buffer.change_unit(
+    "cal_agr_input-use_emissions-CO2", old_unit="MtCO2", new_unit="ktCO2", factor=1000
+)
+
+dm_co2_fuel = dm_energy_buffer.copy()
+dm_co2_fuel.filter({"Variables": ["cal_agr_input-use_emissions-CO2"]}, inplace=True)
+dm_co2_fuel.groupby(
+    {
+        "fuel": [
+            "bioenergy-gas-biogas",
+            "bioenergy-liquid-biodiesel",
+            "bioenergy-liquid-ethanol",
+            "bioenergy-liquid-oth",
+            "bioenergy-solid-wood",
+            "electricity",
+            "gas-ff-natural",
+            "heat",
+            "liquid-ff-diesel",
+            "liquid-ff-fuel-oil",
+            "liquid-ff-gasoline",
+            "liquid-ff-lpg",
+            "oth",
+            "solid-ff-coal",
+        ],
+    },
+    dim="Categories1",
+    inplace=True,
+)
+
+dm_input_co2 = dm_co2_fuel.copy()
+dm_input_co2.append(dm_input, dim="Categories1")
+dm_cal_co2 = dm_input_co2.copy()
+
+### Cal Input (with FXA)
+linear_fitting(dm_input_co2, list(range(1973, 2023)))
+dm_input_co2.drop("Years", [1974])
+dm_cal_co2.change_unit(
+    "cal_agr_input-use_emissions-CO2", old_unit="ktCO2", new_unit="kt", factor=1
+)
+
+### Cal Input CO2, only OTS
+dm_input_co2.change_unit(
+    "cal_agr_input-use_emissions-CO2", old_unit="ktCO2", new_unit="kt", factor=1
+)
+
+### Overwriting DM
+DM_agriculture["fxa"]["cal_input"] = dm_input_co2
+DM_agriculture["fxa"]["cal_agr_input-use_emissions-CO2"] = dm_cal_co2
+
+# Total Land Use for Cantons
+## Just check canton surface file: canton-surface.xlsx in data/
+
+DM_agriculture["fxa"]["lus_land_total-area"][...] = 321223
+
+# Fibre crops
+DM_agriculture["fxa"]["fibers"][...] = DM_agriculture["fxa"]["fibers"][...] * 0.08
+
+
+# Calibration of cropland
+dm_food_crop = DM_agriculture["fxa"]["cal_agr_domestic-production_food"].copy()
+dm_yield_crop = DM_agriculture["ots"]["climate-smart-crop"][
+    "climate-smart-crop_yield"
+].copy()
+dm_yield_crop.filter(
+    {
+        "Categories1": [
+            "cereal",
+            "fruit",
+            "oilcrop",
+            "pulse",
+            "rice",
+            "starch",
+            "sugarcrop",
+            "veg",
+        ]
+    },
+    inplace=True,
+)
+
+arr_crop_area = (
+    dm_food_crop[:, :, "cal_agr_domestic-production_food", :]
+    / dm_yield_crop[:, :, "agr_climate-smart-crop_yield", :]
+)
+dm_food_crop.add(
+    arr_crop_area, dim="Variables", col_label=["cal_agr_lus_land_cropland"], unit=["ha"]
+)
+arr_temp = dm_food_crop[..., "rice"]
+arr_temp[np.isnan(arr_temp)] = 0
+dm_food_crop.drop("Categories1", "rice")
+dm_food_crop.add(arr_temp, dim="Categories1", col_label=["rice"])
+dm_food_crop.sort("Categories1")
+
+dm_cropland_split = dm_food_crop.copy()
+dm_cropland_split.filter({"Variables": ["cal_agr_lus_land_cropland"]}, inplace=True)
+
+dm_cropland_split.add(0, "Categories1", "fibres-plant-eq", dummy=True)
+
+
+DM_agriculture["fxa"]["cal_agr_lus_land_cropland"] = dm_cropland_split
+
+dm_alcool = dm_crop_prod.copy()
+dm_alcool.filter({"Categories1": ["pro-bev-beer", "pro-bev-wine"]}, inplace=True)
+dm_alcool.rename_col("pro-bev-beer", "bev-beer", dim="Categories1")
+dm_alcool.rename_col("pro-bev-wine", "wine", dim="Categories1")
+
+# Use self-sufficiency ?
+dm_alcool.add(0, "Categories1", "bev-fer", dummy=True)
+dm_alcool.add(0, "Categories1", "bev-alc", dummy=True)
+
+dm_alcool.rename_col(
+    "agr_production", "cal_agr_domestic-production_bev", dim="Variables"
+)
+
+DM_agriculture["fxa"]["cal_agr_domestic-production_bev"] = dm_alcool
+
+# Emissions
+## CH4: enteric, manure and rice (burnt residues?)
+dm_emission_ch4_manure = dm_manure_ch4.copy()
+dm_emission_ch4_rice = dm_cropland_split.copy()
+dm_emission_ch4_rice.filter({"Categories1": ["rice"]}, inplace=True)
+dm_ef_rice = DM_agriculture["fxa"]["rice"].copy()
+dm_ef_rice.filter({"Years": years_ots}, inplace=True)
+arr_ch4_rice = (
+    dm_ef_rice[:, :, np.newaxis, "fxa_emission_crop_rice"]
+    * dm_emission_ch4_rice[:, :, "cal_agr_lus_land_cropland", :]
+) * 0.001
+dm_emission_ch4_rice.add(
+    arr_ch4_rice, dim="Variables", col_label=["cal_agr_CH4-emission"], unit=["kt"]
+)
+dm_emission_ch4_rice.filter({"Variables": ["cal_agr_CH4-emission"]}, inplace=True)
+
+dm_emission_ch4_manure = dm_emission_ch4_manure.flatten().flatten()
+dm_emission_ch4_manure.rename_col_regex("cal_agr_liv_CH4-emission_", "", "Variables")
+dm_emission_ch4_rice = dm_emission_ch4_rice.flatten()
+dm_ch4_emission = dm_emission_ch4_manure.copy()
+dm_ch4_emission.append(dm_emission_ch4_rice, dim="Variables")
+dm_ch4_emission.rename_col("cal_agr_CH4-emission_rice", "crop_rice", dim="Variables")
+
+
+dm_ch4_emission_total = dm_ch4_emission.copy()
+dm_ch4_emission_total.groupby(
+    {
+        "ch4": [
+            "treated_abp-dairy-milk",
+            "treated_abp-hens-egg",
+            "treated_meat-bovine",
+            "treated_meat-oth-animals",
+            "treated_meat-pig",
+            "treated_meat-poultry",
+            "treated_meat-sheep",
+            "enteric_abp-dairy-milk",
+            "enteric_meat-bovine",
+            "enteric_meat-oth-animals",
+            "enteric_meat-pig",
+            "enteric_meat-sheep",
+            "crop_rice",
+        ]
+    },
+    dim="Variables",
+    inplace=True,
+)
+
+dm_ch4_emission_total.rename_col_regex("ch4", "cal_agr_CH4-emission", "Variables")
+dm_ch4_emission_total.change_unit(
+    "cal_agr_CH4-emission", old_unit="kt", new_unit="t", factor=1000
+)
+
+## N2O: manure, soil, residues, fertilizers
+# manure
+dm_emission_n2o_livestock = dm_manure_n2o.copy()
+dm_emission_n2o_livestock.change_unit(
+    "cal_agr_liv_N2O-emission", old_unit="kt", new_unit="t", factor=1000
+)
+dm_emission_n2o_livestock = dm_emission_n2o_livestock.flatten().flatten()
+dm_emission_n2o_livestock.rename_col_regex("cal_agr_liv_N2O-emission_", "", "Variables")
+dm_emission_n2o = dm_emission_n2o_livestock.copy()
+
+# fertilizers
+dm_emission_n2o_fertilizer = dm_nitrogen.copy()
+dm_emission_n2o_fertilizer.change_unit(
+    "cal_agr_crop_emission_N2O-emission_fertilizer",
+    old_unit="Mt",
+    new_unit="t",
+    factor=1000000,
+)
+dm_emission_n2o.append(dm_emission_n2o_fertilizer, dim="Variables")
+
+# soil
+
+# residues
+
+# total
+dm_n2o_emission_total = dm_emission_n2o.copy()
+dm_n2o_emission_total.groupby(
+    {
+        "n2o": [
+            "applied_abp-dairy-milk",
+            "applied_abp-hens-egg",
+            "applied_meat-bovine",
+            "applied_meat-oth-animals",
+            "applied_meat-pig",
+            "applied_meat-poultry",
+            "applied_meat-sheep",
+            "pasture_abp-dairy-milk",
+            "pasture_abp-hens-egg",
+            "pasture_meat-bovine",
+            "pasture_meat-oth-animals",
+            "pasture_meat-pig",
+            "pasture_meat-poultry",
+            "pasture_meat-sheep",
+            "treated_abp-dairy-milk",
+            "treated_abp-hens-egg",
+            "treated_meat-bovine",
+            "treated_meat-oth-animals",
+            "treated_meat-pig",
+            "treated_meat-poultry",
+            "treated_meat-sheep",
+            "cal_agr_crop_emission_N2O-emission_fertilizer",
+        ]
+    },
+    dim="Variables",
+    inplace=True,
+)
+
+dm_n2o_emission_total.rename_col_regex("n2o", "cal_agr_N2O-emission", "Variables")
+
+## CO2: liming, fuel and urea
+dm_co2_emission_total = dm_input_co2.copy()
+dm_co2_emission_total.filter({"Years": years_ots}, inplace=True)
+dm_co2_emission_total = dm_co2_emission_total.flatten()
+dm_co2_emission_total.groupby(
+    {
+        "cal_agr_CO2-emission": [
+            "cal_agr_input-use_emissions-CO2_fuel",
+            "cal_agr_input-use_emissions-CO2_liming",
+            "cal_agr_input-use_emissions-CO2_urea",
+        ]
+    },
+    dim="Variables",
+    inplace=True,
+)
+dm_co2_emission_total.change_unit(
+    "cal_agr_CO2-emission", old_unit="kt", new_unit="t", factor=1000
+)
+
+# Total
+dm_agriculture_emission_total = dm_co2_emission_total.copy()
+dm_agriculture_emission_total.append(dm_n2o_emission_total, dim="Variables")
+dm_agriculture_emission_total.append(dm_ch4_emission_total, dim="Variables")
+
+DM_agriculture["fxa"]["cal_agr_emissions"] = dm_agriculture_emission_total
+
+# Check emissions
+dm_ch4_split_co2e = dm_ch4_emission.copy()
+for v in dm_ch4_split_co2e.col_labels["Variables"]:
+    dm_ch4_split_co2e.change_unit(v, old_unit="kt", new_unit="tCO2e", factor=25000)
+dm_ch4_split_co2e.rename_col_regex(r"^(.*)$", r"ch4_\1", dim="Variables")
+
+dm_n2o_split_co2e = dm_emission_n2o.copy()
+for v in dm_emission_n2o.col_labels["Variables"]:
+    dm_n2o_split_co2e.change_unit(v, old_unit="t", new_unit="tCO2e", factor=210)
+dm_n2o_split_co2e.rename_col_regex(r"^(.*)$", r"n2o_\1", dim="Variables")
+
+dm_emission_total_co2e = dm_input_co2.copy()
+dm_emission_total_co2e.filter({"Years": years_ots}, inplace=True)
+dm_emission_total_co2e.change_unit(
+    "cal_agr_input-use_emissions-CO2", old_unit="kt", new_unit="tCO2e", factor=1000
+)
+dm_emission_total_co2e = dm_emission_total_co2e.flatten()
+dm_emission_total_co2e.append(dm_ch4_split_co2e, dim="Variables")
+dm_emission_total_co2e.append(dm_n2o_split_co2e, dim="Variables")
+
 print("Hello")
 
 ################################################################################
 # Pickle overwriting
 ################################################################################
-
-# my_pickle_dump(DM_agriculture, f)
+f = "../../data/datamatrix/agriculture.pickle"
+my_pickle_dump(DM_agriculture, f)

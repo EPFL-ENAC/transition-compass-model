@@ -16,7 +16,7 @@ from transition_compass_model.model.common.auxiliary_functions import (
     simulate_input,
     calibration_rates,
 )
-from transition_compass_model.model.common.auxiliary_functions import material_decomposition
+from transition_compass_model.model.common.auxiliary_functions import material_switch, material_decomposition
 import pandas as pd
 import pickle
 import os

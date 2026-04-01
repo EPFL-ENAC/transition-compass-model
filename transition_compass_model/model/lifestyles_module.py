@@ -3,19 +3,28 @@
 import os  # operating system (e.g., look for workspace)
 
 # Import Class
+from transition_compass_model.model.common.data_matrix_class import DataMatrix  # Class for the model inputs
+from transition_compass_model.model.common.constant_data_matrix_class import (
+    ConstantDataMatrix,
+)  # Class for the constant inputs
 from transition_compass_model.model.common.interface_class import Interface
 
 # ImportFunctions
-from transition_compass_model.model.common.auxiliary_functions import read_level_data, my_pickle_dump
+from transition_compass_model.model.common.auxiliary_functions import (
+    read_level_data,
+    filter_geoscale,
+    my_pickle_dump,
+)
 from transition_compass_model.model.common.auxiliary_functions import filter_country_and_load_data_from_pickles
-from transition_compass_model.model.common.config_loader import load_lever_config
 
 
 # init years and lever
 def init_years_lever():
     # function that can be used when running the module as standalone to initialise years and levers
     years_setting = [1990, 2015, 2050, 5]
-    lever_setting = load_lever_config()
+    current_file_directory = os.path.dirname(os.path.abspath(__file__))
+    f = open(os.path.join(current_file_directory, "../config/lever_position.json"))
+    lever_setting = json.load(f)[0]
     return years_setting, lever_setting
 
 

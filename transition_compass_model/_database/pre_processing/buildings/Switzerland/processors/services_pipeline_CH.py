@@ -1,15 +1,20 @@
 # Non Residential aka Services
 
 import _database.pre_processing.buildings.Switzerland.get_data_functions.services_CH as fser
-from ......model.common.auxiliary_functions import (
+from transition_compass_model.model.common.auxiliary_functions import (
     linear_fitting,
     create_years_list,
+    load_pop,
     dm_add_missing_variables,
+    save_url_to_file,
 )
-from ......model.common.data_matrix_class import DataMatrix
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 from _database.pre_processing.buildings.Switzerland.processors.hot_water_pipeline_CH import (
     run as hotwater_run,
+)
+from _database.pre_processing.buildings.Switzerland.processors.heating_technology_pipeline_CH import (
+    run as heating_tech_run,
 )
 
 import numpy as np
@@ -362,6 +367,13 @@ def run(country_list, years_ots):
         "Zug",
         "Zurich",
     ] + ["Switzerland"]
+
+    ####################################################################
+    #####   COMPUTE SERVICES ENERGY CONSUMPTION BY TECHNOLOGY   ########
+    ####################################################################
+    # Two challenges with obtaining the Sevices energy consumption by technology:
+    #    1) We have Services Energy consumption by fuel and not technology (e.g. heat-pump missing)
+    #    2) We have only national data for the energy consumption
     DM_water = hotwater_run(country_list=cantons_en, years_ots=years_ots)
 
     dm_water = DM_water["hw-tech-mix"]  # hot water mix for useful energy
@@ -536,6 +548,13 @@ def run(country_list, years_ots):
     )
     rename_cantons(dm_fuels_cantons)
 
+    ################################################################################
+    #####  COMPUTE Services energy consumption by technology and end-use    ########
+    ################################################################################
+    # The challenge with this is that we have:
+    #    1) The Services energy consumption by technology (disaggregated by canton)
+    #    2) The Services energy consumption by end-use (at national level)
+
     # Agiculture demand is << than services, I will not split it here. I do have agriculture data by fuel
     # !FIXME: Consider assigning Drives and processes here and in Industry to not only electricity but also diesel and gasoline.
     # Basically remove from Drives and processes the diesel and gasoline demand. and the remainder is electricity.
@@ -571,6 +590,7 @@ def run(country_list, years_ots):
     dm_services_fuels_eud_cantons_FSO.drop(col_label="waste", dim="Categories2")
     dm_services_fuels_eud_cantons_FSO.drop(col_label="nuclear-fuel", dim="Categories2")
 
+    ###############################################################################
     # Compute useful energy demand from energy consumption and efficiency
     dm_eff = DM_water["hw-efficiency"].copy()
     # Add missing efficiencies

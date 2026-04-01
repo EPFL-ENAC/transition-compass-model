@@ -1,7 +1,7 @@
 import re
 import numpy as np
 import pandas as pd
-from ..common.io_database import read_database
+from transition_compass_model.model.common.io_database import read_database
 
 # ConstantDataMatrix is a class used to deal with constants in a way that is similar to DataMatrix class.
 # The main difference if that ConstantDataMatrix has no Country or Years dimensions.
@@ -556,7 +556,7 @@ class ConstantDataMatrix:
         # Check that units are the same
         if dim != "Variables":
             if self.units != data2.units:
-                raise ValueError("The units should be the same")
+                raise ValueError(f"The units should be the same")
         # Check that across the dimension where you want to append the labels are different
         cols1 = set(self.col_labels[dim])
         cols2 = set(data2.col_labels[dim])
@@ -677,7 +677,7 @@ class ConstantDataMatrix:
         # or dm_grouped = dm_to_group.group_all(dim='Categories1', inplace=False)
         # when inplace = False dm_to_group remains unchanged and the grouped dm is return as output
         if "Categories" not in dim:
-            raise ValueError("You can only use group_all() on Categories")
+            raise ValueError(f"You can only use group_all() on Categories")
         if inplace:
             dm = self
         else:

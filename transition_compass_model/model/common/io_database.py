@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 import warnings
-from ..common.data_matrix_class import DataMatrix
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 import numpy as np
 
 
@@ -494,7 +494,7 @@ def database_to_df(df_db, lever, level="all"):
     )
     if len(df_db) - len_init < 0:
         print(
-            "Duplicates found, use .duplicated on dataframe to check which lines are repeated"
+            f"Duplicates found, use .duplicated on dataframe to check which lines are repeated"
         )
     # Extract ots
     df_db_ots = (df_db.loc[(df_db["level"] == 0) & (df_db["lever"] == lever)]).copy()

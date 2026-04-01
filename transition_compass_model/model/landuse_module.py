@@ -9,23 +9,33 @@ from transition_compass_model.model.common.constant_data_matrix_class import Con
 from transition_compass_model.model.common.io_database import (
     read_database_fxa,
     read_database_to_ots_fts_dict_w_groups,
+    edit_database,
     database_to_df,
     dm_to_database,
 )
 from transition_compass_model.model.common.interface_class import Interface
-from transition_compass_model.model.common.auxiliary_functions import filter_geoscale, calibration_rates
-from transition_compass_model.model.common.auxiliary_functions import read_level_data, simulate_input
-from transition_compass_model.model.common.config_loader import load_lever_config
+from transition_compass_model.model.common.auxiliary_functions import (
+    filter_geoscale,
+    calibration_rates,
+    create_years_list,
+)
+from transition_compass_model.model.common.auxiliary_functions import (
+    read_level_data,
+    simulate_input,
+    filter_country_and_load_data_from_pickles,
+)
 from scipy.optimize import linprog
 import pickle
 import os
 import numpy as np
 
 
+
 def init_years_lever():
     # function that can be used when running the module as standalone to initialise years and levers
     years_setting = [1990, 2015, 2020, 2050, 5]
-    lever_setting = load_lever_config()
+    f = open("../config/lever_position.json")
+    lever_setting = json.load(f)[0]
     return years_setting, lever_setting
 
 
@@ -248,10 +258,7 @@ def database_from_csv_to_datamatrix():
     return
 
 
-def read_data(data_file, lever_setting):
-
-    with open(data_file, "rb") as handle:
-        DM_landuse = pickle.load(handle)
+def read_data(DM_landuse, lever_setting):
 
     # Read fts based on lever_setting
     DM_ots_fts = read_level_data(DM_landuse, lever_setting)
@@ -300,6 +307,33 @@ def read_data(data_file, lever_setting):
 
     # return
     return DM_ots_fts, DM_land_use, CDM_const
+
+
+def get_interface(
+    current_file_directory, interface, from_sector, to_sector, country_list
+):
+
+    if interface.has_link(from_sector=from_sector, to_sector=to_sector):
+        DM = interface.get_link(from_sector=from_sector, to_sector=to_sector)
+    else:
+        if len(interface.list_link()) != 0:
+            print("You are missing " + from_sector + " to " + to_sector + " interface")
+        filepath = os.path.join(
+            current_file_directory,
+            "../_database/data/interface/"
+            + from_sector
+            + "_to_"
+            + to_sector
+            + ".pickle",
+        )
+        with open(filepath, "rb") as handle:
+            DM = pickle.load(handle)
+        if type(DM) is dict:
+            for key in DM.keys():
+                DM[key].filter({"Country": country_list}, inplace=True)
+        else:
+            DM.filter({"Country": country_list}, inplace=True)
+    return DM
 
 
 # CalculationLeaf WOOD
@@ -610,7 +644,7 @@ def land_use_change(dm_need, dm_excess):
 
     # check that dm_need == dm_excess
     if abs(dm_need.array.sum(axis=-1) - dm_excess.array.sum(axis=-1)).sum() > 1e-5:
-        raise ValueError("Total land need and total land excess do not match")
+        raise ValueError(f"Total land need and total land excess do not match")
 
     # Normalise dm_need
     dm_need_norm = dm_need.copy()
@@ -1352,33 +1386,44 @@ def landuse_TPE(DM_land_use, dm_wood_TPE):
     return df
 
 
-def land_use(lever_setting, years_setting, interface=Interface(), calibration=False):
+def land_use(
+    lever_setting, years_setting, DM_input, interface=Interface(), calibration=False
+):
 
+    # current_file_directory = os.path.dirname(os.path.abspath(__file__))
+    # landuse_data_file = os.path.join(current_file_directory, '../_database/data/datamatrix/geoscale/landuse.pickle')
+    # DM_ots_fts, DM_land_use, CDM_const = read_data(landuse_data_file, lever_setting)
+
+    # industry data file
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
-    landuse_data_file = os.path.join(
-        current_file_directory, "../_database/data/datamatrix/geoscale/landuse.pickle"
-    )
-    DM_ots_fts, DM_land_use, CDM_const = read_data(landuse_data_file, lever_setting)
+    DM_ots_fts, DM_land_use, CDM_const = read_data(DM_input, lever_setting)
 
     cntr_list = DM_land_use["land_man_use"].col_labels["Country"]
 
-    if interface.has_link(from_sector="industry", to_sector="land-use"):
-        DM_ind = interface.get_link(from_sector="industry", to_sector="land-use")
-    else:
-        if len(interface.list_link()) != 0:
-            print("You are missing industry to agriculture interface")
-        DM_ind = simulate_industry_to_landuse_input()
-        for key in DM_ind.keys():
-            DM_ind[key].filter({"Country": cntr_list}, inplace=True)
+    DM_ind = get_interface(
+        current_file_directory, interface, "industry", "land-use", cntr_list
+    )
+    DM_agr = get_interface(
+        current_file_directory, interface, "agriculture", "land-use", cntr_list
+    )
 
-    if interface.has_link(from_sector="agriculture", to_sector="land-use"):
-        DM_agr = interface.get_link(from_sector="agriculture", to_sector="land-use")
-    else:
-        if len(interface.list_link()) != 0:
-            print("You are missing agriculture to land-use interface")
-        DM_agr = simulate_agriculture_to_landuse_input()
-        for key in DM_agr.keys():
-            DM_agr[key].filter({"Country": cntr_list}, inplace=True)
+    # if interface.has_link(from_sector='industry', to_sector='land-use'):
+    #     DM_ind = interface.get_link(from_sector='industry', to_sector='land-use')
+    # else:
+    #     if len(interface.list_link()) != 0:
+    #         print('You are missing industry to agriculture interface')
+    #     DM_ind = simulate_industry_to_landuse_input()
+    #     for key in DM_ind.keys():
+    #         DM_ind[key].filter({'Country': cntr_list}, inplace=True)
+
+    # if interface.has_link(from_sector='agriculture', to_sector='land-use'):
+    #     DM_agr  = interface.get_link(from_sector='agriculture', to_sector='land-use')
+    # else:
+    #     if len(interface.list_link()) != 0:
+    #         print('You are missing agriculture to land-use interface')
+    #     DM_agr = simulate_agriculture_to_landuse_input()
+    #     for key in DM_agr.keys():
+    #         DM_agr[key].filter({'Country': cntr_list}, inplace=True)
 
     # CalculationTree LAND USE
     dm_wood, dm_wood_TPE, df_cal_rates_wood = wood_workflow(
@@ -1402,21 +1447,44 @@ def land_use(lever_setting, years_setting, interface=Interface(), calibration=Fa
     return results_run
 
 
-def local_land_use_run():
-    years_setting, lever_setting = init_years_lever()
-    global_vars = {"geoscale": ".*"}
-    filter_geoscale(global_vars)
-    land_use(lever_setting, years_setting)
-    return
+# def local_land_use_run():
+#     years_setting, lever_setting = init_years_lever()
+#     global_vars = {'geoscale': '.*'}
+#     filter_geoscale(global_vars)
+#     land_use(lever_setting, years_setting)
+#     return
+
+# # Agathe : made this because the above local_run was not running on my computer
+# def land_use_local_run():
+#     years_setting, lever_setting = init_years_lever()
+#     land_use(lever_setting, years_setting)
+#     return
 
 
-# Agathe : made this because the above local_run was not running on my computer
 def land_use_local_run():
-    years_setting, lever_setting = init_years_lever()
-    land_use(lever_setting, years_setting)
-    return
+
+    # Configures initial input for model run
+    f = open("../config/lever_position.json")
+    lever_setting = json.load(f)[0]
+    years_setting = [1990, 2023, 2025, 2050, 5]
+
+    country_list = ["Switzerland", "EU27", "Vaud"]
+
+    sectors = ["landuse"]
+    # Filter geoscale
+    # from database/data/datamatrix/.* reads the pickles, filters the geoscale, and loads them
+    DM_input = filter_country_and_load_data_from_pickles(
+        country_list=country_list, modules_list=sectors
+    )
+
+    # run
+    results_run = land_use(lever_setting, years_setting, DM_input["landuse"])
+
+    # return
+    return results_run
 
 
+# run local
 if __name__ == "__main__":
     land_use_local_run()
 

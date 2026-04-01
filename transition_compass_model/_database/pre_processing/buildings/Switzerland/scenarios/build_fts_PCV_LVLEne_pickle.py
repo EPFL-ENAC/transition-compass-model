@@ -1,0 +1,486 @@
+import numpy as np
+import pickle
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    my_pickle_dump,
+    create_years_list,
+    sort_pickle,
+    load_pop,
+)
+from _database.pre_processing.api_routines_CH import get_data_api_CH
+import os
+
+
+def extract_stock_floor_area(table_id, file):
+    try:
+        with open(file, "rb") as handle:
+            dm_floor_area = pickle.load(handle)
+    except OSError:
+
+        structure, title = get_data_api_CH(table_id, mode="example", language="fr")
+
+        # Extract buildings floor area
+        filter = {
+            "Année": structure["Année"],
+            "Canton (-) / District (>>) / Commune (......)": ["Suisse", "- Vaud"],
+            "Catégorie de bâtiment": structure["Catégorie de bâtiment"],
+            "Surface du logement": structure["Surface du logement"],
+            "Époque de construction": structure["Époque de construction"],
+        }
+        mapping_dim = {
+            "Country": "Canton (-) / District (>>) / Commune (......)",
+            "Years": "Année",
+            "Variables": "Surface du logement",
+            "Categories1": "Catégorie de bâtiment",
+            "Categories2": "Époque de construction",
+        }
+        unit_all = ["number"] * len(structure["Surface du logement"])
+        # Get api data
+        dm_floor_area = get_data_api_CH(
+            table_id,
+            mode="extract",
+            filter=filter,
+            mapping_dims=mapping_dim,
+            units=unit_all,
+            language="fr",
+        )
+        dm_floor_area.rename_col(
+            ["Suisse", "- Vaud"], ["Switzerland", "Vaud"], dim="Country"
+        )
+
+        current_file_directory = os.path.dirname(os.path.abspath(__file__))
+        f = os.path.join(current_file_directory, file)
+        with open(f, "wb") as handle:
+            pickle.dump(dm_floor_area, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    dm_floor_area.groupby(
+        {
+            "single-family-households": ["Maisons individuelles"],
+            "multi-family-households": [
+                "Maisons à plusieurs logements",
+                "Bâtiments d'habitation avec usage annexe",
+                "Bâtiments partiellement à usage d'habitation",
+            ],
+        },
+        dim="Categories1",
+        inplace=True,
+    )
+
+    # There is something weird happening where the number of buildings with less than 30m2 built before
+    # 1919 increases over time. Maybe they are re-arranging the internal space?
+    # Save number of bld (to compute avg size)
+    dm_num_bld = dm_floor_area.groupby(
+        {"bld_stock-number-bld": ".*"}, dim="Variables", regex=True, inplace=False
+    )
+
+    ## Compute total floor space
+    # Drop split by size
+    dm_floor_area.rename_col_regex(" m2", "", "Variables")
+    # The average size for less than 30 is a guess, as is the average size for 150+,
+    # we will use the data from bfs to calibrate
+    avg_size = {
+        "<30": 25,
+        "30-49": 39.5,
+        "50-69": 59.5,
+        "70-99": 84.5,
+        "100-149": 124.5,
+        "150+": 175,
+    }
+
+    dm_num_bld_per_size_per_type = dm_floor_area.copy()
+    idx = dm_floor_area.idx
+    for size in dm_floor_area.col_labels["Variables"]:
+        dm_floor_area.array[:, :, idx[size], :, :] = (
+            avg_size[size] * dm_floor_area.array[:, :, idx[size], :, :]
+        )
+
+    dm_floor_area.groupby(
+        {"bld_floor-area_stock": ".*"}, dim="Variables", regex=True, inplace=True
+    )
+    dm_floor_area.change_unit("bld_floor-area_stock", 1, "number", "m2")
+
+    return dm_floor_area, dm_num_bld, dm_num_bld_per_size_per_type
+
+
+def replace_years_by_corresponding_categories_for_specified_household(
+    dm_num_bld, env_cat, type_households="single-family-households"
+):
+
+    dm_num_bld_sfh = dm_num_bld.filter({"Categories1": [type_households]})
+    dm_num_bld_sfh.groupby(env_cat, dim="Categories2", inplace=True)
+    return dm_num_bld_sfh
+
+
+def replace_years_by_corresponding_categories(dm_num_bld, env_cat_sfh, env_cat_mfh):
+    dm_num_bld_sfh = replace_years_by_corresponding_categories_for_specified_household(
+        dm_num_bld, env_cat_sfh, type_households="single-family-households"
+    )
+    dm_num_bld_mfh = replace_years_by_corresponding_categories_for_specified_household(
+        dm_num_bld, env_cat_mfh, type_households="multi-family-households"
+    )
+    dm_bld = dm_num_bld_sfh
+    dm_bld.append(dm_num_bld_mfh, dim="Categories1")
+    return dm_bld
+
+
+def compute_renovation_loi_energie(
+    dm_stock_area,
+    dm_num_bld,
+    dm_stock_cat,
+    env_cat_mfh,
+    env_cat_sfh,
+    DM_buildings,
+    dm_num_bld_per_size_per_type,
+):
+    dm_num_bld_per_size_per_cat = replace_years_by_corresponding_categories(
+        dm_num_bld_per_size_per_type, env_cat_sfh, env_cat_mfh
+    )
+    dm_num_bld_per_size_F = dm_num_bld_per_size_per_cat.filter(
+        {"Country": ["Vaud"], "Categories2": ["F"]}
+    )
+
+    dm_num_bld.append(dm_stock_area, dim="Variables")
+    dm_bld = replace_years_by_corresponding_categories(
+        dm_num_bld, env_cat_sfh, env_cat_mfh
+    )
+
+    dm_num_bld_F = dm_bld.filter(
+        {
+            "Country": ["Vaud"],
+            "Variables": ["bld_stock-number-bld"],
+            "Categories2": ["F"],
+        }
+    )
+    dm_num_bld_F.group_all(dim="Categories2")
+
+    dm_num_bld_per_size_F.group_all(dim="Categories2")
+    dm_num_bld_F.append(dm_num_bld_per_size_F, dim="Variables")
+
+    dm_num_bld_F.filter(
+        {"Years": [2023], "Categories1": ["multi-family-households"]}, inplace=True
+    )
+    dm_num_bld_F.group_all(dim="Categories1")
+
+    for col in dm_num_bld_per_size_F.col_labels["Variables"]:
+        dm_num_bld_F.operation(
+            col,
+            "/",
+            "bld_stock-number-bld",
+            out_col=f"ratio_num_bld_{col}",
+            unit="%",
+        )
+
+    idx = dm_num_bld_F.idx
+
+    array_per_surface = dm_num_bld_F.array[
+        idx["Vaud"], idx[2023], idx["ratio_num_bld_<30"] :
+    ]
+    # we only want the twentypercent  biggest buildings to be renovated
+    percent_building_renvoated_100_149 = (
+        1 - (array_per_surface[-2:].sum() - 0.20) / array_per_surface[-2]
+    )
+
+    area_necessary_renovated = (
+        dm_num_bld_F.array[idx["Vaud"], idx[2023], idx["150+"]] * 175
+    )
+    area_necessary_renovated += (
+        dm_num_bld_F.array[idx["Vaud"], idx[2023], idx["100-149"]]
+        * percent_building_renvoated_100_149
+        * 124.5
+    )
+
+    idx = dm_bld.idx
+    ren_rate_min_2035_class_F = area_necessary_renovated / np.sum(
+        dm_bld.array[
+            idx["Vaud"],
+            idx[2023],
+            idx["bld_floor-area_stock"],
+            idx["multi-family-households"],
+            :,
+        ]
+    )
+
+    dm_rr_fts_2 = DM_buildings["fts"]["building-renovation-rate"][
+        "bld_renovation-rate"
+    ][2].copy()
+
+    idx = dm_rr_fts_2.idx
+    yrs_fts = [yr for yr in dm_rr_fts_2.col_labels["Years"] if yr <= 2040]
+    idx_fts = [idx[yr] for yr in yrs_fts]
+
+    ren_redistribution = DM_buildings["fts"]["building-renovation-rate"][
+        "bld_renovation-redistribution"
+    ][2].copy()
+    idx_redistrib = ren_redistribution.idx
+    prop_E_renovated = ren_redistribution.array[
+        idx_redistrib["Vaud"],
+        idx_redistrib[2035],
+        idx_redistrib["bld_renovation-redistribution-out"],
+        idx_redistrib["E"],
+    ]
+    renovation_E = (
+        dm_rr_fts_2.array[
+            idx["Vaud"],
+            idx_fts,
+            idx["bld_renovation-rate"],
+            idx["multi-family-households"],
+        ]
+        * prop_E_renovated
+    )
+
+    dm_rr_fts_2.array[
+        idx["Vaud"], idx_fts, idx["bld_renovation-rate"], idx["multi-family-households"]
+    ] = (
+        ren_rate_min_2035_class_F / (yrs_fts[-1] - yrs_fts[0] + 1) + renovation_E
+    )  # Renovation objective divided by the number of year to apply it
+    return dm_rr_fts_2
+
+
+def update_heating_change_proportion(
+    dm_heating_cat_fts_2, household_type="multi-family-households"
+):
+
+    # update multi households
+    dm_heating_fts_mfh = dm_heating_cat_fts_2.filter(
+        {"Country": ["Vaud"], "Categories1": [household_type]}
+    )
+
+    idx = dm_heating_fts_mfh.idx
+    # Once all the old technologies are set to 0 we want to replace the missing proportion with the ideal scenario proportion
+    dm_sum = dm_heating_fts_mfh.group_all("Categories3", inplace=False)
+    arr_sum = dm_sum.array[..., np.newaxis]
+    proportion_replaced_heating_per_cat = 1 - arr_sum
+
+    if household_type == "multi-family-households":
+        # Proportion according to the study perspectives chaleur (fig. 1)
+        renov_proportion = {
+            "district-heating": 0.563,
+            "heat-pump": 0.25,
+            "solar": 0.067,
+            "wood": 0.057,
+            "other-tech": 0.063,
+        }
+    else:
+        # Proportion according to the study perspectives chaleur (fig 3.)
+        renov_proportion = {
+            "district-heating": 0.004,
+            "heat-pump": 0.822,
+            "solar": 0.081,
+            "wood": 0.061,
+            "other-tech": 0.031,
+        }
+
+    heating_types = list(renov_proportion.keys())
+    prop_vec = np.array([renov_proportion[h] for h in heating_types])
+    dm_heating_fts_mfh.array[:, :, :, :, :, [idx[h] for h in heating_types]] += (
+        proportion_replaced_heating_per_cat * prop_vec
+    )
+
+    return dm_heating_fts_mfh
+
+
+def run(
+    DM_buildings, dm_pop, global_var, country_list, lev=2
+):  # lever =2 for energy law and 3 for PCV 4 is perfect world 1 is BAU
+
+    construction_period_envelope_cat_sfh = global_var["envelope construction sfh"]
+    construction_period_envelope_cat_mfh = global_var["envelope construction mfh"]
+
+    # SECTION: Loi Energie - Renovation fts
+    # LEVEL 2 Vaud: Loi Energie + Plan Climat
+    # According to the Loi Energie, buildings in categories F,G > 750 m2 will have to be renovated before 2035,
+    # They estimate this corresponds to 90'000 multi-family-households being renovated before 2035.
+    table_id = "px-x-0902020200_103"
+    this_dir = os.path.dirname(os.path.abspath(__file__))
+    file = os.path.join(this_dir, "../data/bld_floor-area_stock.pickle")
+    dm_stock_area, dm_num_bld, dm_num_bld_per_size_per_type = extract_stock_floor_area(
+        table_id, file
+    )
+
+    dm_stock_area = dm_stock_area.filter({"Country": country_list}).copy()
+    dm_num_bld = dm_num_bld.filter({"Country": country_list}).copy()
+
+    env_cat_mfh = construction_period_envelope_cat_mfh
+    env_cat_sfh = construction_period_envelope_cat_sfh
+
+    # Recompute stock_cat from DM_buildings
+    dm_floor_cap = DM_buildings["ots"]["floor-intensity"].filter(
+        {"Variables": ["lfs_floor-intensity_space-cap"], "Country": country_list}
+    )
+    dm_bld_mix = (
+        DM_buildings["ots"]["building-renovation-rate"]["bld_building-mix"]
+        .filter({"Country": country_list})
+        .copy()
+    )
+    arr_stock = (
+        dm_floor_cap[:, :, :, np.newaxis, np.newaxis]
+        * dm_pop[:, :, :, np.newaxis, np.newaxis]
+        * dm_bld_mix[:, :, :, :, :]
+    )
+    dm_bld_mix.add(
+        arr_stock, dim="Variables", col_label="bld_floor-area_stock", unit="m2"
+    )
+    dm_stock_cat = dm_bld_mix.filter({"Variables": ["bld_floor-area_stock"]})
+
+    # Compute renovation rate loi energie
+    dm_rr_fts_2 = compute_renovation_loi_energie(
+        dm_stock_area,
+        dm_num_bld,
+        dm_stock_cat,
+        env_cat_mfh,
+        env_cat_sfh,
+        DM_buildings,
+        dm_num_bld_per_size_per_type,
+    )
+    DM_buildings["fts"]["building-renovation-rate"]["bld_renovation-rate"][
+        3
+    ] = dm_rr_fts_2
+    DM_buildings["fts"]["building-renovation-rate"]["bld_renovation-rate"][
+        4
+    ] = dm_rr_fts_2
+
+    # renovation redistribution is also affected
+
+    renov_distrib_fts_3 = DM_buildings["fts"]["building-renovation-rate"][
+        "bld_renovation-redistribution"
+    ][2].copy()
+    idx = renov_distrib_fts_3.idx
+    # the energy law forces to renovate directly to class D
+    renov_distrib_fts_3.array[
+        idx["Vaud"], :, idx["bld_renovation-redistribution-in"], idx["D"]
+    ] += renov_distrib_fts_3.array[
+        idx["Vaud"], :, idx["bld_renovation-redistribution-in"], idx["E"]
+    ]
+    renov_distrib_fts_3.array[
+        idx["Vaud"], :, idx["bld_renovation-redistribution-in"], idx["E"]
+    ] = 0
+    for lever in range(3, 4 + 1):
+        DM_buildings["fts"]["building-renovation-rate"][
+            "bld_renovation-redistribution"
+        ][lever] = renov_distrib_fts_3.copy()
+
+    # SECTION: Loi energy - Heating tech
+    # Plus de gaz, mazout, charbon dans les prochain 15-20 ans. Pas de gaz, mazout, charbon dans les nouvelles constructions
+    dm_heating_cat_fts_1 = DM_buildings["fts"]["heating-technology-fuel"][
+        "bld_heating-technology"
+    ][1].copy()
+
+    idx = dm_heating_cat_fts_1.idx
+    # Electricity
+    # article 41
+    idx_old_cat = [idx["E"], idx["F"]]
+    idx_new_cat = [idx["B"], idx["C"], idx["D"]]
+
+    # article 9 et 10 DACCE 2033 au plus tard et sur justificatif de peu de consomation + 5 ans
+
+    dm_heating_cat_fts_1.array[
+        idx["Vaud"], idx[2035] :, :, :, idx_old_cat, idx["electricity"]
+    ] = 0
+    dm_heating_cat_fts_1.array[
+        idx["Vaud"], idx[2035] :, :, :, idx_new_cat, idx["electricity"]
+    ] = 0
+
+    dm_heating_cat_fts_1.normalise("Categories3")
+    dm_heating_cat_fts_1.fill_nans("Years")
+    # Electricity is set for all levers because it is in a decree from 2022
+    for lever in range(1, 4 + 1):
+        DM_buildings["fts"]["heating-technology-fuel"]["bld_heating-technology"][
+            lever
+        ] = dm_heating_cat_fts_1.copy()
+
+    dm_heating_cat_fts_2 = dm_heating_cat_fts_1.copy()
+    # Fossil heating
+    # article  40.1
+    idx_fossil = [idx["coal"], idx["heating-oil"], idx["gas"]]
+    # dm_heating_cat_fts_2.array[idx['Vaud'], :, idx['bld_heating-mix'], :, idx['B'], idx_fossil] = 0
+    dm_heating_cat_fts_2.array[
+        idx["Vaud"],
+        1 : idx[2040],
+        idx["bld_heating-mix"],
+        :,
+        *np.ix_(idx_new_cat, idx_fossil),
+    ] = np.nan
+    dm_heating_cat_fts_2.array[
+        idx["Vaud"],
+        idx[2040] :,
+        idx["bld_heating-mix"],
+        :,
+        *np.ix_(idx_new_cat, idx_fossil),
+    ] = 0
+    dm_heating_cat_fts_2.array[
+        idx["Vaud"],
+        1 : idx[2045],
+        idx["bld_heating-mix"],
+        :,
+        *np.ix_(idx_old_cat, idx_fossil),
+    ] = np.nan
+    dm_heating_cat_fts_2.array[
+        idx["Vaud"], idx[2045] :, idx["bld_heating-mix"], :, :, idx_fossil
+    ] = 0
+
+    dm_heating_cat_fts_2.fill_nans("Years")
+
+    dm_heating_fts_mfh = update_heating_change_proportion(
+        dm_heating_cat_fts_2, "multi-family-households"
+    )
+    dm_heating_cat_fts_2["Vaud", :, :, "multi-family-households", :, :] = (
+        dm_heating_fts_mfh["Vaud", :, :, "multi-family-households", :, :]
+    )
+
+    dm_heating_fts_sfh = update_heating_change_proportion(
+        dm_heating_cat_fts_2, "single-family-households"
+    )
+    dm_heating_cat_fts_2["Vaud", :, :, "single-family-households", :, :] = (
+        dm_heating_fts_sfh["Vaud", :, :, "single-family-households", :, :]
+    )
+
+    dm_heating_cat_fts_2.normalise("Categories3")
+    dm_heating_cat_fts_2.fill_nans("Years")
+    # for lever in range(lev,4+1):
+    DM_buildings["fts"]["heating-technology-fuel"]["bld_heating-technology"][
+        lev
+    ] = dm_heating_cat_fts_2.copy()
+
+    this_dir = os.path.dirname(os.path.abspath(__file__))
+    # !FIXME: use the actual values and not the calibration factor
+    file = os.path.join(this_dir, "../../../../data/datamatrix/buildings.pickle")
+
+    my_pickle_dump(DM_buildings, file)
+    sort_pickle(file)
+
+    return DM_buildings
+
+
+if __name__ == "__main__":
+    this_dir = os.path.dirname(os.path.abspath(__file__))
+    # !FIXME: use the actual values and not the calibration factor
+    file = os.path.join(this_dir, "../../../../data/datamatrix/buildings.pickle")
+    with open(file, "rb") as handle:
+        DM_buildings = pickle.load(handle)
+
+    construction_period_envelope_cat_sfh = {
+        "F": ["Avant 1919", "1919-1945", "1946-1960", "1961-1970"],
+        "E": ["1971-1980"],
+        "D": ["1981-1990", "1991-2000"],
+        "C": ["2001-2005", "2006-2010"],
+        "B": ["2011-2015", "2016-2020", "2021-2023"],
+    }
+    construction_period_envelope_cat_mfh = {
+        "F": ["Avant 1919", "1919-1945", "1946-1960", "1961-1970", "1971-1980"],
+        "E": ["1981-1990"],
+        "D": ["1991-2000"],
+        "C": ["2001-2005", "2006-2010"],
+        "B": ["2011-2015", "2016-2020", "2021-2023"],
+    }
+
+    global_var = {
+        "envelope construction sfh": construction_period_envelope_cat_sfh,
+        "envelope construction mfh": construction_period_envelope_cat_mfh,
+    }
+
+    years_ots = create_years_list(1990, 2023, 1)
+    country_list = ["Vaud"]
+
+    dm_pop = load_pop(country_list, years_ots)
+
+    DM_buildings = run(DM_buildings, dm_pop, global_var, country_list, lev=2)

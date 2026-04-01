@@ -1,8 +1,8 @@
 import pandas as pd
 import os
 import numpy as np
-from ..common.data_matrix_class import DataMatrix
-from ..common.io_database import dm_lever_dict_from_df
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
+from transition_compass_model.model.common.io_database import dm_lever_dict_from_df
 
 
 def hourly_data_reader(file, years_setting, lever=None, dict_ots={}, dict_fts={}):
@@ -206,7 +206,7 @@ def hourly_data_reader(file, years_setting, lever=None, dict_ots={}, dict_fts={}
     if ".csv" in file:
         df = pd.read_csv(file_path, sep=";")
     else:
-        raise ValueError("Only .csv file allowed")
+        raise ValueError(f"Only .csv file allowed")
 
     # Check if df columns are good
     df = check_columns(df, lever)

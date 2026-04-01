@@ -1,8 +1,8 @@
 import numpy as np
 
-from ......model.common.auxiliary_functions import cdm_to_dm, create_years_list
-from ......model.common.constant_data_matrix_class import ConstantDataMatrix
-from ......model.common.data_matrix_class import DataMatrix
+from transition_compass_model.model.common.auxiliary_functions import cdm_to_dm, create_years_list
+from transition_compass_model.model.common.constant_data_matrix_class import ConstantDataMatrix
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 
 def run(country_list, years_ots, years_fts):
@@ -129,18 +129,28 @@ def run(country_list, years_ots, years_fts):
     ####################################
     #####     EMISSION FACTORS    ######
     ####################################
-    # Obtained dividing emission by energy demand in file file = '../Europe/data/JRC-IDEES-2021_Residential_EU27.xlsx'
-    JRC_emissions_fact = {
+    # Obtained from OFEV file https://www.bafu.admin.ch/dam/fr/sd-web/HnIzzj6OfDUU/EF_CO2_Berichterstattung_Kantone.pdf.
+    # Electricity and heating district are treated separately. There is no coal in vaudx'
+    OFEV_emissions_fact = {
         "coal": 350,
-        "heating-oil": 267,
-        "gas": 200,
+        "heating-oil": 265,
+        "gas": 201,
         "wood": 0,
         "solar": 0,
+        "district-heating": 66,
     }
+
     cdm_emission_fact = ConstantDataMatrix(
         col_labels={
             "Variables": ["bld_CO2-factors"],
-            "Categories1": ["coal", "heating-oil", "gas", "wood", "solar"],
+            "Categories1": [
+                "coal",
+                "heating-oil",
+                "gas",
+                "wood",
+                "solar",
+                "district-heating",
+            ],
         },
         units={"bld_CO2-factors": "kt/TWh"},
     )
@@ -151,7 +161,7 @@ def run(country_list, years_ots, years_fts):
         )
     )
     idx = cdm_emission_fact.idx
-    for key, value in JRC_emissions_fact.items():
+    for key, value in OFEV_emissions_fact.items():
         cdm_emission_fact.array[0, idx[key]] = value
 
     cdm_emission_fact.sort("Categories1")
@@ -167,7 +177,7 @@ def run(country_list, years_ots, years_fts):
 
     arr_elec = np.zeros((2, 40, 1, 1))
     idx = dm_elec.idx
-    arr_elec[:, idx[1990] : idx[2023] + 1, 0, 0] = 112
+    arr_elec[:, idx[1990] : idx[2023] + 1, 0, 0] = 168.64
     arr_elec[:, idx[2025] : idx[2050], 0, 0] = np.nan
     arr_elec[:, idx[2050], 0, 0] = 0
     dm_elec.array = arr_elec

@@ -1,5 +1,5 @@
 import os
-from ......model.common.auxiliary_functions import (
+from transition_compass_model.model.common.auxiliary_functions import (
     create_years_list,
     load_pop,
     dm_add_missing_variables,
@@ -11,7 +11,8 @@ from _database.pre_processing.transport.Switzerland.get_data_functions.demand_pk
     get_travel_demand_region_microrecencement,
 )
 from _database.pre_processing.transport.Switzerland.get_data_functions import utils
-from ......model.common.data_matrix_class import DataMatrix
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
+import pickle
 
 #################################
 #####   TRANSPORT DEMAND   ######
@@ -183,6 +184,8 @@ def run(dm_pop_ots, years_ots):
     dm_pkm_cap_raw.sort("Years")
 
     # For Vaud, adjust pkm/cap for 2015 and 2021 with actual values (split unchanged)
+    # !FIXME: This should be adjusted to all cantons!
+    # Do this by using tra_pkm_CH_cantons_2015.xlsx and tra_pkm_CH_cantons_2021.xlsx
     VD_pkm_day = {2015: 38.2, 2021: 32.1}
     idx = dm_pkm_cap_raw.idx
     arr_tot_pkm_cap_raw = np.nansum(dm_pkm_cap_raw.array, axis=-1)

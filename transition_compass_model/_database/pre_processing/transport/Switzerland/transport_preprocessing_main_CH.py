@@ -1,4 +1,4 @@
-from .....model.common.auxiliary_functions import create_years_list, load_pop
+from transition_compass_model.model.common.auxiliary_functions import create_years_list, load_pop
 from processors.aviation_part1_pipeline_CH import run as aviation_pt1_run
 from processors.transport_demand_pipeline import run as demand_pkm_vkm_run
 from processors.passenger_fleet_pipeline import run as passenger_fleet_run
@@ -11,6 +11,9 @@ from processors.passenger_energy_pipeline import run as passenger_energy_run
 from processors.transport_ots_pickle import run as ots_pickle_run
 from processors.passenger_lifetime_pipeline import run as passenger_lifetime_run
 from processors.electricity_emissions_pipeline import run as electricity_emission_run
+from processors.transport_calib_energy_demand import run as data_check_energy_run
+from processors.transport_calib_emissions import run as data_check_emissions_run
+from processors.transport_calib_vkm import run as data_check_vkm_run
 from scenarios.transport_fts_BAU_pickle import run as fts_bau_pickle_run
 from scenarios.transport_preprocessing_CH_fts import run as fts_PVC_DLS_pickle_run
 
@@ -65,6 +68,18 @@ cdm_emissions_factors = passenger_emission_run()
 print("Energy demand")
 dm_energy = passenger_energy_run(years_ots)
 
+## Load data check energy demand
+print("Load data check energy demand")
+DM_data_check_ene = data_check_energy_run(years_ots)
+
+## Load data check vkm
+print("Load data check vkm")
+dm_LDV_fleet_stock = DM["passenger_private-fleet"].filter({"Categories1": ["LDV"]})
+dm_new_LDV_fleet = DM["passenger_new-vehicles"].filter({"Categories1": ["LDV"]})
+dm_data_check_vkm = data_check_vkm_run(
+    dm_vkm, dm_LDV_fleet_stock, dm_new_LDV_fleet, years_ots
+)
+
 ## Efficiency
 print("Efficiency")
 dm_veh_eff = passenger_efficiency_run(
@@ -74,7 +89,13 @@ dm_veh_eff = passenger_efficiency_run(
     dm_public_fleet,
     cdm_emissions_factors,
     years_ots,
+    dm_data_check_vkm,
 )
+
+## Load data check emissions
+print("Load data check emissions")
+DM_data_check_emi = data_check_emissions_run(years_ots)
+
 
 #####################
 ###   AVIATION    ###

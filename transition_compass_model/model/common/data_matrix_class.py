@@ -1,8 +1,9 @@
+from ast import Dict
+
 import numpy as np
 import re
 import pandas as pd
 import plotly.express as px
-
 
 # DataMatrix is the by-default class used by the calculator.
 # DataMatrix contains:
@@ -211,7 +212,7 @@ class DataMatrix:
         # Note that df needs to have columns 'Country' and 'Years'
         # it returns a datamatrix
         if df.empty:
-            ValueError("You cannot create a datamatrix from an empty dataframe.")
+            ValueError(f"You cannot create a datamatrix from an empty dataframe.")
         dm = cls(empty=True)
         dm.extract_structure(df, num_cat)
         dm.read_data(df, num_cat)
@@ -970,7 +971,7 @@ class DataMatrix:
         return
 
     def groupby(
-        self, group_cols={}, dim=str, aggregation="sum", regex=False, inplace=False
+        self, group_cols: dict, dim: str, aggregation="sum", regex=False, inplace=False
     ):
         # Sum values in group, e.g.
         # dm.groupby({'road': ['LDV', '2W']}, dim='Categories1') sums LDV and 2W and calls it road

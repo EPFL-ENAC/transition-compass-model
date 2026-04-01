@@ -1,5 +1,7 @@
 import numpy as np
-from ....model.common.auxiliary_functions import (
+from transition_compass_model.model.common.auxiliary_functions import (
+    interpolate_nans,
+    add_missing_ots_years,
     linear_fitting_ots_db,
     linear_fitting,
     create_years_list,
@@ -10,15 +12,29 @@ import pandas as pd
 import faostat
 import os
 import re
-from ....model.common.data_matrix_class import DataMatrix
-from ....model.common.constant_data_matrix_class import ConstantDataMatrix
-from ....model.common.io_database import (
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
+from transition_compass_model.model.common.constant_data_matrix_class import ConstantDataMatrix
+from transition_compass_model.model.common.io_database import (
+    read_database,
+    read_database_fxa,
+    edit_database,
     database_to_df,
 )
-from ....model.common.auxiliary_functions import (
+from transition_compass_model.model.common.io_database import (
+    read_database_to_ots_fts_dict,
+    read_database_to_ots_fts_dict_w_groups,
+    read_database_to_dm,
+)
+from transition_compass_model.model.common.interface_class import Interface
+from transition_compass_model.model.common.auxiliary_functions import (
+    compute_stock,
+    filter_geoscale,
+    calibration_rates,
     filter_DM,
     add_dummy_country_to_DM,
 )
+from transition_compass_model.model.common.auxiliary_functions import read_level_data, simulate_input
+from scipy.optimize import linprog
 import pickle
 
 
@@ -2994,7 +3010,7 @@ def climate_smart_livestock_processing(
         "Amount excreted in manure (N content)",
         "Manure left on pasture (N content)",
         "Manure applied to soils (N content)",
-        "Losses from manure treated (N content)",
+        "Manure management (manure treated, N content)",
     ]
 
     list_items = ["All Animals > (List)"]
@@ -3155,7 +3171,7 @@ def climate_smart_livestock_processing(
         / pivot_df["Amount excreted in manure (N content)"]
     )
     pivot_df["Manure treated [%]"] = (
-        pivot_df["Losses from manure treated (N content)"]
+        pivot_df["Manure management (manure treated, N content)"]
         / pivot_df["Amount excreted in manure (N content)"]
     )
     pivot_df["Manure pasture [%]"] = (
@@ -3174,7 +3190,7 @@ def climate_smart_livestock_processing(
     pivot_df = pivot_df.drop(
         columns=[
             "Manure applied to soils (N content)",
-            "Losses from manure treated (N content)",
+            "Manure management (manure treated, N content)",
             "Manure left on pasture (N content)",
             "Amount excreted in manure (N content)",
             "Value",
@@ -7258,8 +7274,8 @@ def land_calibration(list_countries):
 
     list_items = [
         "-- Cropland",
-        "--- Temporary crops",
-        "--- Temporary fallow",
+        "---- Temporary crops",
+        "---- Temporary fallow",
         "-- Permanent meadows and pastures",
     ]
 
@@ -7946,14 +7962,14 @@ def manure_fxa(list_countries, df_liv_emissions, df_manure_n_fxa, df_manure_ch4_
             "Aggregation",
             "Manure left on pasture (N content)",
             "Manure applied to soils (N content)",
-            "Losses from manure treated (N content)",
+            "Manure management (manure treated, N content)",
         ]
     ]
     df_manure_n_fxa.rename(
         columns={
             "Manure left on pasture (N content)": "N2O Pasture",
             "Manure applied to soils (N content)": "N2O Applied",
-            "Losses from manure treated (N content)": "N2O Treated",
+            "Manure management (manure treated, N content)": "N2O Treated",
         },
         inplace=True,
     )

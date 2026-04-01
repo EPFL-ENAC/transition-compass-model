@@ -1,4 +1,4 @@
-from .....model.common.auxiliary_functions import create_years_list
+from transition_compass_model.model.common.auxiliary_functions import create_years_list
 from processors.floor_area_pipeline_CH import run as floor_area_run
 from processors.renovation_pipeline_CH import run as renovation_run
 from processors.heating_technology_pipeline_CH import run as heating_tech_run
@@ -16,8 +16,8 @@ from scenarios.buildings_fts_EP2050_pickle import run as fts_Vaud_EP2050_run
 from scenarios.build_fts_Tint_heating_pickle import run as fts_Tint_heating_run
 from scenarios.build_fts_floor_area_pickle import run as fts_floor_area_run
 from scenarios.build_fts_heating_efficiency_pickle import run as fts_efficiency_run
+from scenarios.build_fts_PCV_LVLEne_pickle import run as fts_PCV_run
 from get_data_functions.construction_period_param import load_construction_period_param
-
 
 years_ots = create_years_list(1990, 2023, 1)
 years_fts = create_years_list(2025, 2050, 5)
@@ -82,6 +82,9 @@ DM_buildings = ots_pickle_run(dm_pop_ots, DM_all, years_ots, years_fts)
 
 print("Compile pickle fts - all BAU")
 DM_buildings = fts_bau_pickle_run(DM_buildings, country_list, years_fts)
+
+print("Compile PCV - Vaud - level 2")
+DM_buildings = fts_PCV_run(DM_buildings, dm_pop_ots, global_var, country_list, lev=2)
 
 print("Compile Scenario EP2050 - Vaud - level 3")
 DM_buildings = fts_Vaud_EP2050_run(DM_buildings, lev=3)

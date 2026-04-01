@@ -1,7 +1,7 @@
 import numpy as np
 import os
 
-from ......model.common.auxiliary_functions import (
+from transition_compass_model.model.common.auxiliary_functions import (
     linear_fitting,
     create_years_list,
     my_pickle_dump,
@@ -164,6 +164,7 @@ def run(DM_buildings, country_list, years_fts):
     dm_heating_cat.fill_nans("Years")
     DM_buildings["fts"]["heating-technology-fuel"] = dict()
     DM_buildings["fts"]["heating-technology-fuel"]["bld_heating-technology"] = dict()
+    dm_heating_cat.normalise("Categories3")
     for lev in range(4):
         lev = lev + 1
         DM_buildings["fts"]["heating-technology-fuel"]["bld_heating-technology"][

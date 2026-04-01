@@ -7,7 +7,7 @@ import numpy as np
 from _database.pre_processing.transport.Switzerland.get_data_functions import (
     passenger_fleet as get_data,
 )
-from ......model.common.auxiliary_functions import create_years_list, load_pop
+from transition_compass_model.model.common.auxiliary_functions import create_years_list, load_pop
 from _database.pre_processing.transport.Switzerland.processors.transport_demand_pipeline import (
     run as demand_pkm_vkm_run,
 )
@@ -69,20 +69,11 @@ def compute_passenger_new_fleet(table_id_new_veh, file_new_veh_ots1, file_new_ve
             != dm_pass_new_fleet_ots2.col_labels["Country"]
         ):
             raise ValueError("Make sure Country match")
-        # Multiply historical data on new fleet by 2005 technology share to obtain fleet by techology
-        idx_n = dm_pass_new_fleet_ots2.idx
-        idx_s = dm_new_fleet_tech_ots1.idx
+        # Multiply historical data on new fleet by 2005 technology share to obtain fleet by technology
         arr = (
-            dm_pass_new_fleet_ots2.array[
-                :, :, idx_n["tra_passenger_new-vehicles"], :, np.newaxis
-            ]
-            * dm_new_fleet_tech_ots1.array[
-                :,
-                idx_s[first_year],
-                np.newaxis,
-                idx_s["tra_passenger_new-vehicles_share"],
-                :,
-                :,
+            dm_pass_new_fleet_ots2[:, :, "tra_passenger_new-vehicles", :, np.newaxis]
+            * dm_new_fleet_tech_ots1[
+                :, first_year, np.newaxis, "tra_passenger_new-vehicles_share", :, :
             ]
         )
         arr = arr[:, :, np.newaxis, :, :]
@@ -215,6 +206,9 @@ def run(dm_pkm, years_ots):
     this_dir = os.path.dirname(os.path.abspath(__file__))
 
     # SECTION New vehicle fleet and technology share LDV, 2W ots
+    # FIXME!: this data is not available anymore on Stat-Tab, meaning we cannot access cantons other than Vaud
+    # FIXME: In order to access other cantons check out: "New registrations of road vehicles by vehicle group and type"
+    # FIXME: on https://stats.swiss/vis?pg=0&snb=21&df[ds]=ds%3Adisseminate&df[id]=DF_IVS_0_GENERAL&df[ag]=CH1.MFZ_IVS&df[vs]=1.0.0&dq=_T._T.N.100%2B200%2B300%2B400%2B500%2B600%2B700%2B_T%2B000._T.A&lom=LASTNPERIODS&lo=6&to[TIME_PERIOD]=false&lc=en
     ##### NEW passenger fleet by technology LDV, 2W
     table_id_new_veh = "px-x-1103020200_120"
     # file is created if it doesn't exist

@@ -16,10 +16,14 @@ from transition_compass_model.model.common.interface_class import Interface
 
 # ImportFunctions
 from transition_compass_model.model.common.io_database import (
+    read_database,
     read_database_fxa,
 )  # read functions for levers & fixed assumptions
-from transition_compass_model.model.common.auxiliary_functions import filter_geoscale, simulate_input
-from transition_compass_model.model.common.config_loader import load_lever_config
+from transition_compass_model.model.common.auxiliary_functions import (
+    read_level_data,
+    filter_geoscale,
+    simulate_input,
+)
 
 warnings.simplefilter("ignore")
 #######################################################################################################################
@@ -556,7 +560,9 @@ def refinery(lever_setting, years_setting, interface=Interface()):
 def local_refinery_run():
     # Function to run only transport module without converter and tpe
     years_setting = [1990, 2015, 2050, 5]
-    lever_setting = load_lever_config()
+    current_file_directory = os.path.dirname(os.path.abspath(__file__))
+    f = open(os.path.join(current_file_directory, "../config/lever_position.json"))
+    lever_setting = json.load(f)[0]
 
     global_vars = {"geoscale": ".*"}
     filter_geoscale(global_vars)

@@ -13,12 +13,8 @@ pio.renderers.default = "browser"
 
 from _database.pre_processing.api_routine_Eurostat import get_data_api_eurostat
 from _database.pre_processing.routine_JRC import get_jrc_data
-from ......model.common.auxiliary_functions import (
-    eurostat_iso2_dict,
-    jrc_iso2_dict,
-    linear_fitting,
-)
-from ......model.common.data_matrix_class import DataMatrix
+from transition_compass_model.model.common.auxiliary_functions import eurostat_iso2_dict, jrc_iso2_dict, linear_fitting
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 # directories
 current_file_directory = os.getcwd()
@@ -201,10 +197,8 @@ dm_fleet_bus = get_jrc_data(dict_extract, dict_iso2_jrc, current_file_directory)
 
 # deepen and sum gas
 dm_fleet_bus.deepen()
-mapping_calc = {"ICE-gas": ["gas-lpg", "gas-natural"]}
-dm_fleet_bus.groupby(
-    mapping_calc, dim="Categories1", aggregation="mean", regex=False, inplace=True
-)
+mapping_calc = {'ICE-gas': ['gas-lpg', 'gas-natural']}
+dm_fleet_bus.groupby(mapping_calc, dim='Categories1', aggregation = "sum", regex=False, inplace=True)
 
 # make rest of the variables (assuming they are all missing for now)
 categories2_missing = categories2_all.copy()
@@ -240,13 +234,9 @@ dict_extract = {
 dm_fleet_rail = get_jrc_data(dict_extract, dict_iso2_jrc, current_file_directory)
 
 # aggregate trains and deepen
-mapping_calc = {
-    "rail_CEV": ["train-conv_CEV", "train-hs_CEV"],
-    "rail_ICE-diesel": ["train-conv_ICE-diesel"],
-}
-dm_fleet_rail.groupby(
-    mapping_calc, dim="Variables", aggregation="mean", regex=False, inplace=True
-)
+mapping_calc = {'rail_CEV': ['train-conv_CEV', 'train-hs_CEV'],
+                'rail_ICE-diesel' : ["train-conv_ICE-diesel"]}
+dm_fleet_rail.groupby(mapping_calc, dim='Variables', aggregation = "sum", regex=False, inplace=True)
 dm_fleet_rail.deepen()
 
 # make rest of the variables (assuming they are all missing for now)
@@ -343,6 +333,11 @@ dm_fleet.sort("Variables")
 
 # check
 # dm_fleet.flatten().filter({"Country" : ["EU27"]}).datamatrix_plot()
+
+# save raw data for check on fleet
+f = os.path.join(current_file_directory, '../data/datamatrix/intermediate_files/jrc_passenger_fleet_calib.pickle')
+with open(f, 'wb') as handle:
+    pickle.dump(dm_fleet, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 # there is a problem with fleet LDV diesel in 2010, lets put nan
 dm_fleet = dm_fleet.flatten()
@@ -1183,10 +1178,8 @@ dm_new_bus = get_jrc_data(dict_extract, dict_iso2_jrc, current_file_directory)
 
 # deepen and sum gas
 dm_new_bus.deepen()
-mapping_calc = {"ICE-gas": ["gas-lpg", "gas-natural"]}
-dm_new_bus.groupby(
-    mapping_calc, dim="Categories1", aggregation="mean", regex=False, inplace=True
-)
+mapping_calc = {'ICE-gas': ['gas-lpg', 'gas-natural']}
+dm_new_bus.groupby(mapping_calc, dim='Categories1', aggregation = "sum", regex=False, inplace=True)
 
 # make rest of the variables (assuming they are all missing for now)
 categories2_missing = categories2_all.copy()
@@ -1222,13 +1215,9 @@ dict_extract = {
 dm_new_rail = get_jrc_data(dict_extract, dict_iso2_jrc, current_file_directory)
 
 # aggregate trains and deepen
-mapping_calc = {
-    "rail_CEV": ["train-conv_CEV", "train-hs_CEV"],
-    "rail_ICE-diesel": ["train-conv_ICE-diesel"],
-}
-dm_new_rail.groupby(
-    mapping_calc, dim="Variables", aggregation="mean", regex=False, inplace=True
-)
+mapping_calc = {'rail_CEV': ['train-conv_CEV', 'train-hs_CEV'],
+                'rail_ICE-diesel' : ["train-conv_ICE-diesel"]}
+dm_new_rail.groupby(mapping_calc, dim='Variables', aggregation = "sum", regex=False, inplace=True)
 dm_new_rail.deepen()
 
 # make rest of the variables (assuming they are all missing for now)
@@ -1297,6 +1286,11 @@ dm_new[:, 1990, "aviation", "kerosene"] = np.nan
 
 # check
 # dm_new.flatten().filter({"Country" : ["EU27"]}).datamatrix_plot()
+
+# save raw data for check on fleet
+f = os.path.join(current_file_directory, '../data/datamatrix/intermediate_files/jrc_passenger_new_calib.pickle')
+with open(f, 'wb') as handle:
+    pickle.dump(dm_new, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 # # put LDV_ICE-gas 2000 as missing
 # dm_new = dm_new.flatten()

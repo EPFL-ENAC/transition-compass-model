@@ -1,5 +1,7 @@
 # packages
-from .......model.common.auxiliary_functions import linear_fitting
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
+from transition_compass_model.model.common.auxiliary_functions import linear_fitting
+import pandas as pd
 import pickle
 import os
 import numpy as np
@@ -9,9 +11,9 @@ import warnings
 warnings.simplefilter("ignore")
 import plotly.io as pio
 
-pio.renderers.default = "browser"
-
-from .......model.common.auxiliary_functions import eurostat_iso2_dict, jrc_iso2_dict
+from _database.pre_processing.api_routine_Eurostat import get_data_api_eurostat
+from _database.pre_processing.routine_JRC import get_jrc_data
+from transition_compass_model.model.common.auxiliary_functions import eurostat_iso2_dict, jrc_iso2_dict
 
 # file
 __file__ = "/Users/echiarot/Documents/GitHub/2050-Calculators/PathwayCalc/_database/pre_processing/transport/EU/python/transport_lever_freight_vehicle-efficiency_fleet.py"

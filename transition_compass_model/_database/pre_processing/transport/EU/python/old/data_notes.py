@@ -1,4 +1,6 @@
 # packages
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
+import pandas as pd
 import pickle
 import os
 import warnings
@@ -11,7 +13,7 @@ import plotly.io as pio
 pio.renderers.default = "browser"
 
 from _database.pre_processing.routine_JRC import get_jrc_data
-from .......model.common.auxiliary_functions import eurostat_iso2_dict, jrc_iso2_dict
+from transition_compass_model.model.common.auxiliary_functions import eurostat_iso2_dict, jrc_iso2_dict
 
 # file
 __file__ = "/Users/echiarot/Documents/GitHub/2050-Calculators/PathwayCalc/_database/pre_processing/transport/EU/python/transport_build-pickle.py"

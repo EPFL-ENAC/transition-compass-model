@@ -3,7 +3,7 @@ import pickle
 import pandas as pd
 import zipfile
 
-from ......model.common.auxiliary_functions import (
+from transition_compass_model.model.common.auxiliary_functions import (
     moving_average,
     linear_fitting,
     create_years_list,
@@ -13,7 +13,7 @@ from ......model.common.auxiliary_functions import (
     save_url_to_file,
 )
 from _database.pre_processing.api_routines_CH import get_data_api_CH
-from ......model.common.data_matrix_class import DataMatrix
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 import os
 
@@ -32,7 +32,7 @@ def compute_avg_floor_area(dm_floor_area, years_ots):
     # years_to_keep = dm_avg_floor_area.col_labels['Categories2'].copy()
     # years_to_keep.remove('Avant 1919')
     dm_avg_floor_area.filter({"Categories2": years_to_keep}, inplace=True)
-    # Compute the avg floor area based on construction period
+    # Compute the avg floor area over the years, by construction period
     arr_avg_area = np.nanmean(dm_avg_floor_area.array, axis=1, keepdims=True)
     # years_all = create_years_list(1919, 2023, 1)
     years_missing = list(set(years_ots) - set(dm_avg_floor_area.col_labels["Years"]))

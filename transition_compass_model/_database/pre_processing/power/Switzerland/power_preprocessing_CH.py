@@ -3,12 +3,13 @@ import pandas as pd
 import requests
 import os
 import pickle
-from .....model.common.io_database import database_to_dm
-from .....model.common.data_matrix_class import DataMatrix
-from .....model.common.auxiliary_functions import create_years_list, my_pickle_dump
+import zipfile
+import io
+from transition_compass_model.model.common.io_database import database_to_dm
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
+from transition_compass_model.model.common.auxiliary_functions import create_years_list, my_pickle_dump
 import numpy as np
 from openpyxl import load_workbook
-
 
 # Initialize the Deepl Translator
 deepl_api_key = "9ecffb3f-5386-4254-a099-8bfc47167661:fx"

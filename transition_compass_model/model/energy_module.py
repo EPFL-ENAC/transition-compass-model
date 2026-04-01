@@ -1,8 +1,10 @@
 from transition_compass_model.model.energy.energyscopepyomo.ses_pyomo import (
     load_data,
+    build_model,
     make_highs,
     attach,
     solve,
+    extract_results,
     build_model_structure,
     set_constraints,
 )
@@ -13,16 +15,18 @@ import os
 from transition_compass_model.model.common.auxiliary_functions import (
     filter_DM,
     create_years_list,
+    filter_geoscale,
+    filter_country_and_load_data_from_pickles,
     dm_add_missing_variables,
+    return_lever_data,
 )
 import pickle
 import numpy as np
-from transition_compass_model.model.energy import interfaces as inter
-from transition_compass_model.model.energy import utils
+import transition_compass_model.model.energy.interfaces as inter
+import transition_compass_model.model.energy.utils as utils
 import re
 import json
 from transition_compass_model.model.common.config_loader import load_lever_config
-
 
 def capture_model_state(model, filename):
     """Capture all model parameters and their values"""
@@ -860,7 +864,9 @@ def energy(lever_setting, years_setting, country_list, interface=Interface()):
 def local_energy_run():
     # Function to run module as stand alone without other modules/converter or TPE
     years_setting = [1990, 2023, 2025, 2050, 5]
-    lever_setting = load_lever_config()
+    current_file_directory = os.path.dirname(os.path.abspath(__file__))
+    f = open(os.path.join(current_file_directory, "../config/lever_position.json"))
+    lever_setting = json.load(f)[0]
     # Function to run only transport module without converter and tpe
 
     # get geoscale

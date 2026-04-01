@@ -1,4 +1,8 @@
-from ......model.common.auxiliary_functions import create_years_list
+from transition_compass_model.model.common.auxiliary_functions import (
+    create_years_list,
+    load_pop,
+    save_url_to_file,
+)
 
 from _database.pre_processing.buildings.Switzerland.get_data_functions.construction_period_param import (
     load_construction_period_param,

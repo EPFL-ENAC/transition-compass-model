@@ -1,3 +1,5 @@
+import pandas as pd
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 from transition_compass_model.model.common.interface_class import Interface
 
 from transition_compass_model.model.common.auxiliary_functions import (
@@ -5,13 +7,13 @@ from transition_compass_model.model.common.auxiliary_functions import (
     filter_country_and_load_data_from_pickles,
     create_years_list,
     dm_add_missing_variables,
+    my_pickle_dump,
 )
 import pickle
 import os
 import warnings
-from transition_compass_model.model.buildings import workflows as wkf
-from transition_compass_model.model.buildings import interfaces as inter
-from transition_compass_model.model.common.config_loader import load_lever_config
+import transition_compass_model.model.buildings.workflows as wkf
+import transition_compass_model.model.buildings.interfaces as inter
 
 warnings.simplefilter("ignore")
 
@@ -19,7 +21,9 @@ warnings.simplefilter("ignore")
 def init_years_lever():
     # function that can be used when running the module as standalone to initialise years and levers
     years_setting = [1990, 2023, 2025, 2050, 5]
-    lever_setting = load_lever_config()
+    current_file_directory = os.path.dirname(os.path.abspath(__file__))
+    f = open(os.path.join(current_file_directory, "../config/lever_position.json"))
+    lever_setting = json.load(f)[0]
     return years_setting, lever_setting
 
 
@@ -143,6 +147,7 @@ def buildings(lever_setting, years_setting, DM_input, interface=Interface()):
     DM_hotwater_out = wkf.bld_hotwater_workflow(
         DM_hotwater,
         DM_energy_out["TPE"]["energy-demand-heating"].copy(),
+        cdm_const,
         dm_lfs,
         years_ots,
         years_fts,
@@ -151,6 +156,7 @@ def buildings(lever_setting, years_setting, DM_input, interface=Interface()):
     DM_services_out = wkf.bld_services_workflow(
         DM_services,
         DM_energy_out["TPE"]["energy-demand-heating"].copy(),
+        cdm_const,
         years_ots,
         years_fts,
     )
@@ -164,7 +170,7 @@ def buildings(lever_setting, years_setting, DM_input, interface=Interface()):
         dm_heat_cool = DM_energy_out["power"].filter(
             {"Variables": ["bld_energy-demand_heating", "bld_energy-demand_cooling"]}
         )
-        dm_hot_water = DM_hotwater_out["power"].filter(
+        dm_hot_water = DM_hotwater_out["TPE"]["power"].filter(
             {"Variables": ["bld_hot-water_energy-demand"]}
         )
         dm_hot_water.rename_col(
@@ -210,7 +216,7 @@ def buildings(lever_setting, years_setting, DM_input, interface=Interface()):
         DM_services_out["TPE"],
         DM_appliances_out["power"],
         DM_light_out["TPE"],
-        DM_hotwater_out["power"],
+        DM_hotwater_out["TPE"],
     )
 
     # 'District-heating' module interface
@@ -222,34 +228,46 @@ def buildings(lever_setting, years_setting, DM_input, interface=Interface()):
 
     DM_inter_energy = {
         "households_heating": DM_energy_out["power"],
-        "households_hot-water": DM_hotwater_out["power"],
+        "households_hot-water": DM_hotwater_out["TPE"]["power"],
         "households_lighting": DM_light_out["energy"],
         "households_electricity": DM_appliances_out["power"],
         "services_all": DM_services_out["energy"],
     }
+
+    # write_pickle = False
+    # if write_pickle is True:
+    #     current_file_directory = os.path.dirname(os.path.abspath(__file__))
+    #     f = os.path.join(
+    #         current_file_directory,
+    #         "../_database/data/interface/buildings_to_energy.pickle",
+    #     )
+    #     my_pickle_dump(DM_inter_energy, f)
+
     interface.add_link(from_sector="buildings", to_sector="energy", dm=DM_inter_energy)
 
     # this_dir = os.path.dirname(os.path.abspath(__file__))
-    # file = os.path.join(this_dir, '../_database/data/interface/buildings_to_lca.pickle')
+    # file = os.path.join(this_dir, '../_database/data/interface/buildings_to_industry.pickle')
     # with open(file, "wb") as handle:
-    #     pickle.dump(DM_floor_out['industry'], handle, protocol=pickle.HIGHEST_PROTOCOL )
+    #     pickle.dump(DM_industry, handle, protocol=pickle.HIGHEST_PROTOCOL )
 
+    # emission interface
+    dm_emi = inter.bld_emissions_interface(DM_energy_out["TPE"]["emissions"])
     interface.add_link(
         from_sector="buildings",
         to_sector="emissions",
-        dm=DM_energy_out["TPE"]["emissions"],
+        dm=dm_emi,
     )
 
-    interface.add_link(
-        from_sector="buildings", to_sector="industry", dm=DM_floor_out["industry"]
+    # industry interface
+    DM_industry = inter.bld_industry_interface(
+        DM_floor_out["industry"], DM_appliances_out["industry"]
     )
+    interface.add_link(from_sector="buildings", to_sector="industry", dm=DM_industry)
     # TODO: probably add non residential (offices) to interface to industry
 
     # interface.add_link(from_sector='buildings', to_sector='minerals', dm=DM_floor_out['industry'])
 
-    interface.add_link(
-        from_sector="buildings", to_sector="lca", dm=DM_floor_out["industry"]
-    )
+    interface.add_link(from_sector="buildings", to_sector="lca", dm=DM_industry)
 
     # interface.add_link(from_sector='buildings', to_sector='agriculture', dm=DM_energy_out['agriculture'])
 

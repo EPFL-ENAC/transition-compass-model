@@ -1,6 +1,6 @@
 # packages
-from ......model.common.data_matrix_class import DataMatrix
-
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
+from transition_compass_model.model.common.auxiliary_functions import linear_fitting
 # from _database.pre_processing.fix_jumps import fix_jumps_in_dm
 import pickle
 import os
