@@ -103,8 +103,15 @@ To customise lever settings, edit `transition_compass_model/config/lever_positio
 ```bash
 git clone https://github.com/2050Calculators/transition-compass-model.git
 cd transition-compass-model
-uv sync          # Creates .venv and installs all dependencies
+make install     # Install deps + activate pre-commit hooks
 ```
+
+| Command | Description |
+|---|---|
+| `make install` | Install all dependencies (incl. dev) and register git pre-commit hooks |
+| `make format` | Auto-format code with ruff |
+| `make lint` | Check code quality with ruff |
+| `make test` | Run test suite with pytest |
 
 Run the full model:
 

@@ -3,10 +3,11 @@
 install:
 	@if uv --version >/dev/null 2>&1; then \
 		uv sync --all-groups; \
+		uv run pre-commit install; \
 	else \
 		pip install -e ".[dev]"; \
+		pre-commit install; \
 	fi
-	pre-commit install
 
 format:
 	@if uv --version >/dev/null 2>&1; then \
