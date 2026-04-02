@@ -115,64 +115,12 @@ def runner(lever_setting, years_setting, DM_in, sectors, logger):
         )
     if "lca" in sectors:
         start_time = time.time()
-        TPE["lifestyles"] = lifestyles(
-            lever_setting, years_setting, DM_input["lifestyles"], interface
-        )
+        TPE["lca"] = lca(
+            lever_setting, years_setting, DM_input["lca"], interface
+            )
         logger.info(
-            "Execution time Lifestyles: {0:.3g} s".format(time.time() - start_time)
+            "Execution time LCA: {0:.3g} s".format(time.time() - start_time)
         )
-    if "transport" in sectors:
-        start_time = time.time()
-        TPE["transport"], KPI["transport"] = transport(
-            lever_setting, years_setting, DM_input["transport"], interface
-        )
-        logger.info(
-            "Execution time Transport: {0:.3g} s".format(time.time() - start_time)
-        )
-    if "buildings" in sectors:
-        start_time = time.time()
-        TPE["buildings"], KPI["buildings"] = buildings(
-            lever_setting, years_setting, DM_input["buildings"], interface
-        )
-        logger.info(
-            "Execution time Buildings: {0:.3g} s".format(time.time() - start_time)
-        )
-    if "industry" in sectors:
-        start_time = time.time()
-        TPE["industry"] = industry(
-            lever_setting, years_setting, DM_input["industry"], interface
-        )
-        logger.info(
-            "Execution time Industry: {0:.3g} s".format(time.time() - start_time)
-        )
-    if "forestry" in sectors:
-        start_time = time.time()
-        TPE["forestry"] = forestry(
-            lever_setting, years_setting, DM_input["forestry"], interface
-        )
-        logger.info(
-            "Execution time Forestry: {0:.3g} s".format(time.time() - start_time)
-        )
-    if "agriculture" in sectors:
-        start_time = time.time()
-        TPE["agriculture"] = agriculture(
-            lever_setting, years_setting, DM_input["agriculture"], interface
-        )
-        logger.info(
-            "Execution time Agriculture: {0:.3g} s".format(time.time() - start_time)
-        )
-    if "ammonia" in sectors:
-        start_time = time.time()
-        TPE["ammonia"] = ammonia(
-            lever_setting, years_setting, DM_input["ammonia"], interface
-        )
-        logger.info(
-            "Execution time Ammonia: {0:.3g} s".format(time.time() - start_time)
-        )
-    if "lca" in sectors:
-        start_time = time.time()
-        TPE["lca"] = lca(lever_setting, years_setting, DM_input["lca"], interface)
-        logger.info("Execution time LCA: {0:.3g} s".format(time.time() - start_time))
 
     # start_time = time.time()
     # TPE['agriculture'] = agriculture(lever_setting, years_setting, interface)
