@@ -59,7 +59,7 @@ Given a set of policy lever values (integers 1–4 representing ambition levels)
 
 ## Git LFS
 
-This repository uses [Git LFS](https://git-lfs.com/) to store binary data files (`.pickle`, `.pdf`) on an [ENAC IT self-hosted server](https://enac-it-git-lfs.epfl.ch). You need Git LFS installed for a working clone:
+This repository uses [Git LFS](https://git-lfs.com/) to store binary data files (`.pickle`, `.pdf`) on GitHub's built-in LFS storage. You need Git LFS installed for a working clone:
 
 ```bash
 # Install Git LFS (once per machine)
