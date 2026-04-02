@@ -1,23 +1,14 @@
+import os
+
 import numpy as np
 import pandas as pd
+import requests
 
 from transition_compass_model.model.common.auxiliary_functions import (
-    moving_average,
-    linear_fitting,
     create_years_list,
+    linear_fitting,
 )
-from transition_compass_model.model.common.io_database import (
-    update_database_from_dm,
-    csv_database_reformat,
-    read_database_to_dm,
-)
-from _database.pre_processing.api_routines_CH import get_data_api_CH
 from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from transition_compass_model.model.common.constant_data_matrix_class import ConstantDataMatrix
-import eurostat
-import math
-import requests
-import os
 
 
 def extract_oil_product_demand(file_url, local_filename, sheet_name, years_ots):

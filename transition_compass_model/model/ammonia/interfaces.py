@@ -1,12 +1,12 @@
 import os
 import pickle
+
 import numpy as np
 
 
 def get_interface(
     current_file_directory, interface, from_sector, to_sector, country_list
 ):
-
     if interface.has_link(from_sector=from_sector, to_sector=to_sector):
         DM = interface.get_link(from_sector=from_sector, to_sector=to_sector)
     else:
@@ -97,7 +97,6 @@ def get_interface(
 
 
 def variables_for_tpe(dm_matprod, dm_emi_bygas):
-
     dm_out = dm_matprod.flatten()
     dm_out.append(dm_emi_bygas.flatten(), "Variables")
 
@@ -107,7 +106,6 @@ def variables_for_tpe(dm_matprod, dm_emi_bygas):
 def ammonia_energy_interface(
     dm_energy_demand_by_carr, cdm_split, cdm_eneff, write_pickle=False
 ):
-
     # split between electricity and lighting
     dm_temp = dm_energy_demand_by_carr.filter({"Categories1": ["electricity"]})
     dm_temp.rename_col("electricity", "lighting", "Categories1")
@@ -139,7 +137,7 @@ def ammonia_energy_interface(
     dm_temp.sort("Categories1")
     dm_energy_demand_by_carr_reshaped = dm_temp.copy()
 
-    # get useful enery demand
+    # get useful energy demand
     dm_useful_energy_demand_by_carr = dm_energy_demand_by_carr_reshaped.copy()
     dm_useful_energy_demand_by_carr.array = (
         dm_useful_energy_demand_by_carr.array * cdm_eneff[np.newaxis, np.newaxis, ...]
@@ -265,7 +263,6 @@ def ammonia_energy_interface(
 
 
 def ammonia_emissions_interface(DM_emissions, write_pickle=False):
-
     # emissions by gas
     dm_ems = DM_emissions["bygas"].copy()
     dm_ems.rename_col("emissions", "ammonia", "Variables")

@@ -1,14 +1,16 @@
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from transition_compass_model.model.common.interface_class import Interface
-from transition_compass_model.model.common.auxiliary_functions import filter_geoscale, cdm_to_dm, read_level_data
-from transition_compass_model.model.common.auxiliary_functions import calibration_rates, cost
-from transition_compass_model.model.common.auxiliary_functions import material_switch, energy_switch
-import pickle
 import json
 import os
-import numpy as np
+import pickle
 import warnings
-import time
+
+import numpy as np
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    filter_geoscale,
+    read_level_data,
+)
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
+from transition_compass_model.model.common.interface_class import Interface
 
 warnings.simplefilter("ignore")
 

@@ -1,11 +1,13 @@
 # packages
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from transition_compass_model.model.common.auxiliary_functions import linear_fitting
-import pickle
 import os
+import pickle
+import warnings
+
 import numpy as np
 import pandas as pd
-import warnings
+
+from transition_compass_model.model.common.auxiliary_functions import linear_fitting
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 warnings.simplefilter("ignore")
 

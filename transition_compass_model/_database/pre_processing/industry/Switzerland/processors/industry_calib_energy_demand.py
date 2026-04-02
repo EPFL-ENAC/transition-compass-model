@@ -1,8 +1,4 @@
-import pandas as pd
 import numpy as np
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from transition_compass_model.model.common.auxiliary_functions import linear_fitting
-import pickle
 import plotly.io as pio
 
 pio.renderers.default = "browser"
@@ -11,6 +7,7 @@ import os
 from _database.pre_processing.industry.Switzerland.get_data_functions.data_energy import (
     data_energy as get_energy_data,
 )
+
 from transition_compass_model.model.common.auxiliary_functions import create_years_list
 
 
@@ -85,7 +82,6 @@ def run(years_ots, years_fts):
 
 
 if __name__ == "__main__":
-
     years_ots = create_years_list(1990, 2023, 1)
     years_fts = create_years_list(2025, 2050, 5)
 

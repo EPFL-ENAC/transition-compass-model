@@ -1,10 +1,11 @@
 # packages
-import pandas as pd
-import pickle
 import os
-import numpy as np
-import warnings
+import pickle
 import re
+import warnings
+
+import numpy as np
+import pandas as pd
 
 warnings.simplefilter("ignore")
 
@@ -40,7 +41,11 @@ df["variable"] = [
 df = df.loc[:, ["variable", "value"]]
 
 # make cdm
-from transition_compass_model.model.common.constant_data_matrix_class import ConstantDataMatrix
+from transition_compass_model.model.common.constant_data_matrix_class import (
+    ConstantDataMatrix,
+)
+
+
 def create_constant(df, variables):
 
     df_temp = df.loc[df["variable"].isin(variables), :]
@@ -398,8 +403,9 @@ df.sort_values(by=["variable"], inplace=True)
 # ammonia N2O: set ~0 (avoid misplacing nitric acid emissions on ammonia output)
 # value = np.mean(np.array([2, 2.5, 5, 7, 9])/1000)
 value = 0
-df_N2O = pd.DataFrame({"variable" : ["process-emissions_ammonia-tech_N2O[Mt/Mt]"],
-                           "value" : [value]})
+df_N2O = pd.DataFrame(
+    {"variable": ["process-emissions_ammonia-tech_N2O[Mt/Mt]"], "value": [value]}
+)
 
 # chemicals
 # source: https://www.ipcc-nggip.iges.or.jp/public/2006gl/pdf/3_Volume3/V3_3_Ch3_Chemical_Industry.pdf
@@ -416,9 +422,15 @@ df_N2O = pd.DataFrame({"variable" : ["process-emissions_ammonia-tech_N2O[Mt/Mt]"
 # without applying nitric-acid-specific factors to all chemicals.
 # you can consider 0.003–0.004 which may be best constants for years 2000-2021
 value = 0.005  # Mt N2O per Mt chemical output (= 5 kg/t)
-df_temp = pd.DataFrame({"variable" : ["process-emissions_chem-chem-tech_N2O[Mt/Mt]",
-                                      "process-emissions_chem-sec_N2O[Mt/Mt]"], # I assume post consumer it's the same for process emissions N2O
-                        "value" : [value, value]})
+df_temp = pd.DataFrame(
+    {
+        "variable": [
+            "process-emissions_chem-chem-tech_N2O[Mt/Mt]",
+            "process-emissions_chem-sec_N2O[Mt/Mt]",
+        ],  # I assume post consumer it's the same for process emissions N2O
+        "value": [value, value],
+    }
+)
 df_N2O = pd.concat([df_N2O, df_temp])
 
 # assign 0 to others
@@ -462,7 +474,10 @@ df.sort_values(by=["variable"], inplace=True)
 ############# CONVERT TO CONSTANT DATA MATRIX #############
 ###########################################################
 
-from transition_compass_model.model.common.constant_data_matrix_class import ConstantDataMatrix
+from transition_compass_model.model.common.constant_data_matrix_class import (
+    ConstantDataMatrix,
+)
+
 
 # create dms
 def create_constant(df, variables):

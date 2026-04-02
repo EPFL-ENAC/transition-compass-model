@@ -1,5 +1,6 @@
-import pandas as pd
 import os
+
+import pandas as pd
 
 
 def get_data_lca(current_file_directory):

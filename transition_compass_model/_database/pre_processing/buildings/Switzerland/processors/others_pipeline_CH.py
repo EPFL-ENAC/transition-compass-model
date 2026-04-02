@@ -1,7 +1,12 @@
 import numpy as np
 
-from transition_compass_model.model.common.auxiliary_functions import cdm_to_dm, create_years_list
-from transition_compass_model.model.common.constant_data_matrix_class import ConstantDataMatrix
+from transition_compass_model.model.common.auxiliary_functions import (
+    cdm_to_dm,
+    create_years_list,
+)
+from transition_compass_model.model.common.constant_data_matrix_class import (
+    ConstantDataMatrix,
+)
 from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 
@@ -95,7 +100,7 @@ def run(country_list, years_ots, years_fts):
         ] = tint
         dm_Tint_heat.array[
             :, :, idx["bld_Tint-heating"], idx["single-family-households"], idx[cat]
-        ] = (tint - 1)
+        ] = tint - 1
 
     # SECION: Building age
     first_bld_sfh = {"F": 1900, "E": 1971, "D": 1981, "C": 2001, "B": 2011}

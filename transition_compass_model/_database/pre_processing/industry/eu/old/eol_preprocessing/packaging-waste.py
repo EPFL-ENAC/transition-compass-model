@@ -1,7 +1,7 @@
-import pandas as pd
 import eurostat
-import pycountry
 import numpy as np
+import pandas as pd
+import pycountry
 
 
 # Function for converting Eurostat country codes to English names using pycountry

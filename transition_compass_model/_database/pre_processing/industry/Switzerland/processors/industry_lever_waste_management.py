@@ -1,23 +1,23 @@
-import re
-import numpy as np
 import os
-import pandas as pd
 import pickle
 import warnings
+
+import numpy as np
 
 warnings.simplefilter("ignore")
 import plotly.io as pio
 
 pio.renderers.default = "browser"
 
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from transition_compass_model.model.common.auxiliary_functions import linear_fitting
-from transition_compass_model.model.common.auxiliary_functions import create_years_list
-
 from _database.pre_processing.industry.Switzerland.get_data_functions.data_waste import (
-    get_data_waste_vehicles,
-    get_data_special_waste,
     extract_waste_data_from_dechets_speciaux,
+    get_data_special_waste,
+    get_data_waste_vehicles,
+)
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    create_years_list,
+    linear_fitting,
 )
 
 
@@ -756,7 +756,6 @@ def run(years_ots):
 
 
 if __name__ == "__main__":
-
     years_ots = create_years_list(1990, 2023, 1)
 
     run(years_ots)

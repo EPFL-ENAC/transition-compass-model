@@ -1,13 +1,16 @@
-import numpy as np
 import warnings
+
+import numpy as np
 
 warnings.simplefilter("ignore")
 import os
-import pandas as pd
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from transition_compass_model.model.common.auxiliary_functions import linear_fitting
 import pickle
+
+import pandas as pd
 import plotly.io as pio
+
+from transition_compass_model.model.common.auxiliary_functions import linear_fitting
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 pio.renderers.default = "browser"
 

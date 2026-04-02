@@ -1,7 +1,8 @@
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
 import os
-import numpy as np
 import pickle
+
+import numpy as np
+
 from transition_compass_model.model.common.auxiliary_functions import my_pickle_dump
 
 
@@ -209,7 +210,6 @@ def tra_oilrefinery_interface(dm_pass_energy, dm_freight_energy, write_pickle=Fa
 
 
 def prepare_KPIs(DM_kpi_dict):
-
     KPI = []
     yr = 2050
 
@@ -465,7 +465,6 @@ def prepare_TPE_output(DM_passenger_out, DM_freight_out):
 def tra_emissions_interface(
     dm_pass_emissions, dm_freight_emissions, write_pickle=False
 ):
-
     dm_emi_aviation = dm_pass_emissions.filter({"Categories1": ["aviation"]})
     dm_emi_aviation.group_all("Categories1")
     dm_emi_aviation.rename_col("tra_passenger_emissions", "aviation", "Variables")
@@ -518,7 +517,6 @@ def tra_emissions_interface(
 def tra_agriculture_interface(
     dm_freight_agriculture, dm_passenger_agriculture, write_pickle=False
 ):
-
     # !FIXME: of all of the bio-energy demand, only the biogas one is accounted for in Agriculture
     dm_agriculture = dm_freight_agriculture
     dm_agriculture.array = dm_agriculture.array + dm_passenger_agriculture.array
@@ -541,7 +539,6 @@ def tra_agriculture_interface(
 
 
 def tra_power_interface(DM_passenger_power, DM_freight_power, write_pickle=False):
-
     DM_power = DM_passenger_power
     DM_power["hydrogen"].array = (
         DM_power["hydrogen"].array + DM_freight_power["hydrogen"].array

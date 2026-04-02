@@ -1,12 +1,10 @@
-import numpy as np
+import os
 import pickle
 
-from transition_compass_model.model.common.auxiliary_functions import my_pickle_dump
+import numpy as np
 from _database.pre_processing.api_routines_CH import get_data_api_CH
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from transition_compass_model.model.common.constant_data_matrix_class import ConstantDataMatrix
 
-import os
+from transition_compass_model.model.common.auxiliary_functions import my_pickle_dump
 
 
 def extract_heating_demand(table_id, file):
@@ -15,7 +13,6 @@ def extract_heating_demand(table_id, file):
         with open(file, "rb") as handle:
             dm_heating = pickle.load(handle)
     except OSError:
-
         structure, title = get_data_api_CH(table_id, mode="example", language="fr")
 
         filter = {

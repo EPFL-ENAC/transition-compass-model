@@ -1,22 +1,25 @@
-from transition_compass_model.model.common.auxiliary_functions import create_years_list, load_pop
 from processors.aviation_part1_pipeline_CH import run as aviation_pt1_run
-from processors.transport_demand_pipeline import run as demand_pkm_vkm_run
+from processors.electricity_emissions_pipeline import run as electricity_emission_run
+from processors.passenger_efficiency_pipeline import run as passenger_efficiency_run
+from processors.passenger_emission_factors import run as passenger_emission_run
+from processors.passenger_energy_pipeline import run as passenger_energy_run
 from processors.passenger_fleet_pipeline import run as passenger_fleet_run
+from processors.passenger_lifetime_pipeline import run as passenger_lifetime_run
 from processors.passenger_renewal_rate_and_waste_pipeline import (
     run as passenger_ren_rate_waste_adj_run,
 )
-from processors.passenger_emission_factors import run as passenger_emission_run
-from processors.passenger_efficiency_pipeline import run as passenger_efficiency_run
-from processors.passenger_energy_pipeline import run as passenger_energy_run
-from processors.transport_ots_pickle import run as ots_pickle_run
-from processors.passenger_lifetime_pipeline import run as passenger_lifetime_run
-from processors.electricity_emissions_pipeline import run as electricity_emission_run
-from processors.transport_calib_energy_demand import run as data_check_energy_run
 from processors.transport_calib_emissions import run as data_check_emissions_run
+from processors.transport_calib_energy_demand import run as data_check_energy_run
 from processors.transport_calib_vkm import run as data_check_vkm_run
+from processors.transport_demand_pipeline import run as demand_pkm_vkm_run
+from processors.transport_ots_pickle import run as ots_pickle_run
 from scenarios.transport_fts_BAU_pickle import run as fts_bau_pickle_run
 from scenarios.transport_preprocessing_CH_fts import run as fts_PVC_DLS_pickle_run
 
+from transition_compass_model.model.common.auxiliary_functions import (
+    create_years_list,
+    load_pop,
+)
 
 years_ots = create_years_list(1990, 2023, 1)
 years_fts = create_years_list(2025, 2050, 5)

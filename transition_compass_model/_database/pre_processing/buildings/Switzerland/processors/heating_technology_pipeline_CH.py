@@ -1,15 +1,7 @@
-import numpy as np
+import os
 
-from transition_compass_model.model.common.auxiliary_functions import (
-    create_years_list,
-    load_pop,
-    dm_add_missing_variables,
-    linear_fitting,
-    extrapolate_missing_years_based_on_per_capita,
-    add_dummy_country_to_DM,
-)
 import _database.pre_processing.buildings.Switzerland.get_data_functions.heating_technology_CH as ht
-
+import numpy as np
 from _database.pre_processing.buildings.Switzerland.get_data_functions.construction_period_param import (
     load_construction_period_param,
 )
@@ -20,7 +12,14 @@ from _database.pre_processing.buildings.Switzerland.get_data_functions.hot_water
     extract_heating_efficiencies_EP2050,
 )
 
-import os
+from transition_compass_model.model.common.auxiliary_functions import (
+    add_dummy_country_to_DM,
+    create_years_list,
+    dm_add_missing_variables,
+    extrapolate_missing_years_based_on_per_capita,
+    linear_fitting,
+    load_pop,
+)
 
 
 def add_dummy_envelope_cat(dm_heating_eff):

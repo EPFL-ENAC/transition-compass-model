@@ -1,12 +1,13 @@
 import pickle
 
 import numpy as np
+import pandas as pd
+
 from ....model.common.auxiliary_functions import (
+    create_years_list,
     filter_DM,
     linear_fitting,
-    create_years_list,
 )
-import pandas as pd
 from ....model.common.constant_data_matrix_class import ConstantDataMatrix
 
 years_ots = create_years_list(1990, 2023, 1)  # make list with years from 1990 to 2015
@@ -365,7 +366,7 @@ tj_to_ktoe = 0.02388458966275  # source https://www.unitjuggler.com/convertir-en
 # Source : UNFCCC Table 1.1(a)s4
 DM_agriculture["constant"]["cdm_CO2"][
     "cp_emission-factor_CO2", "bioenergy-solid-wood"
-] = (10**-6 * 72.71 / tj_to_ktoe)
+] = 10**-6 * 72.71 / tj_to_ktoe
 DM_agriculture["constant"]["cdm_CO2"]["cp_emission-factor_CO2", "gas-ff-natural"] = (
     10**-6 * 55.90 / tj_to_ktoe
 )
@@ -374,7 +375,7 @@ DM_agriculture["constant"]["cdm_CO2"]["cp_emission-factor_CO2", "liquid-ff-diese
 )
 DM_agriculture["constant"]["cdm_CO2"][
     "cp_emission-factor_CO2", "liquid-ff-gasoline"
-] = (10**-6 * 73.80 / tj_to_ktoe)
+] = 10**-6 * 73.80 / tj_to_ktoe
 DM_agriculture["constant"]["cdm_CO2"]["cp_emission-factor_CO2", "liquid-ff-lpg"] = (
     10**-6 * 0.0 / tj_to_ktoe
 )
@@ -392,22 +393,22 @@ DM_agriculture["constant"]["cdm_CO2"]["cp_emission-factor_CO2", "solid-ff-coal"]
 DM_agriculture["constant"]["cdm_cp_efficiency"][
     "cp_efficiency_liv", "abp-dairy-milk"
 ] = 0.24
-DM_agriculture["constant"]["cdm_cp_efficiency"][
-    "cp_efficiency_liv", "abp-hens-egg"
-] = 0.19
-DM_agriculture["constant"]["cdm_cp_efficiency"][
-    "cp_efficiency_liv", "meat-bovine"
-] = 0.019
+DM_agriculture["constant"]["cdm_cp_efficiency"]["cp_efficiency_liv", "abp-hens-egg"] = (
+    0.19
+)
+DM_agriculture["constant"]["cdm_cp_efficiency"]["cp_efficiency_liv", "meat-bovine"] = (
+    0.019
+)
 DM_agriculture["constant"]["cdm_cp_efficiency"][
     "cp_efficiency_liv", "meat-oth-animals"
 ] = 0.044
 DM_agriculture["constant"]["cdm_cp_efficiency"]["cp_efficiency_liv", "meat-pig"] = 0.086
-DM_agriculture["constant"]["cdm_cp_efficiency"][
-    "cp_efficiency_liv", "meat-poultry"
-] = 0.13
-DM_agriculture["constant"]["cdm_cp_efficiency"][
-    "cp_efficiency_liv", "meat-sheep"
-] = 0.044
+DM_agriculture["constant"]["cdm_cp_efficiency"]["cp_efficiency_liv", "meat-poultry"] = (
+    0.13
+)
+DM_agriculture["constant"]["cdm_cp_efficiency"]["cp_efficiency_liv", "meat-sheep"] = (
+    0.044
+)
 
 # FXA EF NITROGEN FERTILIZER ----------------------------------------------------------------------------------------
 # Load data

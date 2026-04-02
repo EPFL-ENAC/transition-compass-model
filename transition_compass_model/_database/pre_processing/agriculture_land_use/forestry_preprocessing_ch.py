@@ -1,19 +1,22 @@
-import pandas as pd
-import numpy as np
-from _database.pre_processing.api_routines_CH import get_data_api_CH
-import pickle
 import os
-import requests
+import pickle
+
 import deepl
 import faostat
-from ....model.common.data_matrix_class import DataMatrix
-from ....model.common.constant_data_matrix_class import ConstantDataMatrix
+import numpy as np
+import pandas as pd
+import requests
+from _database.pre_processing.api_routines_CH import get_data_api_CH
+
 from ....model.common.auxiliary_functions import (
+    add_dummy_country_to_DM,
     create_years_list,
     linear_fitting,
     my_pickle_dump,
+    sort_pickle,
 )
-from ....model.common.auxiliary_functions import sort_pickle, add_dummy_country_to_DM
+from ....model.common.constant_data_matrix_class import ConstantDataMatrix
+from ....model.common.data_matrix_class import DataMatrix
 
 # Initialize the Deepl Translator
 deepl_api_key = "9ecffb3f-5386-4254-a099-8bfc47167661:fx"
@@ -405,7 +408,9 @@ def get_wood_trade_balance(file):
         dm = dm.rename(columns={"Year": "Years", "Area": "Country"})
 
         dm["Variable"] = dm.apply(
-            lambda row: f"{row['Item'].lower()}_{row['Element'].lower()}[{row['Unit'].lower()}]",
+            lambda row: (
+                f"{row['Item'].lower()}_{row['Element'].lower()}[{row['Unit'].lower()}]"
+            ),
             axis=1,
         )
         dm = dm.drop(columns=["Item", "Element", "Unit"])
@@ -1312,9 +1317,9 @@ DM_forestry = {"ots": dict(), "fts": dict(), "fxa": dict(), "constant": dict()}
 DM_forestry["constant"]["energy-density"] = cdm_energy_density
 DM_forestry["constant"]["wood-density"] = cdm_wood_density
 DM_forestry["constant"]["industry-byproducts"] = cdm_industry_yields
-DM_forestry["constant"][
-    "wood-category-conversion-factors"
-] = cdm_forestry_conversion_industry_to_wood
+DM_forestry["constant"]["wood-category-conversion-factors"] = (
+    cdm_forestry_conversion_industry_to_wood
+)
 DM_forestry["fxa"]["coniferous-share"] = dm_wood_type
 DM_forestry["fxa"]["any-other-industrial-wood"] = dm_fxa_wood_demand
 DM_forestry["fxa"]["forest-exploited-share"] = dm_forest_exploited_share

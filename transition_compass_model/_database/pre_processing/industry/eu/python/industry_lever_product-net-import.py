@@ -1,12 +1,13 @@
 # packages
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from transition_compass_model.model.common.auxiliary_functions import linear_fitting
-
-import pandas as pd
-import pickle
 import os
-import numpy as np
+import pickle
 import warnings
+
+import numpy as np
+import pandas as pd
+
+from transition_compass_model.model.common.auxiliary_functions import linear_fitting
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 # from _database.pre_processing.api_routine_Eurostat import get_data_api_eurostat
 warnings.simplefilter("ignore")
@@ -984,15 +985,15 @@ LDV_PHEV_gasoline_2050 = np.round(
 )
 DM_trade["tra-veh"].array[idx["EU27"], idx[2050], :, idx["HDV_BEV"]] = HDV_BEV_2050
 DM_trade["tra-veh"] = make_fts(DM_trade["tra-veh"], "HDV_BEV", 2023, 2050)
-DM_trade["tra-veh"].array[
-    idx["EU27"], idx[2050], :, idx["HDV_PHEV-diesel"]
-] = HDV_PHEV_diesel_2050
+DM_trade["tra-veh"].array[idx["EU27"], idx[2050], :, idx["HDV_PHEV-diesel"]] = (
+    HDV_PHEV_diesel_2050
+)
 DM_trade["tra-veh"] = make_fts(DM_trade["tra-veh"], "HDV_PHEV-diesel", 2023, 2050)
 DM_trade["tra-veh"].array[idx["EU27"], idx[2050], :, idx["LDV_BEV"]] = LDV_BEV_2050
 DM_trade["tra-veh"] = make_fts(DM_trade["tra-veh"], "LDV_BEV", 2023, 2050)
-DM_trade["tra-veh"].array[
-    idx["EU27"], idx[2050], :, idx["LDV_PHEV-gasoline"]
-] = LDV_PHEV_gasoline_2050
+DM_trade["tra-veh"].array[idx["EU27"], idx[2050], :, idx["LDV_PHEV-gasoline"]] = (
+    LDV_PHEV_gasoline_2050
+)
 DM_trade["tra-veh"] = make_fts(DM_trade["tra-veh"], "LDV_PHEV-gasoline", 2023, 2050)
 DM_trade["tra-veh"].drop("Categories1", ["electric_total", "total"])
 

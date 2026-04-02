@@ -1,8 +1,6 @@
 """Preprocessing for Eu."""
 
-from . import data
-from . import old
-from . import python
+from . import data, old, python
 
 __all__ = [
     "data",

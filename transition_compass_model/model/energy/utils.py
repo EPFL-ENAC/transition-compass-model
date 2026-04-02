@@ -1,6 +1,8 @@
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
+from typing import Dict, List
+
 import numpy as np
-from typing import List, Dict
+
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 
 def pyomo_var_to_dm(
@@ -209,7 +211,6 @@ def get_pyomo_output(m, country, endyr):
 
 
 def get_ampl_output(ampl, country, endyr):
-
     dm_f_mult = ampl_var_to_dm(
         ampl,
         ampl_var_name="F_Mult",

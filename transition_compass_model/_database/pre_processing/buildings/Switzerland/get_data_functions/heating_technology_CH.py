@@ -1,19 +1,22 @@
-import numpy as np
-import pandas as pd
+import os
 import pickle
 import time
+import zipfile
+
+import numpy as np
+import pandas as pd
+from _database.pre_processing.api_routines_CH import get_data_api_CH
+
 from transition_compass_model.model.common.auxiliary_functions import (
+    dm_add_missing_variables,
     linear_fitting,
     rename_cantons,
-    dm_add_missing_variables,
     save_url_to_file,
 )
-from _database.pre_processing.api_routines_CH import get_data_api_CH
+from transition_compass_model.model.common.constant_data_matrix_class import (
+    ConstantDataMatrix,
+)
 from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from transition_compass_model.model.common.constant_data_matrix_class import ConstantDataMatrix
-
-import os
-import zipfile
 
 
 def df_excel_to_dm(

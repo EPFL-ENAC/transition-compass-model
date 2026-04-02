@@ -1,14 +1,16 @@
 # materials: ['aluminium', 'ammonia, 'cement', 'chem', 'copper', 'glass', 'lime', 'other', 'paper', 'steel', 'timber']
 
 # packages
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from transition_compass_model.model.common.auxiliary_functions import linear_fitting
-from _database.pre_processing.fix_jumps import fix_jumps_in_dm
-import pandas as pd
-import pickle
 import os
-import numpy as np
+import pickle
 import warnings
+
+import numpy as np
+import pandas as pd
+from _database.pre_processing.fix_jumps import fix_jumps_in_dm
+
+from transition_compass_model.model.common.auxiliary_functions import linear_fitting
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 # from _database.pre_processing.api_routine_Eurostat import get_data_api_eurostat
 warnings.simplefilter("ignore")

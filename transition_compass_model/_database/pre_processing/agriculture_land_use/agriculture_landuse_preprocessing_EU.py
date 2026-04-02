@@ -1,41 +1,27 @@
+import os
+import pickle
+import re
+
+import faostat
 import numpy as np
-from transition_compass_model.model.common.auxiliary_functions import (
-    interpolate_nans,
-    add_missing_ots_years,
-    linear_fitting_ots_db,
-    linear_fitting,
-    create_years_list,
-)
 
 # from _database.pre_processing.api_routines_CH import get_data_api_CH
 import pandas as pd
-import faostat
-import os
-import re
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    add_dummy_country_to_DM,
+    create_years_list,
+    filter_DM,
+    linear_fitting,
+    linear_fitting_ots_db,
+)
+from transition_compass_model.model.common.constant_data_matrix_class import (
+    ConstantDataMatrix,
+)
 from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from transition_compass_model.model.common.constant_data_matrix_class import ConstantDataMatrix
 from transition_compass_model.model.common.io_database import (
-    read_database,
-    read_database_fxa,
-    edit_database,
     database_to_df,
 )
-from transition_compass_model.model.common.io_database import (
-    read_database_to_ots_fts_dict,
-    read_database_to_ots_fts_dict_w_groups,
-    read_database_to_dm,
-)
-from transition_compass_model.model.common.interface_class import Interface
-from transition_compass_model.model.common.auxiliary_functions import (
-    compute_stock,
-    filter_geoscale,
-    calibration_rates,
-    filter_DM,
-    add_dummy_country_to_DM,
-)
-from transition_compass_model.model.common.auxiliary_functions import read_level_data, simulate_input
-from scipy.optimize import linprog
-import pickle
 
 
 # Ensure structure coherence
@@ -76,7 +62,6 @@ def diet_processing(list_countries, file):
     try:
         df_diet = pd.read_csv(file)
     except OSError:
-
         # FOOD BALANCE SHEETS (FBS) - -------------------------------------------------
         # List of elements
         list_elements = ["Food"]
@@ -572,7 +557,6 @@ def self_sufficiency_processing(years_ots, list_countries, file_dict):
     try:
         df_ssr = pd.read_csv(file_dict["ssr"])
     except OSError:
-
         # FOOD BALANCE SHEETS (FBS) - For everything except molasses and cakes -------------------------------------------------
         # List of elements
         list_elements = [
@@ -3631,9 +3615,9 @@ def climate_smart_livestock_processing(
     condition = (df_producing_animals_1990_2022["Unit"] == "An") | (
         df_producing_animals_1990_2022["Unit"] == "1000 An"
     )
-    df_producing_animals_1990_2022.loc[
-        condition, "Value"
-    ] *= df_producing_animals_1990_2022["lsu"]
+    df_producing_animals_1990_2022.loc[condition, "Value"] *= (
+        df_producing_animals_1990_2022["lsu"]
+    )
 
     # Aggregating
     grouped_df = df_producing_animals_1990_2022.groupby(
@@ -6310,7 +6294,9 @@ def livestock_crop_calibration(df_energy_demand_cal, list_countries):
     df_kcal_t = df_kcal_t[["Item", "kcal per t"]]
     # Merge
     merged_df = pd.merge(
-        df_kcal_t, pivot_df_domestic_supply, on=["Item"]  # Only keep the needed columns
+        df_kcal_t,
+        pivot_df_domestic_supply,
+        on=["Item"],  # Only keep the needed columns
     )
     # Operation
     merged_df["Production [kcal]"] = (
@@ -8094,7 +8080,10 @@ def fxa_preprocessing():
 
     # Extract fxa list we need for Agriculture & Land Use
     df_ref = pd.read_excel(
-        os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../agriculture_land-use_references.xlsx"),
+        os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "../../agriculture_land-use_references.xlsx",
+        ),
         sheet_name="references_agriculture",
     )
     df_ref_fxa = df_ref[df_ref["level"] == "fxa"].copy()
@@ -8496,9 +8485,9 @@ def database_from_csv_to_datamatrix(
     dm_cal_n = dm_cal.filter_w_regex(
         {"Variables": "cal_agr_crop_emission_N2O-emission_fertilizer.*"}
     )
-    DM_agriculture_old["fxa"][
-        "cal_agr_crop_emission_N2O-emission_fertilizer"
-    ] = dm_cal_n
+    DM_agriculture_old["fxa"]["cal_agr_crop_emission_N2O-emission_fertilizer"] = (
+        dm_cal_n
+    )
 
     # Data - Fixed assumptions - Calibration factors - Energy demand for agricultural land
     dm_cal_energy_demand = dm_cal.filter_w_regex(
@@ -9262,7 +9251,7 @@ tj_to_ktoe = 0.02388458966275  # source https://www.unitjuggler.com/convertir-en
 # Source : UNFCCC Table 1.1(a)s4
 DM_agriculture["constant"]["cdm_CO2"][
     "cp_emission-factor_CO2", "bioenergy-solid-wood"
-] = (10**-6 * 72.71 / tj_to_ktoe)
+] = 10**-6 * 72.71 / tj_to_ktoe
 DM_agriculture["constant"]["cdm_CO2"]["cp_emission-factor_CO2", "gas-ff-natural"] = (
     10**-6 * 55.90 / tj_to_ktoe
 )
@@ -9271,7 +9260,7 @@ DM_agriculture["constant"]["cdm_CO2"]["cp_emission-factor_CO2", "liquid-ff-diese
 )
 DM_agriculture["constant"]["cdm_CO2"][
     "cp_emission-factor_CO2", "liquid-ff-gasoline"
-] = (10**-6 * 73.80 / tj_to_ktoe)
+] = 10**-6 * 73.80 / tj_to_ktoe
 DM_agriculture["constant"]["cdm_CO2"]["cp_emission-factor_CO2", "liquid-ff-lpg"] = (
     10**-6 * 0.0 / tj_to_ktoe
 )
@@ -9288,15 +9277,15 @@ DM_agriculture["constant"]["cdm_CO2"]["cp_emission-factor_CO2", "solid-ff-coal"]
 DM_agriculture["constant"]["cdm_cp_efficiency"][
     "cp_efficiency_liv", "abp-dairy-milk"
 ] = 0.7
-DM_agriculture["constant"]["cdm_cp_efficiency"][
-    "cp_efficiency_liv", "abp-hens-egg"
-] = 2.3
+DM_agriculture["constant"]["cdm_cp_efficiency"]["cp_efficiency_liv", "abp-hens-egg"] = (
+    2.3
+)
 DM_agriculture["constant"]["cdm_cp_efficiency"]["cp_efficiency_liv", "meat-bovine"] = 25
 
 # Source Agristat 2023 https://www.sbv-usp.ch/fr/ettiquettes/agristat
 DM_agriculture["constant"]["cdm_cp_efficiency"][
     "cp_efficiency_liv", "meat-oth-animals"
-] = (312619 / 3541)
+] = 312619 / 3541
 DM_agriculture["constant"]["cdm_cp_efficiency"]["cp_efficiency_liv", "meat-pig"] = (
     723830 / 212594
 )

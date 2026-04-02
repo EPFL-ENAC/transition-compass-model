@@ -6,32 +6,29 @@ Created on Thu May 30 15:55:39 2024
 @author: echiarot
 """
 
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from transition_compass_model.model.common.constant_data_matrix_class import ConstantDataMatrix
-from transition_compass_model.model.common.io_database import read_database_fxa, read_database_to_ots_fts_dict
-from transition_compass_model.model.common.interface_class import Interface
-from transition_compass_model.model.common.auxiliary_functions import (
-    filter_geoscale,
-    cdm_to_dm,
-    read_level_data,
-    simulate_input,
-    calibration_rates,
-    cost,
-)
-import pickle
 import json
 import os
-import numpy as np
+import pickle
 import re
 import warnings
-import time
-from scipy import interpolate
+
+import numpy as np
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    filter_geoscale,
+    simulate_input,
+)
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
+from transition_compass_model.model.common.interface_class import Interface
+from transition_compass_model.model.common.io_database import (
+    read_database_fxa,
+    read_database_to_ots_fts_dict,
+)
 
 warnings.simplefilter("ignore")
 
 
 def database_from_csv_to_datamatrix():
-
     # Read database
 
     #############################
@@ -179,7 +176,6 @@ def database_from_csv_to_datamatrix():
 
 
 def read_data(data_file, lever_setting):
-
     # load dm
     with open(data_file, "rb") as handle:
         DM_emissions = pickle.load(handle)
@@ -342,7 +338,6 @@ def sum_emissions_by_gas(DM_interface):
 
 
 def emissions_equivalent(DM_interface, DM_fxa):
-
     # TODO: note that this currently works with dms all flattened (no categories), later on after all modules are finalized we can think of making it work with categories, and avoid deepen done in variables for TPE
     # put together
     dm_ems = DM_interface["buildings"].copy()
@@ -407,7 +402,6 @@ def emissions_equivalent(DM_interface, DM_fxa):
 
 
 def variables_for_tpe(dm_ems):
-
     # # biodiversity
     # dm_tpe = dm_ems.filter_w_regex({"Variables" : ".*bdy.*"})
     # dm_tpe.deepen()
@@ -619,7 +613,6 @@ def variables_for_tpe(dm_ems):
 
 
 def simulate_buildings_to_emissions_input():
-
     dm = simulate_input(from_sector="buildings", to_sector="emissions")
     dm.rename_col(
         "bld_residential-emissions-CO2_non_appliances",
@@ -650,14 +643,12 @@ def simulate_buildings_to_emissions_input():
 
 
 def simulate_district_heating_to_emissions_input():
-
     dm = simulate_input(from_sector="district-heating", to_sector="emissions")
 
     return dm
 
 
 def simulate_power_to_emissions_input():
-
     dm = simulate_input(from_sector="power", to_sector="emissions")
 
     # drop variables that are already aggregated
@@ -684,14 +675,12 @@ def simulate_power_to_emissions_input():
 
 
 def simulate_refinery_to_emissions_input():
-
     dm = simulate_input(from_sector="refinery", to_sector="emissions")
 
     return dm
 
 
 def simulate_agriculture_to_emissions_input():
-
     dm = simulate_input(from_sector="agriculture", to_sector="emissions")
     # import pprint
     # dm.sort("Variables")
@@ -701,7 +690,6 @@ def simulate_agriculture_to_emissions_input():
 
 
 def simulate_land_use_to_emissions_input():
-
     dm = simulate_input(from_sector="land-use", to_sector="emissions")
     dm = dm.filter(
         {
@@ -722,35 +710,30 @@ def simulate_land_use_to_emissions_input():
 
 
 def simulate_biodiversity_to_emissions_input():
-
     dm = simulate_input(from_sector="biodiversity", to_sector="emissions")
 
     return dm
 
 
 def simulate_industry_to_emissions_input():
-
     dm = simulate_input(from_sector="industry", to_sector="emissions")
 
     return dm
 
 
 def simulate_ammonia_to_emissions_input():
-
     dm = simulate_input(from_sector="ammonia", to_sector="emissions")
 
     return dm
 
 
 def simulate_transport_to_emissions_input():
-
     dm = simulate_input(from_sector="transport", to_sector="emissions")
 
     return dm
 
 
 def emissions(lever_setting, years_setting, interface=Interface(), calibration=False):
-
     # emissions data file
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
     emissions_data_file = os.path.join(
@@ -879,7 +862,6 @@ def emissions(lever_setting, years_setting, interface=Interface(), calibration=F
 
 
 def local_emissions_run():
-
     # get years and lever setting
     years_setting = [1990, 2015, 2100, 1]
     current_file_directory = os.path.dirname(os.path.abspath(__file__))

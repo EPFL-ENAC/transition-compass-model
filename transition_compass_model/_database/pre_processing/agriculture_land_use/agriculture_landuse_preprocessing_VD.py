@@ -1,20 +1,17 @@
-import numpy as np
-
-import pandas as pd
 import os
-import re
-
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from transition_compass_model.model.common.constant_data_matrix_class import ConstantDataMatrix
-from _database.pre_processing.api_routines_CH import get_data_api_CH
-from transition_compass_model.model.common.auxiliary_functions import (
-    create_years_list,
-    linear_fitting,
-    filter_DM,
-    add_dummy_country_to_DM,
-)
-
 import pickle
+
+import numpy as np
+import pandas as pd
+from _database.pre_processing.api_routines_CH import get_data_api_CH
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    add_dummy_country_to_DM,
+    create_years_list,
+    filter_DM,
+    linear_fitting,
+)
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 
 def get_livestock_all(table_id, file, years_ots):

@@ -1,18 +1,11 @@
-from transition_compass_model.model.common.interface_class import Interface
-from transition_compass_model.model.common.auxiliary_functions import (
-    read_level_data,
-    filter_country_and_load_data_from_pickles,
-)
+import os
 
 import transition_compass_model.model.emissions.interfaces as inter
 import transition_compass_model.model.emissions.workflows as wkf
-
-import os
-import json
+from transition_compass_model.model.common.interface_class import Interface
 
 
 def emissions(years_setting, interface=Interface(), cntr_list=None, calibration=False):
-
     # get interfaces
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
     dm_transport = inter.get_interface(
@@ -52,7 +45,6 @@ def emissions(years_setting, interface=Interface(), cntr_list=None, calibration=
 
 
 def local_industry_run():
-
     # Configures initial input for model run
     # f = open('../config/lever_position.json')
     # lever_setting = json.load(f)[0]

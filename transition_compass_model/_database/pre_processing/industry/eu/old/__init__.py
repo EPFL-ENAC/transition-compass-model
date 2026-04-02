@@ -1,8 +1,6 @@
 """Preprocessing for Old."""
 
-from . import industry_preprocessing_EU
-
-from . import eol_preprocessing
+from . import eol_preprocessing, industry_preprocessing_EU
 
 __all__ = [
     "industry_preprocessing_EU",

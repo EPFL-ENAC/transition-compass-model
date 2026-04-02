@@ -1,11 +1,10 @@
-import numpy as np
+import os
 import pickle
 
+import numpy as np
 from _database.pre_processing.api_routines_CH import get_data_api_CH
+
 from transition_compass_model.model.common.data_matrix_class import DataMatrix
-
-
-import os
 
 
 def extract_number_of_buildings(table_id, file):
@@ -74,10 +73,10 @@ def compute_renovated_buildings(dm_bld, nb_buildings_renovated, VD_share, share_
         for cat in ["single-family-households", "multi-family-households"]:
             dm_bld.array[
                 idx["Switzerland"], idx[yr], idx["bld_nb-bld-renovated"], idx[cat]
-            ] = (nb_buildings_renovated[yr] * share_by_bld[cat])
+            ] = nb_buildings_renovated[yr] * share_by_bld[cat]
             dm_bld.array[
                 idx["Vaud"], idx[yr], idx["bld_nb-bld-renovated"], idx[cat]
-            ] = (nb_buildings_renovated[yr] * VD_share[yr] * share_by_bld[cat])
+            ] = nb_buildings_renovated[yr] * VD_share[yr] * share_by_bld[cat]
     return dm_bld
 
 

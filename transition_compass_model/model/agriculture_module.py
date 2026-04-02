@@ -1,20 +1,20 @@
-import pandas as pd
-
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from transition_compass_model.model.common.constant_data_matrix_class import ConstantDataMatrix
-from transition_compass_model.model.common.io_database import dm_to_database
-from transition_compass_model.model.common.interface_class import Interface
-from transition_compass_model.model.common.auxiliary_functions import calibration_rates, create_years_list
-from transition_compass_model.model.common.auxiliary_functions import (
-    read_level_data,
-    filter_country_and_load_data_from_pickles,
-)
-from transition_compass_model.model.common.config_loader import load_lever_config
-import pickle
 import os
-import numpy as np
+import pickle
 import time
 
+import numpy as np
+import pandas as pd
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    calibration_rates,
+    create_years_list,
+    filter_country_and_load_data_from_pickles,
+    read_level_data,
+)
+from transition_compass_model.model.common.config_loader import load_lever_config
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
+from transition_compass_model.model.common.interface_class import Interface
+from transition_compass_model.model.common.io_database import dm_to_database
 
 
 def init_years_lever():
@@ -31,7 +31,6 @@ def init_years_lever():
 
 # CalculationLeaf READ PICKLE
 def read_data(DM_agriculture, lever_setting):
-
     # Read fts based on lever_setting
     # FIXME error it adds ots and fts
     # DM_check = check_ots_fts_match(DM_agriculture, lever_setting)
@@ -128,7 +127,9 @@ def read_data(DM_agriculture, lever_setting):
     dm_ruminant_feed = DM_ots_fts["ruminant-feed"]
 
     # Sub-matrix for CROP
-    dm_food_net_import_crop = DM_ots_fts["food-net-import"].filter_w_regex(
+    dm_food_net_import_crop = DM_ots_fts[
+        "food-net-import"
+    ].filter_w_regex(
         {"Categories1": "crop-.*", "Variables": "agr_food-net-import"}
     )  # filtered here on purpose and not in the pickle (other parts of the datamatrix are used)
     dm_food_net_import_crop.rename_col_regex(str1="crop-", str2="", dim="Categories1")
@@ -383,7 +384,6 @@ def simulate_lifestyles_to_agriculture_input():
 
 
 def simulate_buildings_to_agriculture_input():
-
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
     f = os.path.join(
         current_file_directory,
@@ -820,9 +820,9 @@ def livestock_workflow(DM_livestock, CDM_const, dm_lfs_pro, years_setting):
             :, :, "fxa_agr_feed-processing-food-ratio_abp-dairy-milk"
         ]
     )
-    DM_livestock["losses"][
-        :, :, "agr_domestic_production", "abp-dairy-milk"
-    ] = array_temp
+    DM_livestock["losses"][:, :, "agr_domestic_production", "abp-dairy-milk"] = (
+        array_temp
+    )
 
     # Livestock domestic prod with losses [kcal] = livestock domestic prod [kcal] * Production losses livestock [%]
     DM_livestock["losses"].operation(
@@ -1369,9 +1369,9 @@ def bioenergy_workflow(DM_bioenergy, CDM_const, DM_ind, dm_bld, dm_tra):
         ]
     )
 
-    dm_biogas = DM_ind[
-        "natfibers"
-    ].copy()  # FIXME backup I do not know how to create a blanck dm with Country & Years
+    dm_biogas = (
+        DM_ind["natfibers"].copy()
+    )  # FIXME backup I do not know how to create a blanck dm with Country & Years
     dm_biogas.add(
         dm_bio_gas_demand,
         dim="Variables",
@@ -1448,9 +1448,9 @@ def bioenergy_workflow(DM_bioenergy, CDM_const, DM_ind, dm_bld, dm_tra):
         ]
     )
 
-    dm_solid = DM_ind[
-        "natfibers"
-    ].copy()  # FIXME backup I do not know how to create a blanck dm with Country & Years
+    dm_solid = (
+        DM_ind["natfibers"].copy()
+    )  # FIXME backup I do not know how to create a blanck dm with Country & Years
     dm_solid.add(
         dm_solid_demand,
         dim="Variables",
@@ -3530,9 +3530,7 @@ def agriculture_emissions_interface(
     write_xls=False,
     write_pickle=False,
 ):
-
     def agg_zeroes_for_missing_gases(dm):
-
         gases = ["CH4", "CO2", "N2O"]
         gases_current = dm.col_labels["Categories1"]
         gases_missing = np.array(gases)[

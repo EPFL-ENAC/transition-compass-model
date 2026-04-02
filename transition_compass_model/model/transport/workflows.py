@@ -1,7 +1,8 @@
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
 import numpy as np
+
 import transition_compass_model.model.transport.utils as utils
 from transition_compass_model.model.common.auxiliary_functions import compute_stock
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 
 def passenger_fleet_energy(DM_passenger, dm_lfs, DM_other, cdm_const, years_setting):
@@ -153,18 +154,18 @@ def passenger_fleet_energy(DM_passenger, dm_lfs, DM_other, cdm_const, years_sett
         ],
     )
 
-    dm_energy[
-        :, :, "tra_passenger_energy-demand", "aviation", "kerosenebio"
-    ] -= overcapacity_biofuel_aviation
+    dm_energy[:, :, "tra_passenger_energy-demand", "aviation", "kerosenebio"] -= (
+        overcapacity_biofuel_aviation
+    )
     overcapacity_efuel_aviation = np.maximum(
         0,
         dm_energy[:, :, "tra_passenger_energy-demand", "aviation", "keroseneefuel"]
         - dm_avail_fuel[:, :, "tra_passenger_available-fuel-mix", "efuel", "aviation"],
     )
 
-    dm_energy[
-        :, :, "tra_passenger_energy-demand", "aviation", "keroseneefuel"
-    ] -= overcapacity_efuel_aviation
+    dm_energy[:, :, "tra_passenger_energy-demand", "aviation", "keroseneefuel"] -= (
+        overcapacity_efuel_aviation
+    )
     dm_energy[:, :, "tra_passenger_energy-demand", "aviation", "kerosene"] += (
         overcapacity_efuel_aviation + overcapacity_biofuel_aviation
     )
@@ -848,7 +849,6 @@ def freight_fleet_energy(DM_freight, DM_other, cdm_const, years_setting):
 
 # !FIXME: infrastructure dummy not OK, find real tot infrastructure data and real renewal-rates or new-infrastructure
 def dummy_tra_infrastructure_workflow(dm_pop):
-
     # Industry and Minerals need the new infrastructure in km for rails, roads, and trolley-cables
     # In order to compute the new infrastructure we need the tot infrastructure and a renewal-rate
     # tot_infrastructure = Looking at Swiss data it looks like there are around 10 m of road per capita

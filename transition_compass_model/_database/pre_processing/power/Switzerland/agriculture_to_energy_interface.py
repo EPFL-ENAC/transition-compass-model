@@ -1,18 +1,17 @@
-import numpy as np
 import os
 import pickle
+
+import numpy as np
+from industry_to_energy_interface import (
+    extract_employees_per_sector_canton,
+    extract_national_energy_demand,
+)
 
 from transition_compass_model.model.common.auxiliary_functions import (
     create_years_list,
     linear_fitting,
     rename_cantons,
     sort_pickle,
-    dm_add_missing_variables,
-)
-from industry_to_energy_interface import (
-    extract_national_energy_demand,
-    extract_employees_per_sector_canton,
-    map_national_energy_demand_by_sector_to_cantons,
 )
 
 ######################################

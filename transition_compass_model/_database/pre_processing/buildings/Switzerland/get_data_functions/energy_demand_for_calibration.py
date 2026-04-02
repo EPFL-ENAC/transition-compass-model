@@ -1,8 +1,10 @@
 import os
-import requests
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
+
 import pandas as pd
+import requests
 from _database.pre_processing.buildings.Switzerland.get_data_functions import utils
+
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 
 def extract_energy_statistics_data(

@@ -1,15 +1,18 @@
-import deepl
-import pandas as pd
-import requests
 import os
 import pickle
-import zipfile
-import io
-from transition_compass_model.model.common.io_database import database_to_dm
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from transition_compass_model.model.common.auxiliary_functions import create_years_list, my_pickle_dump
+
+import deepl
 import numpy as np
+import pandas as pd
+import requests
 from openpyxl import load_workbook
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    create_years_list,
+    my_pickle_dump,
+)
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
+from transition_compass_model.model.common.io_database import database_to_dm
 
 # Initialize the Deepl Translator
 deepl_api_key = "9ecffb3f-5386-4254-a099-8bfc47167661:fx"
@@ -627,7 +630,6 @@ def extract_old_hydro_capacity_zip(url_dict):
 
     dm_all = None
     for yr in url_dict.keys():
-
         df = pd.read_excel(url_dict[yr]["local_filename"])
         dm = extract_hydro_capacity_at_year(df, yr)
 
@@ -666,9 +668,9 @@ def extract_nuclear_capacity_data(reactor_list, dm_capacity):
         startyr = max(dm.col_labels["Years"][0], properties["StartYr"])
         endyr = min(dm.col_labels["Years"][-1], properties["EndYr"])
         for yr in range(startyr, endyr + 1):
-            dm.array[
-                idx[cntr], idx[yr], idx["pow_capacity-Pmax"], idx["Nuclear"]
-            ] += properties["Pmax"]
+            dm.array[idx[cntr], idx[yr], idx["pow_capacity-Pmax"], idx["Nuclear"]] += (
+                properties["Pmax"]
+            )
     dm.array[idx["Switzerland"], ...] = np.nansum(dm.array, axis=0)
     return dm
 
@@ -792,9 +794,9 @@ def extract_oil_gas_capacity_data(local_filename):
             if StartYr <= yr and yr <= EndYr:
                 cntr = df.iloc[row]["Canton"]
                 cat = df.iloc[row]["Type"]
-                dm.array[
-                    idx[cntr], idx[yr], idx["pow_capacity-Pmax"], idx[cat]
-                ] += df.iloc[row]["Pmax"]
+                dm.array[idx[cntr], idx[yr], idx["pow_capacity-Pmax"], idx[cat]] += (
+                    df.iloc[row]["Pmax"]
+                )
     dm_CH = dm.groupby({"Switzerland": ".*"}, dim="Country", regex=True, inplace=False)
     dm.append(dm_CH, dim="Country")
     return dm

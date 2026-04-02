@@ -1,6 +1,7 @@
-from transition_compass_model.model.common.auxiliary_functions import save_url_to_file
-from _database.pre_processing.transport.Switzerland.get_data_functions import utils
 import pandas as pd
+from _database.pre_processing.transport.Switzerland.get_data_functions import utils
+
+from transition_compass_model.model.common.auxiliary_functions import save_url_to_file
 
 
 def get_pkm_cap_aviation(file_url, local_filename):

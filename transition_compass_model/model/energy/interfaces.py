@@ -1,7 +1,9 @@
 import numpy as np
 import pyomo.environ as pyo
 
-from transition_compass_model.model.common.auxiliary_functions import dm_add_missing_variables
+from transition_compass_model.model.common.auxiliary_functions import (
+    dm_add_missing_variables,
+)
 
 
 def extract_transport_demand(DM_tra):
@@ -859,7 +861,6 @@ def impose_industry_demand_pyomo(m, endyr, share_of_pop, DM_ind, DM_agr, cntr):
 
 
 def prepare_TPE_output(dm_prod_cap_cntr, dm_demand):
-
     dm_out = dm_prod_cap_cntr.filter({"Variables": ["pow_production", "pow_capacity"]})
     dm_out.groupby({"Gas": ["GasCC", "GasCC-Syn", "GasSC"]}, dim="Categories1")
     if "Vaud" in dm_demand.col_labels["Country"]:

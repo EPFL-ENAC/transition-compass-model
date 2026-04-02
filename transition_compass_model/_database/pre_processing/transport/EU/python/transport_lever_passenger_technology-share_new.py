@@ -1,10 +1,12 @@
 # packages
-from transition_compass_model.model.common.auxiliary_functions import linear_fitting
-import pickle
 import os
-import numpy as np
+import pickle
 import warnings
+
+import numpy as np
 import pandas as pd
+
+from transition_compass_model.model.common.auxiliary_functions import linear_fitting
 
 # from _database.pre_processing.api_routine_Eurostat import get_data_api_eurostat
 warnings.simplefilter("ignore")

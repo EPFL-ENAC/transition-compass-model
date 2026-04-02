@@ -64,3 +64,7 @@ known-first-party = ["transition_compass_model"]
 python_version = "3.12"
 ignore_missing_imports = true
 exclude = ["tests", "old", ".venv"]
+
+[tool.codespell]
+skip = "_database/*"
+ignore-words-list = "classe,ans,vie,variante,habitant,habitants,ot,ois,ore,tre,fo,caf,reste,mesure,calculs,categorie,formating,dowload,comute,lenght,blanck,syntetic,catpure,crate,arrray,moteur,correspondance,temporarely,substracting,fallow,exlcuded,mangement"

@@ -3,13 +3,18 @@
 ################################
 
 import os
+
 import numpy as np
 from _database.pre_processing.transport.Switzerland.get_data_functions import (
     passenger_fleet as get_data,
 )
-from transition_compass_model.model.common.auxiliary_functions import create_years_list, load_pop
 from _database.pre_processing.transport.Switzerland.processors.transport_demand_pipeline import (
     run as demand_pkm_vkm_run,
+)
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    create_years_list,
+    load_pop,
 )
 
 
@@ -253,7 +258,6 @@ def run(dm_pkm, years_ots):
 
 
 if __name__ == "__main__":
-
     country_list = ["Switzerland", "Vaud"]
     years_ots = create_years_list(1990, 2023, 1)
 

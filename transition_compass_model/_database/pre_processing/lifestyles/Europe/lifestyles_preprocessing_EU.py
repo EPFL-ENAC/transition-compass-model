@@ -1,19 +1,13 @@
-import numpy as np
 import os
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from transition_compass_model.model.common.auxiliary_functions import (
-    linear_fitting,
-    linear_forecast_BAU,
-    moving_average,
-    create_years_list,
-)
-from transition_compass_model.model.common.auxiliary_functions import eurostat_iso2_dict, my_pickle_dump
-from transition_compass_model.model.common.io_database import (
-    update_database_from_dm,
-    csv_database_reformat,
-    read_database_to_dm,
-)
+
+import numpy as np
 from _database.pre_processing.api_routine_Eurostat import get_data_api_eurostat
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    create_years_list,
+    eurostat_iso2_dict,
+    my_pickle_dump,
+)
 
 EU27_cntr_list = [
     "Austria",
@@ -250,9 +244,7 @@ def get_pop_eurostat_fts(
     dm_pop_age.sort("Country")
     factors_2024 = (
         dm_pop_age_ots[:, 2024, ...] - dm_pop_age[:, 2024, ...]
-    ) / dm_pop_age[
-        :, 2024, ...
-    ]  # get factor for 2024 to be used later
+    ) / dm_pop_age[:, 2024, ...]  # get factor for 2024 to be used later
     years_common = [2022, 2023, 2024]
     for y in years_common:
         factors = (dm_pop_age_ots[:, y, ...] - dm_pop_age[:, y, ...]) / dm_pop_age[

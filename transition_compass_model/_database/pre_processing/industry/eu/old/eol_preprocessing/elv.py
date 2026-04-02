@@ -1,9 +1,9 @@
-import pandas as pd
-import eurostat
-import pycountry
-import numpy as np
 import os
 
+import eurostat
+import numpy as np
+import pandas as pd
+import pycountry
 
 
 # Function for converting Eurostat country codes to English names using pycountry
@@ -461,9 +461,7 @@ df[
         "waste-collected[%]",
         "export[%]",
     ]
-].apply(
-    lambda x: x.clip(lower=0).fillna(0)
-)
+].apply(lambda x: x.clip(lower=0).fillna(0))
 # 1.16 Make sure no value is greater than 1
 exclude_columns = ["geoscale", "timescale"]
 df.update(

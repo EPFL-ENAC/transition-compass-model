@@ -1,6 +1,8 @@
 import os
-import pandas as pd
 import re
+
+import pandas as pd
+
 from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 

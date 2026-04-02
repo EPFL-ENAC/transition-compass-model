@@ -2,8 +2,7 @@
 
 import sys as _sys
 
-from . import _database
-from . import model
+from . import _database, model
 
 
 def _register_compat_aliases():

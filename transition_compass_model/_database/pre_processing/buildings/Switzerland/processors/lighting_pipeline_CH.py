@@ -1,15 +1,15 @@
 import os
 
+import _database.pre_processing.buildings.Switzerland.get_data_functions.lighting_CH as lt
 import numpy as np
+from src.api.routes import country_list
 
 from transition_compass_model.model.common.auxiliary_functions import (
-    save_url_to_file,
-    linear_fitting,
     create_years_list,
+    linear_fitting,
     load_pop,
+    save_url_to_file,
 )
-import _database.pre_processing.buildings.Switzerland.get_data_functions.lighting_CH as lt
-from src.api.routes import country_list
 
 
 def run(country_list, years_ots):

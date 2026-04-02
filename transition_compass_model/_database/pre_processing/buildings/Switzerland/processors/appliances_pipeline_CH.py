@@ -1,21 +1,17 @@
 import os.path
 
 import numpy as np
-
-from transition_compass_model.model.common.auxiliary_functions import (
-    linear_fitting,
-    create_years_list,
-    my_pickle_dump,
-    add_dummy_country_to_DM,
-    save_url_to_file,
-    dm_add_missing_variables,
-)
-
 from _database.pre_processing.buildings.Switzerland.get_data_functions import (
     appliances_CH as get_data,
 )
 
-from transition_compass_model.model.common.auxiliary_functions import load_pop
+from transition_compass_model.model.common.auxiliary_functions import (
+    create_years_list,
+    dm_add_missing_variables,
+    linear_fitting,
+    load_pop,
+    save_url_to_file,
+)
 
 
 def run(dm_pop, country_list, years_ots, years_fts):
@@ -291,7 +287,6 @@ def run(dm_pop, country_list, years_ots, years_fts):
 
 
 if __name__ == "__main__":
-
     years_ots = create_years_list(1990, 2023, 1)
     years_fts = create_years_list(2025, 2050, 5)
 

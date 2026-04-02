@@ -1,14 +1,15 @@
-import numpy as np
+import os
 import pickle
 
-from transition_compass_model.model.common.auxiliary_functions import (
-    my_pickle_dump,
-    create_years_list,
-    sort_pickle,
-    load_pop,
-)
+import numpy as np
 from _database.pre_processing.api_routines_CH import get_data_api_CH
-import os
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    create_years_list,
+    load_pop,
+    my_pickle_dump,
+    sort_pickle,
+)
 
 
 def extract_stock_floor_area(table_id, file):
@@ -16,7 +17,6 @@ def extract_stock_floor_area(table_id, file):
         with open(file, "rb") as handle:
             dm_floor_area = pickle.load(handle)
     except OSError:
-
         structure, title = get_data_api_CH(table_id, mode="example", language="fr")
 
         # Extract buildings floor area
@@ -332,12 +332,12 @@ def run(
         DM_buildings,
         dm_num_bld_per_size_per_type,
     )
-    DM_buildings["fts"]["building-renovation-rate"]["bld_renovation-rate"][
-        3
-    ] = dm_rr_fts_2
-    DM_buildings["fts"]["building-renovation-rate"]["bld_renovation-rate"][
-        4
-    ] = dm_rr_fts_2
+    DM_buildings["fts"]["building-renovation-rate"]["bld_renovation-rate"][3] = (
+        dm_rr_fts_2
+    )
+    DM_buildings["fts"]["building-renovation-rate"]["bld_renovation-rate"][4] = (
+        dm_rr_fts_2
+    )
 
     # renovation redistribution is also affected
 
@@ -437,9 +437,9 @@ def run(
     dm_heating_cat_fts_2.normalise("Categories3")
     dm_heating_cat_fts_2.fill_nans("Years")
     # for lever in range(lev,4+1):
-    DM_buildings["fts"]["heating-technology-fuel"]["bld_heating-technology"][
-        lev
-    ] = dm_heating_cat_fts_2.copy()
+    DM_buildings["fts"]["heating-technology-fuel"]["bld_heating-technology"][lev] = (
+        dm_heating_cat_fts_2.copy()
+    )
 
     this_dir = os.path.dirname(os.path.abspath(__file__))
     # !FIXME: use the actual values and not the calibration factor

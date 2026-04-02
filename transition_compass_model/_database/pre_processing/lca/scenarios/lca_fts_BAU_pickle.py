@@ -1,20 +1,22 @@
 import os
-import numpy as np
-import pandas as pd
 import pickle
 import warnings
 
+import numpy as np
+import pandas as pd
+
 warnings.simplefilter("ignore")
 
+from _database.pre_processing.lca.processors.lca_levers import (
+    make_aggregates_footprint,
+    make_footprint_dm,
+)
+
 from transition_compass_model.model.common.auxiliary_functions import (
-    linear_fitting,
     create_years_list,
+    linear_fitting,
     my_pickle_dump,
     sort_pickle,
-)
-from _database.pre_processing.lca.processors.lca_levers import (
-    make_footprint_dm,
-    make_aggregates_footprint,
 )
 
 
@@ -199,7 +201,6 @@ def run(DM_lca, years_fts):
 
 
 if __name__ == "__main__":
-
     # get country ots fts
     years_fts = create_years_list(2025, 2050, 5)
 

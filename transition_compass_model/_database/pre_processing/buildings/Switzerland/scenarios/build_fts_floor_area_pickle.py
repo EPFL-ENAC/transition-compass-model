@@ -1,15 +1,15 @@
-import numpy as np
 import os
+
+import numpy as np
+from src.api.routes import country_list
+
 from transition_compass_model.model.common.auxiliary_functions import (
+    create_years_list,
+    filter_country_and_load_data_from_pickles,
+    load_pop,
     my_pickle_dump,
     sort_pickle,
-    create_years_list,
-    load_pop,
-    filter_country_and_load_data_from_pickles,
 )
-import pickle
-
-from src.api.routes import country_list
 
 
 def run(DM_buildings, years_ots, years_fts):

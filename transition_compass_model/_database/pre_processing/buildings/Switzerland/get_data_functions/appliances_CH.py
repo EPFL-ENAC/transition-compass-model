@@ -1,9 +1,10 @@
+import os
+import pickle
+
+import deepl
 import numpy as np
 import pandas as pd
-import pickle
-import deepl
 import requests
-import os
 
 from transition_compass_model.model.common.auxiliary_functions import linear_fitting
 from transition_compass_model.model.common.data_matrix_class import DataMatrix

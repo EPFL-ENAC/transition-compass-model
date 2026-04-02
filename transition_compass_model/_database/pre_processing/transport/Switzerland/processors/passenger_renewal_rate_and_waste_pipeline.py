@@ -3,7 +3,6 @@
 ########################################
 
 import numpy as np
-from transition_compass_model.model.common.auxiliary_functions import dm_add_missing_variables
 
 
 def compute_renewal_rate_and_adjust(dm, var_names, max_rr):
@@ -145,13 +144,13 @@ def run(dm_private_fleet, dm_public_fleet):
     idx_cat2_public = [idx[cat] for cat in dm_public_fleet.col_labels["Categories2"]]
     dm_renewal_rate.array[
         :, :, idx["tra_passenger_renewal-rate"], idx["rail"], idx_cat2_public
-    ] = (1 / 30)
+    ] = 1 / 30
     dm_renewal_rate.array[
         :, :, idx["tra_passenger_renewal-rate"], idx["metrotram"], idx["mt"]
-    ] = (1 / 20)
+    ] = 1 / 20
     dm_renewal_rate.array[
         :, :, idx["tra_passenger_renewal-rate"], idx["bus"], idx_cat2_public
-    ] = (1 / 10)
+    ] = 1 / 10
 
     dm_public_fleet.append(
         dm_renewal_rate.filter(

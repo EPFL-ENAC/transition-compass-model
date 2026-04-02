@@ -1,7 +1,6 @@
 """Preprocessing for Climate."""
 
-from . import Europe
-from . import Switzerland
+from . import Europe, Switzerland
 
 __all__ = [
     "Europe",

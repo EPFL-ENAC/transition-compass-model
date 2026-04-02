@@ -1,8 +1,5 @@
 """Preprocessing for Python."""
 
-from . import industry_buildpickle
-from . import industry_calib_emissions
-
 # Note: industry_calib_energy-demand cannot be imported due to hyphen in filename
 # from . import industry_calib_energy-demand
 # Note: industry_calib_material-production cannot be imported due to hyphen in filename
@@ -15,7 +12,7 @@ from . import industry_calib_emissions
 # from . import industry_const_material-decomposition
 # Note: industry_const_material-switch-ratio cannot be imported due to hyphen in filename
 # from . import industry_const_material-switch-ratio
-from . import industry_fxa_costs
+from . import industry_buildpickle, industry_calib_emissions, industry_fxa_costs
 
 # Note: industry_fxa_material-production cannot be imported due to hyphen in filename
 # from . import industry_fxa_material-production

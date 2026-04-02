@@ -1,9 +1,9 @@
-import pandas as pd
-import eurostat
-import pycountry
-import numpy as np
 import os
 
+import eurostat
+import numpy as np
+import pandas as pd
+import pycountry
 
 
 # Function for converting Eurostat country codes to English names using pycountry
@@ -467,9 +467,7 @@ df[
         "export[%]",
         "littered[%]",
     ]
-].apply(
-    lambda x: x.clip(lower=0).fillna(0)
-)
+].apply(lambda x: x.clip(lower=0).fillna(0))
 # 2. Filter columns containing '%' and the 'geoscale' and 'timescale' columns
 columns_to_include = [
     col for col in df.columns if "%" in col or col in ["geoscale", "timescale"]

@@ -1,7 +1,8 @@
 # packages
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
 import pickle
 import warnings
+
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 warnings.simplefilter("ignore")
 

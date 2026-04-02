@@ -1,17 +1,16 @@
-import numpy as np
+import os
 import pickle
 
+import numpy as np
+from _database.pre_processing.api_routines_CH import get_data_api_CH
+
 from transition_compass_model.model.common.auxiliary_functions import (
+    dm_add_missing_variables,
     linear_fitting,
     my_pickle_dump,
-    add_dummy_country_to_DM,
-    dm_add_missing_variables,
     sort_pickle,
 )
-from _database.pre_processing.api_routines_CH import get_data_api_CH
 from transition_compass_model.model.common.data_matrix_class import DataMatrix
-
-import os
 
 
 def recompute_floor_area_per_capita(dm_all, dm_pop):
@@ -294,9 +293,9 @@ def run(dm_pop, DM_all, years_ots, years_fts):
     DM_buildings["ots"]["building-renovation-rate"]["bld_renovation-rate"] = dm_rr
 
     # SECTION: ots - renovation-rate -> renovation-redistribution
-    DM_buildings["ots"]["building-renovation-rate"][
-        "bld_renovation-redistribution"
-    ] = dm_renov_distr.copy()
+    DM_buildings["ots"]["building-renovation-rate"]["bld_renovation-redistribution"] = (
+        dm_renov_distr.copy()
+    )
 
     # SECTION: ots - renovation-rate -> demolition-rate
     dm_tot = dm_all.filter(
@@ -311,16 +310,16 @@ def run(dm_pop, DM_all, years_ots, years_fts):
         unit="%",
     )
     dm_demolition_rate = dm_tot.filter({"Variables": ["bld_demolition-rate"]})
-    DM_buildings["ots"]["building-renovation-rate"][
-        "bld_demolition-rate"
-    ] = dm_demolition_rate.copy()
+    DM_buildings["ots"]["building-renovation-rate"]["bld_demolition-rate"] = (
+        dm_demolition_rate.copy()
+    )
 
     # SECTION: ots - heating-technology-fuel -> bld_heating-technology
     DM_buildings["ots"]["heating-technology-fuel"] = dict()
     dm_heating_cat.sort("Categories3")
-    DM_buildings["ots"]["heating-technology-fuel"][
-        "bld_heating-technology"
-    ] = dm_heating_cat.copy()
+    DM_buildings["ots"]["heating-technology-fuel"]["bld_heating-technology"] = (
+        dm_heating_cat.copy()
+    )
 
     # SECTION: ots - heating-efficiency
     DM_buildings["ots"]["heating-efficiency"] = dm_heating_eff_cat.copy()

@@ -1,13 +1,15 @@
 # DataMatrix with shape (32, 33, 1, 16), variables ['ind_material-efficiency'] and categories1 ['aluminium', 'ammonia', 'cement', 'chem', 'copper', 'fbt', 'glass', 'lime', 'mae', 'ois', 'paper', 'steel', 'textiles', 'timber', 'tra-equip', 'wwp']
 
 # packages
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from transition_compass_model.model.common.auxiliary_functions import linear_fitting
-import pickle
 import os
+import pickle
+import warnings
+
 import numpy as np
 import pandas as pd
-import warnings
+
+from transition_compass_model.model.common.auxiliary_functions import linear_fitting
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 warnings.simplefilter("ignore")
 

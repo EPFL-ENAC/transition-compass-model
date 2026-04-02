@@ -1,4 +1,4 @@
-""" Database module."""
+"""Database module."""
 
 from . import data
 

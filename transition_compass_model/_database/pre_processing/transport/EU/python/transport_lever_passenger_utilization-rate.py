@@ -1,11 +1,13 @@
 # packages
-import pickle
 import os
-import numpy as np
+import pickle
 import warnings
+
+import numpy as np
 
 warnings.simplefilter("ignore")
 import pandas as pd
+
 from transition_compass_model.model.common.auxiliary_functions import linear_fitting
 
 # directories
@@ -89,9 +91,7 @@ for y in years_fts:
     dm_uti_level4.array[idx["EU27"], idx[y], :, :] = np.nan
 dm_uti_level4.array[idx["EU27"], idx[2050], :, idx["LDV"]] = dm_uti_level4.array[
     idx["EU27"], idx[2023], :, idx["LDV"]
-] * (
-    1 + 0.30
-)  # I do not put 900% here as it would blow all the results
+] * (1 + 0.30)  # I do not put 900% here as it would blow all the results
 dm_uti_level4.array[idx["EU27"], idx[2050], :, idx["2W"]] = dm_uti_level4.array[
     idx["EU27"], idx[2023], :, idx["2W"]
 ] * (1 + 0.15)
@@ -100,9 +100,7 @@ dm_uti_level4.array[idx["EU27"], idx[2050], :, idx["bus"]] = dm_uti_level4.array
 ] * (1 + 0.45)
 dm_uti_level4.array[idx["EU27"], idx[2050], :, idx["aviation"]] = dm_uti_level4.array[
     idx["EU27"], idx[2023], :, idx["aviation"]
-] * (
-    1 + 0.45
-)  # TODO: temporary as bus, re do this later
+] * (1 + 0.45)  # TODO: temporary as bus, re do this later
 dm_uti_level4.array[idx["EU27"], idx[2050], :, idx["rail"]] = dm_uti_level4.array[
     idx["EU27"], idx[2023], :, idx["rail"]
 ] * (1 + 0.45)

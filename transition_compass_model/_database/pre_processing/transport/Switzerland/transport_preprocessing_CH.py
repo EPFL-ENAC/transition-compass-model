@@ -1,15 +1,23 @@
+import os
+import pickle
+
 import numpy as np
 import pandas as pd
-from _database.pre_processing.api_routines_CH import get_data_api_CH
-from transition_compass_model.model.common.constant_data_matrix_class import ConstantDataMatrix
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from transition_compass_model.model.common.io_database import read_database_to_dm
-from transition_compass_model.model.common.auxiliary_functions import create_years_list, linear_fitting, add_missing_ots_years, moving_average
-from transition_compass_model.model.common.auxiliary_functions import my_pickle_dump, sort_pickle
-from _database.pre_processing.WorldBank_data_extract import get_WB_data
-import pickle
-import os
 import requests
+from _database.pre_processing.api_routines_CH import get_data_api_CH
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    add_missing_ots_years,
+    create_years_list,
+    linear_fitting,
+    moving_average,
+    my_pickle_dump,
+    sort_pickle,
+)
+from transition_compass_model.model.common.constant_data_matrix_class import (
+    ConstantDataMatrix,
+)
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 print(
     "In order for this routine to run you need to download a couple of files and save them locally in ./data/:"
@@ -2410,13 +2418,13 @@ idx = dm_renewal_rate.idx
 idx_cat2_public = [idx[cat] for cat in dm_public_fleet.col_labels["Categories2"]]
 dm_renewal_rate.array[
     :, :, idx["tra_passenger_renewal-rate"], idx["rail"], idx_cat2_public
-] = (1 / 30)
+] = 1 / 30
 dm_renewal_rate.array[
     :, :, idx["tra_passenger_renewal-rate"], idx["metrotram"], idx["mt"]
-] = (1 / 20)
+] = 1 / 20
 dm_renewal_rate.array[
     :, :, idx["tra_passenger_renewal-rate"], idx["bus"], idx_cat2_public
-] = (1 / 10)
+] = 1 / 10
 
 dm_public_fleet.append(
     dm_renewal_rate.filter(
@@ -2560,7 +2568,10 @@ dm_veh_new_eff_LDV = convert_eff_from_gCO2_km_to_MJ_km(
 )
 
 ### We should do a separate flow for aviation. from pkm/cap -> pkm -> technology share (applied to pkm) -> emissions/pkm
-data_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../data/datamatrix/transport.pickle")
+data_file = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "../../../data/datamatrix/transport.pickle",
+)
 with open(data_file, "rb") as handle:
     DM_transport = pickle.load(handle)
 

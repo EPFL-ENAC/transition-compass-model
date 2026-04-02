@@ -1,7 +1,6 @@
-from ast import Dict
+import re
 
 import numpy as np
-import re
 import pandas as pd
 import plotly.express as px
 
@@ -28,7 +27,6 @@ import plotly.express as px
 
 
 class DataMatrix:
-
     def __init__(self, col_labels=dict(), units=dict(), idx=dict(), empty=False):
         # Empty = True does not crate the arrray
         self.dim_labels = ["Country", "Years", "Variables"]  # list
@@ -60,15 +58,14 @@ class DataMatrix:
         return
 
     def __repr__(self):
-
         if len(self.col_labels) == 3:
-            return f'DataMatrix with shape {self.array.shape} and variables {self.col_labels["Variables"]}'
+            return f"DataMatrix with shape {self.array.shape} and variables {self.col_labels['Variables']}"
         if len(self.col_labels) == 4:
-            return f'DataMatrix with shape {self.array.shape}, variables {self.col_labels["Variables"]} and categories1 {self.col_labels["Categories1"]}'
+            return f"DataMatrix with shape {self.array.shape}, variables {self.col_labels['Variables']} and categories1 {self.col_labels['Categories1']}"
         if len(self.col_labels) == 5:
-            return f'DataMatrix with shape {self.array.shape}, variables {self.col_labels["Variables"]}, categories1 {self.col_labels["Categories1"]} and categories2 {self.col_labels["Categories2"]}'
+            return f"DataMatrix with shape {self.array.shape}, variables {self.col_labels['Variables']}, categories1 {self.col_labels['Categories1']} and categories2 {self.col_labels['Categories2']}"
         if len(self.col_labels) == 6:
-            return f'DataMatrix with shape {self.array.shape}, variables {self.col_labels["Variables"]}, categories1 {self.col_labels["Categories1"]}, categories2 {self.col_labels["Categories2"]} and categories3 {self.col_labels["Categories3"]}'
+            return f"DataMatrix with shape {self.array.shape}, variables {self.col_labels['Variables']}, categories1 {self.col_labels['Categories1']}, categories2 {self.col_labels['Categories2']} and categories3 {self.col_labels['Categories3']}"
 
     def read_data(self, df, num_cat):
         # Function called by the classmethod 'create_from_df' (see below)
@@ -212,7 +209,7 @@ class DataMatrix:
         # Note that df needs to have columns 'Country' and 'Years'
         # it returns a datamatrix
         if df.empty:
-            ValueError(f"You cannot create a datamatrix from an empty dataframe.")
+            ValueError("You cannot create a datamatrix from an empty dataframe.")
         dm = cls(empty=True)
         dm.extract_structure(df, num_cat)
         dm.read_data(df, num_cat)
@@ -450,7 +447,6 @@ class DataMatrix:
             )
 
     def fill_nans(self, dim_to_interp):
-
         axis_to_interp = self.dim_labels.index(dim_to_interp)
 
         def interpolate_nans(arr, x_values):
@@ -1074,7 +1070,6 @@ class DataMatrix:
         return
 
     def datamatrix_plot(self, selected_cols={}, title="title", stacked=None):
-
         if stacked is not None:
             stacked = "one"
 
@@ -1132,7 +1127,6 @@ class DataMatrix:
         return
 
     def normalise(self, dim, inplace=True, keep_original=False):
-
         # Axis over which to normalise
         a = self.dim_labels.index(dim)
         if inplace and not keep_original:

@@ -2,8 +2,7 @@
 
 # Note: OTS-FTS cannot be imported due to hyphen in filename
 # from . import OTS-FTS
-from . import TV_PV
-from . import elv
+from . import TV_PV, elv
 
 # Note: larger-appliances cannot be imported due to hyphen in filename
 # from . import larger-appliances

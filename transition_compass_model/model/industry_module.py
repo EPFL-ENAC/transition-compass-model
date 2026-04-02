@@ -1,18 +1,16 @@
-from transition_compass_model.model.common.interface_class import Interface
-from transition_compass_model.model.common.auxiliary_functions import (
-    read_level_data,
-    filter_country_and_load_data_from_pickles,
-)
+import json
+import os
 
 import transition_compass_model.model.industry.interfaces as inter
 import transition_compass_model.model.industry.workflows as wkf
-
-import os
-import json
+from transition_compass_model.model.common.auxiliary_functions import (
+    filter_country_and_load_data_from_pickles,
+    read_level_data,
+)
+from transition_compass_model.model.common.interface_class import Interface
 
 
 def read_data(DM_industry, lever_setting):
-
     # get fxa
     DM_fxa = DM_industry["fxa"]
 
@@ -32,7 +30,6 @@ def read_data(DM_industry, lever_setting):
 def industry(
     lever_setting, years_setting, DM_input, interface=Interface(), calibration=False
 ):
-
     # TODO: understand what to do with calibration and set calibration True
 
     # industry data file
@@ -84,9 +81,7 @@ def industry(
     )
 
     # do material switch (writes in DM_material_demand and DM_input_matswitchimpact)
-    DM_input_matswitchimpact = (
-        {}
-    )  # create dict to save material switch that will be used later for environmental impact
+    DM_input_matswitchimpact = {}  # create dict to save material switch that will be used later for environmental impact
     wkf.apply_material_switch(
         DM_material_demand["material-demand"],
         DM_ots_fts["material-switch"],
@@ -314,7 +309,6 @@ def industry(
 
 
 def local_industry_run():
-
     # Configures initial input for model run
     f = open("../config/lever_position.json")
     lever_setting = json.load(f)[0]

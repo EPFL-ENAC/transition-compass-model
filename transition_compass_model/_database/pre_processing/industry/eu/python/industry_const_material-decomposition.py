@@ -1,9 +1,13 @@
 # packages
-from transition_compass_model.model.common.constant_data_matrix_class import ConstantDataMatrix
-import pandas as pd
 import pickle
 import warnings
+
 import numpy as np
+import pandas as pd
+
+from transition_compass_model.model.common.constant_data_matrix_class import (
+    ConstantDataMatrix,
+)
 
 warnings.simplefilter("ignore")
 
@@ -158,19 +162,52 @@ df_check = df_agg.groupby(["variable"], as_index=False)["value"].agg(sum)
 # fix cement
 # cement is just a fraction of concrete-and-inert, I will apply an adjustment factor of 0.12 and put rest to other
 df_temp = df_agg.copy()
-df_agg.loc[df_agg["material"] == "cement","value"] = df_temp.loc[df_temp["material"] == "cement","value"] * 0.12
-df_agg.loc[df_agg["material"] == "other","value"] = df_temp.loc[df_temp["material"] == "other","value"].values + (df_temp.loc[df_temp["material"] == "cement","value"] * (1-0.12)).values
+df_agg.loc[df_agg["material"] == "cement", "value"] = (
+    df_temp.loc[df_temp["material"] == "cement", "value"] * 0.12
+)
+df_agg.loc[df_agg["material"] == "other", "value"] = (
+    df_temp.loc[df_temp["material"] == "other", "value"].values
+    + (df_temp.loc[df_temp["material"] == "cement", "value"] * (1 - 0.12)).values
+)
 
 # fix lime
 # move some mass from other to lime
-df_agg.loc[df_agg["variable"] == "floor-area-new-residential[kg/m2]",:]
-df_agg.loc[(df_agg["variable"] == "floor-area-new-residential[kg/m2]") & (df_agg["material"] == "lime"),"value"] = 10
-df_agg.loc[(df_agg["variable"] == "floor-area-new-residential[kg/m2]") & (df_agg["material"] == "other"),"value"] = \
-    df_agg.loc[(df_agg["variable"] == "floor-area-new-residential[kg/m2]") & (df_agg["material"] == "other"),"value"] - 10
-df_agg.loc[df_agg["variable"] == "floor-area-new-non-residential[kg/m2]",:]
-df_agg.loc[(df_agg["variable"] == "floor-area-new-non-residential[kg/m2]") & (df_agg["material"] == "lime"),"value"] = 10
-df_agg.loc[(df_agg["variable"] == "floor-area-new-non-residential[kg/m2]") & (df_agg["material"] == "other"),"value"] = \
-    df_agg.loc[(df_agg["variable"] == "floor-area-new-non-residential[kg/m2]") & (df_agg["material"] == "other"),"value"] - 10
+df_agg.loc[df_agg["variable"] == "floor-area-new-residential[kg/m2]", :]
+df_agg.loc[
+    (df_agg["variable"] == "floor-area-new-residential[kg/m2]")
+    & (df_agg["material"] == "lime"),
+    "value",
+] = 10
+df_agg.loc[
+    (df_agg["variable"] == "floor-area-new-residential[kg/m2]")
+    & (df_agg["material"] == "other"),
+    "value",
+] = (
+    df_agg.loc[
+        (df_agg["variable"] == "floor-area-new-residential[kg/m2]")
+        & (df_agg["material"] == "other"),
+        "value",
+    ]
+    - 10
+)
+df_agg.loc[df_agg["variable"] == "floor-area-new-non-residential[kg/m2]", :]
+df_agg.loc[
+    (df_agg["variable"] == "floor-area-new-non-residential[kg/m2]")
+    & (df_agg["material"] == "lime"),
+    "value",
+] = 10
+df_agg.loc[
+    (df_agg["variable"] == "floor-area-new-non-residential[kg/m2]")
+    & (df_agg["material"] == "other"),
+    "value",
+] = (
+    df_agg.loc[
+        (df_agg["variable"] == "floor-area-new-non-residential[kg/m2]")
+        & (df_agg["material"] == "other"),
+        "value",
+    ]
+    - 10
+)
 
 # map to products we have in the calc (by taking the mean across products)
 dict_map = {

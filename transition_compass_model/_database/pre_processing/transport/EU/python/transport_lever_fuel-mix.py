@@ -1,11 +1,16 @@
 # packages
-from transition_compass_model.model.common.auxiliary_functions import linear_fitting
-from _database.pre_processing.routine_JRC import get_jrc_data
-from transition_compass_model.model.common.auxiliary_functions import eurostat_iso2_dict, jrc_iso2_dict
-import pickle
 import os
-import numpy as np
+import pickle
 import warnings
+
+import numpy as np
+from _database.pre_processing.routine_JRC import get_jrc_data
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    eurostat_iso2_dict,
+    jrc_iso2_dict,
+    linear_fitting,
+)
 
 warnings.simplefilter("ignore")
 

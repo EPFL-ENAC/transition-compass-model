@@ -1,24 +1,19 @@
-import numpy as np
-import pandas as pd
+import math
+import os
 import pickle
 
-
-from transition_compass_model.model.common.auxiliary_functions import (
-    linear_fitting,
-    linear_fitting_ots_db,
-    create_years_list,
-    my_pickle_dump,
-)
-from transition_compass_model.model.common.io_database import update_database_from_dm, csv_database_reformat
-from _database.pre_processing.api_routines_CH import get_data_api_CH
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-
-import math
+import numpy as np
+import pandas as pd
 import requests
-
+from _database.pre_processing.api_routines_CH import get_data_api_CH
 from _database.pre_processing.WorldBank_data_extract import get_WB_data
 
-import os
+from transition_compass_model.model.common.auxiliary_functions import (
+    create_years_list,
+    linear_fitting,
+    my_pickle_dump,
+)
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 
 def create_ots_years_list(years_setting):

@@ -1,8 +1,8 @@
-from itertools import product
-import pandas as pd
-import numpy as np
 import os
+from itertools import product
 
+import numpy as np
+import pandas as pd
 
 # import
 current_file_directory = os.path.dirname(os.path.abspath(__file__))

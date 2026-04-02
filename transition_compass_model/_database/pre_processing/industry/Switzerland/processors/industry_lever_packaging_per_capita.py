@@ -1,11 +1,14 @@
-import numpy as np
 import os
 
+import numpy as np
 from _database.pre_processing.industry.Switzerland.get_data_functions.data_product_net_import import (
     get_packaging_data,
 )
-from transition_compass_model.model.common.auxiliary_functions import linear_fitting
-from transition_compass_model.model.common.auxiliary_functions import create_years_list, load_pop
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    create_years_list,
+    load_pop,
+)
 
 
 def make_dm_packaging(current_file_directory, dm_pop):
@@ -77,7 +80,6 @@ def run(dm_pop_ots):
 
 
 if __name__ == "__main__":
-
     country_list = ["Switzerland"]
     years_ots = create_years_list(1990, 2023, 1)
     years_fts = create_years_list(2025, 2050, 5)

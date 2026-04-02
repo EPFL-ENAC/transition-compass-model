@@ -1,11 +1,8 @@
 """Energy module."""
 
-from . import interfaces
-from . import utils
-
 # Note: energyscope-MILP cannot be imported due to hyphen in directory name
 # from . import energyscope-MILP
-from . import energyscopepyomo
+from . import energyscopepyomo, interfaces, utils
 
 __all__ = [
     "interfaces",

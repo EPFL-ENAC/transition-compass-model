@@ -1,18 +1,16 @@
-import os
 import json
-
-from transition_compass_model.model.common.auxiliary_functions import (
-    read_level_data,
-    filter_country_and_load_data_from_pickles,
-)
-from transition_compass_model.model.common.interface_class import Interface
+import os
 
 import transition_compass_model.model.ammonia.interfaces as inter
 import transition_compass_model.model.ammonia.workflows as wkf
+from transition_compass_model.model.common.auxiliary_functions import (
+    filter_country_and_load_data_from_pickles,
+    read_level_data,
+)
+from transition_compass_model.model.common.interface_class import Interface
 
 
 def read_data(DM_ammonia, lever_setting):
-
     # get fxa
     DM_fxa = DM_ammonia["fxa"]
 
@@ -32,7 +30,6 @@ def read_data(DM_ammonia, lever_setting):
 def ammonia(
     lever_setting, years_setting, DM_input, interface=Interface(), calibration=True
 ):
-
     # ammonia data file
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
     DM_fxa, DM_ots_fts, DM_cal, CDM_const = read_data(DM_input, lever_setting)
@@ -210,7 +207,6 @@ def ammonia(
 
 
 def local_ammonia_run():
-
     # Configures initial input for model run
     f = open("../config/lever_position.json")
     lever_setting = json.load(f)[0]

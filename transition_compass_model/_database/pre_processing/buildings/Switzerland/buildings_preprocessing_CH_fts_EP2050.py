@@ -3,19 +3,17 @@
 # -------------------------------------------------------------------------
 import copy
 import pickle
+
 import numpy as np
 import pandas as pd
+
 from transition_compass_model.model.common.auxiliary_functions import (
-    linear_fitting,
-    my_pickle_dump,
-    filter_DM,
     create_years_list,
+    filter_DM,
+    my_pickle_dump,
     sort_pickle,
 )
 from transition_compass_model.model.common.data_matrix_class import DataMatrix
-import matplotlib.pyplot as plt
-import numpy as np
-import plotly.graph_objects as go
 
 # --------------------------------------------------------------------------------
 # CONFIGURATION
@@ -229,9 +227,9 @@ dm_bld_building_mix_new_adj[
     - 0.01
 )
 dm_bld_building_mix_new_adj.fill_nans(dim_to_interp="Years")
-DM_buildings["fts"]["building-renovation-rate"]["bld_building-mix"][
-    3
-] = dm_bld_building_mix_new_adj
+DM_buildings["fts"]["building-renovation-rate"]["bld_building-mix"][3] = (
+    dm_bld_building_mix_new_adj
+)
 
 
 # --------------------------------------------------------------------------------
@@ -301,9 +299,9 @@ dm_renovation.array[0, idx[2025] : idx[2050], ...] = np.nan
 dm_renovation.array[0, idx[2030], ...] = 0.038
 dm_renovation.fill_nans("Years")
 dm_renovation.filter({"Years": years_fts}, inplace=True)
-DM_buildings["fts"]["building-renovation-rate"]["bld_renovation-rate"][
-    4
-] = dm_renovation
+DM_buildings["fts"]["building-renovation-rate"]["bld_renovation-rate"][4] = (
+    dm_renovation
+)
 # --------------------------------------------------------------------------------
 
 ### 3.3 bld_renovation_redistribution ###
@@ -327,9 +325,9 @@ dm_dem_rate["Switzerland", :, "bld_demolition-rate", :] = 0.002
 dm_dem_rate_dls = dm_dem_rate.copy()
 dm_dem_rate_dls["Switzerland", :, "bld_demolition-rate", :] = 0.00  # old value = 0
 DM_buildings["fts"]["building-renovation-rate"]["bld_demolition-rate"][3] = dm_dem_rate
-DM_buildings["fts"]["building-renovation-rate"]["bld_demolition-rate"][
-    4
-] = dm_dem_rate_dls
+DM_buildings["fts"]["building-renovation-rate"]["bld_demolition-rate"][4] = (
+    dm_dem_rate_dls
+)
 
 
 # --------------------------------------------------------------------------------

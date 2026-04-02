@@ -1,8 +1,10 @@
-import pickle
 import os
-from _database.pre_processing.api_routines_CH import get_data_api_CH
-from transition_compass_model.model.common.auxiliary_functions import create_years_list
+import pickle
+
 import numpy as np
+from _database.pre_processing.api_routines_CH import get_data_api_CH
+
+from transition_compass_model.model.common.auxiliary_functions import create_years_list
 
 
 def extract_hotwater_technologies(table_id, file):

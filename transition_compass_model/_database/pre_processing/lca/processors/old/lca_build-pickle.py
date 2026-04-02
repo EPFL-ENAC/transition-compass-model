@@ -1,12 +1,12 @@
 # packages
-from transition_compass_model.model.common.auxiliary_functions import my_pickle_dump
-import pickle
 import os
+import pickle
 
 # from _database.pre_processing.api_routine_Eurostat import get_data_api_eurostat
-
 # import plotly.express as px
 import plotly.io as pio
+
+from transition_compass_model.model.common.auxiliary_functions import my_pickle_dump
 
 # import re
 pio.renderers.default = "browser"

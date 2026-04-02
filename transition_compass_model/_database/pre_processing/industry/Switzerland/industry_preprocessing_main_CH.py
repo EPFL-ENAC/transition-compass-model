@@ -1,17 +1,21 @@
-from transition_compass_model.model.common.auxiliary_functions import create_years_list, load_pop
-from processors.industry_lever_product_net_import import run as net_import_share_run
+from processors.ammonia_levers_fxa import run as ammonia_run
+from processors.industry_calib_emissions import run as emissions_run
+from processors.industry_calib_energy_demand import run as energy_demand_run
 from processors.industry_lever_packaging_per_capita import (
     run as packaging_per_capita_run,
 )
+from processors.industry_lever_product_net_import import run as net_import_share_run
 from processors.industry_lever_waste_management import run as waste_management_run
-from processors.industry_calib_energy_demand import run as energy_demand_run
-from processors.industry_calib_emissions import run as emissions_run
-from processors.ammonia_levers_fxa import run as ammonia_run
+from processors.industry_ots_pickle import run as ots_pickle_run
 from processors.industry_pre_processing_save import (
     run as save_industry_pre_processing_run,
 )
-from processors.industry_ots_pickle import run as ots_pickle_run
 from scenarios.industry_fts_BAU_pickle import run as fts_bau_pickle_run
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    create_years_list,
+    load_pop,
+)
 
 # years
 years_ots = create_years_list(1990, 2023, 1)

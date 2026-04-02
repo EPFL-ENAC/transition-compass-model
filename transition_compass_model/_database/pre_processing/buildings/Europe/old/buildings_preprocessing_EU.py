@@ -1,13 +1,20 @@
-import pandas as pd
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
 import numpy as np
-from transition_compass_model.model.common.auxiliary_functions import linear_fitting, linear_forecast_BAU, moving_average, create_years_list
-from transition_compass_model.model.common.auxiliary_functions import eurostat_iso2_dict
-from transition_compass_model.model.common.io_database import read_database_to_dm, edit_database, update_database_from_dm
-import eurostat
-import json
+import pandas as pd
 from _database.pre_processing.api_routine_Eurostat import get_data_api_eurostat
 from scipy.optimize import minimize
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    create_years_list,
+    eurostat_iso2_dict,
+    linear_fitting,
+    linear_forecast_BAU,
+    moving_average,
+)
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
+from transition_compass_model.model.common.io_database import (
+    read_database_to_dm,
+    update_database_from_dm,
+)
 
 EU27_cntr_list = [
     "Austria",
@@ -726,9 +733,7 @@ def solve_optimisation_problem(dm_area_res, country, cat):
         )  # Normalized new residual
         residual_dem_rate = np.linalg.norm(
             computed_dem_rate - dem_rates_init[1:]
-        ) / np.linalg.norm(
-            dem_rates_init[1:]
-        )  # Normalized dem-rate residual
+        ) / np.linalg.norm(dem_rates_init[1:])  # Normalized dem-rate residual
 
         tot_residual = residual_stock + residual_new + residual_dem_rate
 

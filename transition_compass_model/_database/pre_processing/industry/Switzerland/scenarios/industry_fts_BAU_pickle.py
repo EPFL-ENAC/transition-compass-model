@@ -1,13 +1,14 @@
 import os
 import pickle
+
+import plotly.io as pio
+
 from transition_compass_model.model.common.auxiliary_functions import (
-    linear_fitting,
     create_years_list,
+    linear_fitting,
     my_pickle_dump,
     sort_pickle,
 )
-
-import plotly.io as pio
 
 pio.renderers.default = "browser"
 
@@ -114,7 +115,6 @@ def run(DM_industry, DM_ammonia, country_list, years_ots, years_fts):
 
 
 if __name__ == "__main__":
-
     # get country ots fts
     years_ots = create_years_list(1990, 2023, 1)
     years_fts = create_years_list(2025, 2050, 5)

@@ -1,12 +1,17 @@
 # packages
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from transition_compass_model.model.common.auxiliary_functions import linear_fitting, eurostat_iso2_dict, jrc_iso2_dict
-from _database.pre_processing.api_routine_Eurostat import get_data_api_eurostat
-from _database.pre_processing.routine_JRC import get_jrc_data
-import pickle
 import os
-import numpy as np
+import pickle
 import warnings
+
+import numpy as np
+from _database.pre_processing.routine_JRC import get_jrc_data
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    eurostat_iso2_dict,
+    jrc_iso2_dict,
+    linear_fitting,
+)
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 # from _database.pre_processing.api_routine_Eurostat import get_data_api_eurostat
 warnings.simplefilter("ignore")

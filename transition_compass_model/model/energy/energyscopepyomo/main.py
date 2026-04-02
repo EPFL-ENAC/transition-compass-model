@@ -1,10 +1,10 @@
 from .ses_pyomo import (
-    load_data,
-    build_model,
-    make_highs,
     attach,
-    solve,
+    build_model,
     extract_results,
+    load_data,
+    make_highs,
+    solve,
 )
 
 data = load_data("ses_main.json")

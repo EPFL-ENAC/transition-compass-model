@@ -1,15 +1,18 @@
 # packages
-from ....model.common.data_matrix_class import DataMatrix
-import pandas as pd
-import pickle
 import os
-import numpy as np
+import pickle
 import warnings
+
+import numpy as np
+import pandas as pd
+
+from ....model.common.data_matrix_class import DataMatrix
 
 # from _database.pre_processing.api_routine_Eurostat import get_data_api_eurostat
 warnings.simplefilter("ignore")
-import plotly.io as pio
 import re
+
+import plotly.io as pio
 
 pio.renderers.default = "browser"
 
@@ -21,7 +24,6 @@ current_file_directory = os.path.dirname(os.path.abspath(__file__))
 
 # def simulate input
 def simulate_input(from_sector, to_sector, num_cat=0):
-
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
 
     # get file

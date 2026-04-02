@@ -5,6 +5,7 @@
 # - Defaults to minimizing TotalGWP; you can switch to "cost".
 
 import json
+
 import pyomo.environ as pyo
 from pyomo.contrib.appsi.solvers import Highs
 
@@ -329,8 +330,10 @@ def build_model(data, objective="gwp"):
     # Annuity factor
     m.tau = pyo.Expression(
         m.TECHNOLOGIES,
-        rule=lambda m, i: (m.i_rate * (1 + m.i_rate) ** m.lifetime[i])
-        / ((1 + m.i_rate) ** m.lifetime[i] - 1.0),
+        rule=lambda m, i: (
+            (m.i_rate * (1 + m.i_rate) ** m.lifetime[i])
+            / ((1 + m.i_rate) ** m.lifetime[i] - 1.0)
+        ),
     )
 
     # ---------- Variables ----------
@@ -473,8 +476,10 @@ def build_model(data, objective="gwp"):
     # [Eq. 1.9] Annual capacity factor
     m.capacity_factor = pyo.Constraint(
         m.TECHNOLOGIES,
-        rule=lambda m, i: sum(m.F_Mult_t[i, t] * m.t_op[t] for t in m.PERIODS)
-        <= m.F_Mult[i] * m.c_p[i] * m.total_time,
+        rule=lambda m, i: (
+            sum(m.F_Mult_t[i, t] * m.t_op[t] for t in m.PERIODS)
+            <= m.F_Mult[i] * m.c_p[i] * m.total_time
+        ),
     )
 
     # Linearization of Eq. 1.19
@@ -548,17 +553,25 @@ def build_model(data, objective="gwp"):
     m.layer_balance = pyo.Constraint(
         m.LAYERS,
         m.PERIODS,
-        rule=lambda m, l, t: 0
-        == (sum(m.layers_in_out[x, l] * m.F_Mult_t[x, t] for x in m.NON_STORAGE_X))
-        + (sum(m.Storage_Out[j, l, t] - m.Storage_In[j, l, t] for j in m.STORAGE_TECH))
-        - m.End_Uses[l, t],
+        rule=lambda m, l, t: (
+            0
+            == (sum(m.layers_in_out[x, l] * m.F_Mult_t[x, t] for x in m.NON_STORAGE_X))
+            + (
+                sum(
+                    m.Storage_Out[j, l, t] - m.Storage_In[j, l, t]
+                    for j in m.STORAGE_TECH
+                )
+            )
+            - m.End_Uses[l, t]
+        ),
     )
 
     # [Eq. 1.12] Resources availability
     m.resource_availability = pyo.Constraint(
         m.RESOURCES,
-        rule=lambda m, i: sum(m.F_Mult_t[i, t] * m.t_op[t] for t in m.PERIODS)
-        <= m.avail[i],
+        rule=lambda m, i: (
+            sum(m.F_Mult_t[i, t] * m.t_op[t] for t in m.PERIODS) <= m.avail[i]
+        ),
     )
 
     # [Eq. 1.15-1.16] Each storage technology can have input/output only to certain layers.
@@ -569,15 +582,17 @@ def build_model(data, objective="gwp"):
         m.STORAGE_TECH,
         m.LAYERS,
         m.PERIODS,
-        rule=lambda m, i, l, t: m.Storage_In[i, l, t] * (1 - m.storage_eff_in[i, l])
-        == 0,
+        rule=lambda m, i, l, t: (
+            m.Storage_In[i, l, t] * (1 - m.storage_eff_in[i, l]) == 0
+        ),
     )
     m.storage_layer_out = pyo.Constraint(
         m.STORAGE_TECH,
         m.LAYERS,
         m.PERIODS,
-        rule=lambda m, i, l, t: m.Storage_Out[i, l, t] * (1 - m.storage_eff_out[i, l])
-        == 0,
+        rule=lambda m, i, l, t: (
+            m.Storage_Out[i, l, t] * (1 - m.storage_eff_out[i, l]) == 0
+        ),
     )
 
     # Linearization of [Eq. 1.17]
@@ -586,29 +601,33 @@ def build_model(data, objective="gwp"):
         m.STORAGE_TECH,
         m.PERIODS,
         rule=lambda m, i, t: (
-            sum(
-                m.Storage_In[i, l, t] * m.storage_eff_in[i, l]
-                for l in m.LAYERS
-                if pyo.value(m.storage_eff_in[i, l]) > 0
+            (
+                sum(
+                    m.Storage_In[i, l, t] * m.storage_eff_in[i, l]
+                    for l in m.LAYERS
+                    if pyo.value(m.storage_eff_in[i, l]) > 0
+                )
+                * m.t_op[t]
+                / m.f_max[i]
             )
-            * m.t_op[t]
-            / m.f_max[i]
-        )
-        <= m.Y_Sto_In[i, t],
+            <= m.Y_Sto_In[i, t]
+        ),
     )
     m.storage_no_transfer_2 = pyo.Constraint(
         m.STORAGE_TECH,
         m.PERIODS,
         rule=lambda m, i, t: (
-            sum(
-                m.Storage_Out[i, l, t] / m.storage_eff_out[i, l]
-                for l in m.LAYERS
-                if pyo.value(m.storage_eff_out[i, l]) > 0
+            (
+                sum(
+                    m.Storage_Out[i, l, t] / m.storage_eff_out[i, l]
+                    for l in m.LAYERS
+                    if pyo.value(m.storage_eff_out[i, l]) > 0
+                )
+                * m.t_op[t]
+                / m.f_max[i]
             )
-            * m.t_op[t]
-            / m.f_max[i]
-        )
-        <= m.Y_Sto_Out[i, t],
+            <= m.Y_Sto_Out[i, t]
+        ),
     )
     m.storage_no_transfer_3 = pyo.Constraint(
         m.STORAGE_TECH,
@@ -639,9 +658,15 @@ def build_model(data, objective="gwp"):
     m.network_losses = pyo.Constraint(
         m.END_USES_TYPES,
         m.PERIODS,
-        rule=lambda m, i, t: m.Losses[i, t]
-        == (sum(m.layers_in_out[j, i] * m.F_Mult_t[j, t] for j in m.POS_PROVIDERS[i]))
-        * m.loss_coeff[i],
+        rule=lambda m, i, t: (
+            m.Losses[i, t]
+            == (
+                sum(
+                    m.layers_in_out[j, i] * m.F_Mult_t[j, t] for j in m.POS_PROVIDERS[i]
+                )
+            )
+            * m.loss_coeff[i]
+        ),
     )
 
     # [Eq 1.22] f_max_perc / f_min_perc per end-use type
@@ -694,15 +719,21 @@ def build_model(data, objective="gwp"):
     # [Eq. 1.25] Hydro dams can only shift production — rule-based with Skip ------   !  HERE  !
     m.hydro_dams_shift = pyo.Constraint(
         m.PERIODS,
-        rule=lambda m, t: m.Storage_In["PUMPED_HYDRO", "ELECTRICITY", t]
-        <= m.F_Mult_t["HYDRO_DAM", t] + m.F_Mult_t["NEW_HYDRO_DAM", t],
+        rule=lambda m, t: (
+            m.Storage_In["PUMPED_HYDRO", "ELECTRICITY", t]
+            <= m.F_Mult_t["HYDRO_DAM", t] + m.F_Mult_t["NEW_HYDRO_DAM", t]
+        ),
     )
 
     # [Eq. 1.26] DHN: assigning a cost to the network
     # Note that in Moret (2017), page 26, there is a ">=" sign instead of an "=". The two formulations are equivalent as long as the problem minimises cost and the DHN has a cost > 0
     m.extra_dhn = pyo.Constraint(
-        rule=lambda m: m.F_Mult["DHN"]
-        == sum(m.F_Mult[j] for j in m.TECHNOLOGIES_OF_END_USES_TYPE["HEAT_LOW_T_DHN"])
+        rule=lambda m: (
+            m.F_Mult["DHN"]
+            == sum(
+                m.F_Mult[j] for j in m.TECHNOLOGIES_OF_END_USES_TYPE["HEAT_LOW_T_DHN"]
+            )
+        )
     )
 
     # [Eq. 1.27] Calculation of max heat demand in DHN
@@ -713,19 +744,21 @@ def build_model(data, objective="gwp"):
 
     # peak_dhn
     m.peak_dhn = pyo.Constraint(
-        rule=lambda m: sum(
-            m.F_Mult[j] for j in m.TECHNOLOGIES_OF_END_USES_TYPE["HEAT_LOW_T_DHN"]
+        rule=lambda m: (
+            sum(m.F_Mult[j] for j in m.TECHNOLOGIES_OF_END_USES_TYPE["HEAT_LOW_T_DHN"])
+            >= m.peak_dhn_factor * m.Max_Heat_Demand_DHN
         )
-        >= m.peak_dhn_factor * m.Max_Heat_Demand_DHN
     )
 
     # [Eq. 1.28] 9.4 BCHF is the extra investment needed if there is a big deployment of stochastic renewables
     m.extra_grid = pyo.Constraint(
-        rule=lambda m: m.F_Mult["GRID"]
-        == 1
-        + (9400 / m.c_inv["GRID"])
-        * (m.F_Mult["WIND"] + m.F_Mult["PV"])
-        / (m.f_max["WIND"] + m.f_max["PV"])
+        rule=lambda m: (
+            m.F_Mult["GRID"]
+            == 1
+            + (9400 / m.c_inv["GRID"])
+            * (m.F_Mult["WIND"] + m.F_Mult["PV"])
+            / (m.f_max["WIND"] + m.f_max["PV"])
+        )
     )
 
     # [Eq. 1.29] Power2Gas investment cost is calculated on the max size of the two units
@@ -769,8 +802,10 @@ def build_model(data, objective="gwp"):
     # [Eq. 1.10] Total cost of each resource
     m.op_cost_calc = pyo.Constraint(
         m.RESOURCES,
-        rule=lambda m, i: m.C_op[i]
-        == sum(m.c_op[i, t] * m.F_Mult_t[i, t] * m.t_op[t] for t in m.PERIODS),
+        rule=lambda m, i: (
+            m.C_op[i]
+            == sum(m.c_op[i, t] * m.F_Mult_t[i, t] * m.t_op[t] for t in m.PERIODS)
+        ),
     )
     # [Eq. 1.1]
     m.totalcost_cal = pyo.Constraint(
@@ -786,8 +821,10 @@ def build_model(data, objective="gwp"):
     )
     m.gwp_op_calc = pyo.Constraint(
         m.RESOURCES,
-        rule=lambda m, i: m.GWP_op[i]
-        == m.gwp_op_param[i] * sum(m.t_op[t] * m.F_Mult_t[i, t] for t in m.PERIODS),
+        rule=lambda m, i: (
+            m.GWP_op[i]
+            == m.gwp_op_param[i] * sum(m.t_op[t] * m.F_Mult_t[i, t] for t in m.PERIODS)
+        ),
     )
     m.totalGWP_calc = pyo.Constraint(
         expr=m.TotalGWP
@@ -1051,8 +1088,10 @@ def build_model_structure(data):
     # Annuity factor
     m.tau = pyo.Expression(
         m.TECHNOLOGIES,
-        rule=lambda m, i: (m.i_rate * (1 + m.i_rate) ** m.lifetime[i])
-        / ((1 + m.i_rate) ** m.lifetime[i] - 1.0),
+        rule=lambda m, i: (
+            (m.i_rate * (1 + m.i_rate) ** m.lifetime[i])
+            / ((1 + m.i_rate) ** m.lifetime[i] - 1.0)
+        ),
     )
 
     # ---------- Variables ----------
@@ -1103,7 +1142,6 @@ def build_model_structure(data):
 
 
 def set_constraints(m, objective="gwp"):
-
     # Initialising derived constraints
     # 1. end_uses_input
     if not hasattr(m, "end_uses_input"):
@@ -1231,8 +1269,10 @@ def set_constraints(m, objective="gwp"):
     # [Eq. 1.9] Annual capacity factor
     m.capacity_factor = pyo.Constraint(
         m.TECHNOLOGIES,
-        rule=lambda m, i: sum(m.F_Mult_t[i, t] * m.t_op[t] for t in m.PERIODS)
-        <= m.F_Mult[i] * m.c_p[i] * m.total_time,
+        rule=lambda m, i: (
+            sum(m.F_Mult_t[i, t] * m.t_op[t] for t in m.PERIODS)
+            <= m.F_Mult[i] * m.c_p[i] * m.total_time
+        ),
     )
 
     # Linearization of Eq. 1.19
@@ -1306,17 +1346,25 @@ def set_constraints(m, objective="gwp"):
     m.layer_balance = pyo.Constraint(
         m.LAYERS,
         m.PERIODS,
-        rule=lambda m, l, t: 0
-        == (sum(m.layers_in_out[x, l] * m.F_Mult_t[x, t] for x in m.NON_STORAGE_X))
-        + (sum(m.Storage_Out[j, l, t] - m.Storage_In[j, l, t] for j in m.STORAGE_TECH))
-        - m.End_Uses[l, t],
+        rule=lambda m, l, t: (
+            0
+            == (sum(m.layers_in_out[x, l] * m.F_Mult_t[x, t] for x in m.NON_STORAGE_X))
+            + (
+                sum(
+                    m.Storage_Out[j, l, t] - m.Storage_In[j, l, t]
+                    for j in m.STORAGE_TECH
+                )
+            )
+            - m.End_Uses[l, t]
+        ),
     )
 
     # [Eq. 1.12] Resources availability
     m.resource_availability = pyo.Constraint(
         m.RESOURCES,
-        rule=lambda m, i: sum(m.F_Mult_t[i, t] * m.t_op[t] for t in m.PERIODS)
-        <= m.avail[i],
+        rule=lambda m, i: (
+            sum(m.F_Mult_t[i, t] * m.t_op[t] for t in m.PERIODS) <= m.avail[i]
+        ),
     )
 
     # [Eq. 1.15-1.16] Each storage technology can have input/output only to certain layers.
@@ -1327,15 +1375,17 @@ def set_constraints(m, objective="gwp"):
         m.STORAGE_TECH,
         m.LAYERS,
         m.PERIODS,
-        rule=lambda m, i, l, t: m.Storage_In[i, l, t] * (1 - m.storage_eff_in[i, l])
-        == 0,
+        rule=lambda m, i, l, t: (
+            m.Storage_In[i, l, t] * (1 - m.storage_eff_in[i, l]) == 0
+        ),
     )
     m.storage_layer_out = pyo.Constraint(
         m.STORAGE_TECH,
         m.LAYERS,
         m.PERIODS,
-        rule=lambda m, i, l, t: m.Storage_Out[i, l, t] * (1 - m.storage_eff_out[i, l])
-        == 0,
+        rule=lambda m, i, l, t: (
+            m.Storage_Out[i, l, t] * (1 - m.storage_eff_out[i, l]) == 0
+        ),
     )
 
     # Linearization of [Eq. 1.17]
@@ -1344,29 +1394,33 @@ def set_constraints(m, objective="gwp"):
         m.STORAGE_TECH,
         m.PERIODS,
         rule=lambda m, i, t: (
-            sum(
-                m.Storage_In[i, l, t] * m.storage_eff_in[i, l]
-                for l in m.LAYERS
-                if pyo.value(m.storage_eff_in[i, l]) > 0
+            (
+                sum(
+                    m.Storage_In[i, l, t] * m.storage_eff_in[i, l]
+                    for l in m.LAYERS
+                    if pyo.value(m.storage_eff_in[i, l]) > 0
+                )
+                * m.t_op[t]
+                / m.f_max[i]
             )
-            * m.t_op[t]
-            / m.f_max[i]
-        )
-        <= m.Y_Sto_In[i, t],
+            <= m.Y_Sto_In[i, t]
+        ),
     )
     m.storage_no_transfer_2 = pyo.Constraint(
         m.STORAGE_TECH,
         m.PERIODS,
         rule=lambda m, i, t: (
-            sum(
-                m.Storage_Out[i, l, t] / m.storage_eff_out[i, l]
-                for l in m.LAYERS
-                if pyo.value(m.storage_eff_out[i, l]) > 0
+            (
+                sum(
+                    m.Storage_Out[i, l, t] / m.storage_eff_out[i, l]
+                    for l in m.LAYERS
+                    if pyo.value(m.storage_eff_out[i, l]) > 0
+                )
+                * m.t_op[t]
+                / m.f_max[i]
             )
-            * m.t_op[t]
-            / m.f_max[i]
-        )
-        <= m.Y_Sto_Out[i, t],
+            <= m.Y_Sto_Out[i, t]
+        ),
     )
     m.storage_no_transfer_3 = pyo.Constraint(
         m.STORAGE_TECH,
@@ -1397,9 +1451,15 @@ def set_constraints(m, objective="gwp"):
     m.network_losses = pyo.Constraint(
         m.END_USES_TYPES,
         m.PERIODS,
-        rule=lambda m, i, t: m.Losses[i, t]
-        == (sum(m.layers_in_out[j, i] * m.F_Mult_t[j, t] for j in m.POS_PROVIDERS[i]))
-        * m.loss_coeff[i],
+        rule=lambda m, i, t: (
+            m.Losses[i, t]
+            == (
+                sum(
+                    m.layers_in_out[j, i] * m.F_Mult_t[j, t] for j in m.POS_PROVIDERS[i]
+                )
+            )
+            * m.loss_coeff[i]
+        ),
     )
 
     # [Eq 1.22] f_max_perc / f_min_perc per end-use type
@@ -1452,15 +1512,21 @@ def set_constraints(m, objective="gwp"):
     # [Eq. 1.25] Hydro dams can only shift production — rule-based with Skip ------   !  HERE  !
     m.hydro_dams_shift = pyo.Constraint(
         m.PERIODS,
-        rule=lambda m, t: m.Storage_In["PUMPED_HYDRO", "ELECTRICITY", t]
-        <= m.F_Mult_t["HYDRO_DAM", t] + m.F_Mult_t["NEW_HYDRO_DAM", t],
+        rule=lambda m, t: (
+            m.Storage_In["PUMPED_HYDRO", "ELECTRICITY", t]
+            <= m.F_Mult_t["HYDRO_DAM", t] + m.F_Mult_t["NEW_HYDRO_DAM", t]
+        ),
     )
 
     # [Eq. 1.26] DHN: assigning a cost to the network
     # Note that in Moret (2017), page 26, there is a ">=" sign instead of an "=". The two formulations are equivalent as long as the problem minimises cost and the DHN has a cost > 0
     m.extra_dhn = pyo.Constraint(
-        rule=lambda m: m.F_Mult["DHN"]
-        == sum(m.F_Mult[j] for j in m.TECHNOLOGIES_OF_END_USES_TYPE["HEAT_LOW_T_DHN"])
+        rule=lambda m: (
+            m.F_Mult["DHN"]
+            == sum(
+                m.F_Mult[j] for j in m.TECHNOLOGIES_OF_END_USES_TYPE["HEAT_LOW_T_DHN"]
+            )
+        )
     )
 
     # [Eq. 1.27] Calculation of max heat demand in DHN
@@ -1471,19 +1537,21 @@ def set_constraints(m, objective="gwp"):
 
     # peak_dhn
     m.peak_dhn = pyo.Constraint(
-        rule=lambda m: sum(
-            m.F_Mult[j] for j in m.TECHNOLOGIES_OF_END_USES_TYPE["HEAT_LOW_T_DHN"]
+        rule=lambda m: (
+            sum(m.F_Mult[j] for j in m.TECHNOLOGIES_OF_END_USES_TYPE["HEAT_LOW_T_DHN"])
+            >= m.peak_dhn_factor * m.Max_Heat_Demand_DHN
         )
-        >= m.peak_dhn_factor * m.Max_Heat_Demand_DHN
     )
 
     # [Eq. 1.28] 9.4 BCHF is the extra investment needed if there is a big deployment of stochastic renewables
     m.extra_grid = pyo.Constraint(
-        rule=lambda m: m.F_Mult["GRID"]
-        == 1
-        + (9400 / m.c_inv["GRID"])
-        * (m.F_Mult["WIND"] + m.F_Mult["PV"])
-        / (m.f_max["WIND"] + m.f_max["PV"])
+        rule=lambda m: (
+            m.F_Mult["GRID"]
+            == 1
+            + (9400 / m.c_inv["GRID"])
+            * (m.F_Mult["WIND"] + m.F_Mult["PV"])
+            / (m.f_max["WIND"] + m.f_max["PV"])
+        )
     )
 
     # [Eq. 1.29] Power2Gas investment cost is calculated on the max size of the two units
@@ -1527,8 +1595,10 @@ def set_constraints(m, objective="gwp"):
     # [Eq. 1.10] Total cost of each resource
     m.op_cost_calc = pyo.Constraint(
         m.RESOURCES,
-        rule=lambda m, i: m.C_op[i]
-        == sum(m.c_op[i, t] * m.F_Mult_t[i, t] * m.t_op[t] for t in m.PERIODS),
+        rule=lambda m, i: (
+            m.C_op[i]
+            == sum(m.c_op[i, t] * m.F_Mult_t[i, t] * m.t_op[t] for t in m.PERIODS)
+        ),
     )
     # [Eq. 1.1]
     m.totalcost_cal = pyo.Constraint(
@@ -1544,8 +1614,10 @@ def set_constraints(m, objective="gwp"):
     )
     m.gwp_op_calc = pyo.Constraint(
         m.RESOURCES,
-        rule=lambda m, i: m.GWP_op[i]
-        == m.gwp_op_param[i] * sum(m.t_op[t] * m.F_Mult_t[i, t] for t in m.PERIODS),
+        rule=lambda m, i: (
+            m.GWP_op[i]
+            == m.gwp_op_param[i] * sum(m.t_op[t] * m.F_Mult_t[i, t] for t in m.PERIODS)
+        ),
     )
     m.totalGWP_calc = pyo.Constraint(
         expr=m.TotalGWP

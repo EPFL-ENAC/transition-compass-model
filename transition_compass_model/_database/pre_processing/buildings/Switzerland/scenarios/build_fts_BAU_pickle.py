@@ -1,11 +1,12 @@
-import numpy as np
 import os
 
+import numpy as np
+
 from transition_compass_model.model.common.auxiliary_functions import (
-    linear_fitting,
     create_years_list,
-    my_pickle_dump,
     filter_DM,
+    linear_fitting,
+    my_pickle_dump,
     sort_pickle,
 )
 
@@ -113,9 +114,9 @@ def run(DM_buildings, country_list, years_fts):
     dm_renov_distr = DM_buildings["ots"]["building-renovation-rate"][
         "bld_renovation-redistribution"
     ].copy()
-    DM_buildings["fts"]["building-renovation-rate"][
-        "bld_renovation-redistribution"
-    ] = dict()
+    DM_buildings["fts"]["building-renovation-rate"]["bld_renovation-redistribution"] = (
+        dict()
+    )
     dm_renov_distr.add(np.nan, dim="Years", dummy=True, col_label=years_fts)
     dm_renov_distr.fill_nans(dim_to_interp="Years")
     for lev in range(4):

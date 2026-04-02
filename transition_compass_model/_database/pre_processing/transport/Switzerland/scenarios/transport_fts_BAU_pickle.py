@@ -1,11 +1,18 @@
-import numpy as np
-import os
 import copy
-from transition_compass_model.model.common.auxiliary_functions import my_pickle_dump, filter_DM, \
-  create_years_list, linear_fitting, dm_add_missing_variables, sort_pickle
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
+import os
 import pickle
+
+import numpy as np
 from _database.pre_processing.transport.Switzerland.get_data_functions import utils
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    create_years_list,
+    dm_add_missing_variables,
+    linear_fitting,
+    my_pickle_dump,
+    sort_pickle,
+)
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 
 def forecast_vkm_cap(dm_km, years_fts):

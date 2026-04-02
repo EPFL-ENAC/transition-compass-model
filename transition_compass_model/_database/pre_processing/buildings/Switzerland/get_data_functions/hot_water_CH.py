@@ -1,14 +1,13 @@
-import pickle
 import os
-import pandas as pd
+import pickle
 import zipfile
 
+import pandas as pd
 from _database.pre_processing.api_routines_CH import get_data_api_CH
+
 from transition_compass_model.model.common.auxiliary_functions import (
-    translate_text,
-    save_url_to_file,
     df_excel_to_dm,
-    linear_fitting,
+    save_url_to_file,
 )
 from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
@@ -350,7 +349,6 @@ def extract_heating_efficiencies_EP2050(file_url, zip_name, file_pickle):
             dm = pickle.load(handle)
 
     except OSError:
-
         extract_dir = os.path.splitext(zip_name)[0]  # 'data/EP2050_sectors'
         if not os.path.exists(extract_dir):
             save_url_to_file(file_url, zip_name)

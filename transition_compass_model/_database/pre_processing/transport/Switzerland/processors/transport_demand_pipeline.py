@@ -1,18 +1,19 @@
 import os
-from transition_compass_model.model.common.auxiliary_functions import (
-    create_years_list,
-    load_pop,
-    dm_add_missing_variables,
-)
+
 import numpy as np
+from _database.pre_processing.transport.Switzerland.get_data_functions import utils
 from _database.pre_processing.transport.Switzerland.get_data_functions.demand_pkm_vkm import (
     get_transport_demand_pkm,
     get_transport_demand_vkm,
     get_travel_demand_region_microrecencement,
 )
-from _database.pre_processing.transport.Switzerland.get_data_functions import utils
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    create_years_list,
+    dm_add_missing_variables,
+    load_pop,
+)
 from transition_compass_model.model.common.data_matrix_class import DataMatrix
-import pickle
 
 #################################
 #####   TRANSPORT DEMAND   ######
@@ -218,7 +219,6 @@ def run(dm_pop_ots, years_ots):
 
 
 if __name__ == "__main__":
-
     years_ots = create_years_list(1990, 2023, 1)
     dm_pop_ots = load_pop(["Switzerland", "Vaud"], years_list=years_ots)
 

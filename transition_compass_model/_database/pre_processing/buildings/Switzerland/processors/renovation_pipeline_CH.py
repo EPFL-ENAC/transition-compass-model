@@ -1,16 +1,13 @@
-from transition_compass_model.model.common.auxiliary_functions import (
-    create_years_list,
-    load_pop,
-    save_url_to_file,
-)
+import os
 
+import _database.pre_processing.buildings.Switzerland.get_data_functions.renovation_CH as renov
 from _database.pre_processing.buildings.Switzerland.get_data_functions.construction_period_param import (
     load_construction_period_param,
 )
 
-import _database.pre_processing.buildings.Switzerland.get_data_functions.renovation_CH as renov
-
-import os
+from transition_compass_model.model.common.auxiliary_functions import (
+    create_years_list,
+)
 
 
 def run(dm_stock_tot, dm_stock_cat, dm_new_cat, dm_waste_cat, years_ots):
@@ -128,7 +125,6 @@ def run(dm_stock_tot, dm_stock_cat, dm_new_cat, dm_waste_cat, years_ots):
 
 
 if __name__ == "__main__":
-
     from floor_area_pipeline_CH import run as floor_area_run
 
     years_ots = create_years_list(1990, 2023, 1)

@@ -1,11 +1,13 @@
-import numpy as np
 import os
+import pickle
+
+import numpy as np
+
 from transition_compass_model.model.common.auxiliary_functions import (
+    create_years_list,
     my_pickle_dump,
     sort_pickle,
-    create_years_list,
 )
-import pickle
 
 
 def run(DM_buildings, years_ots, years_fts):

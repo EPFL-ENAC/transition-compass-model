@@ -1,10 +1,11 @@
 import numpy as np
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
+
 from transition_compass_model.model.common.auxiliary_functions import (
     create_years_list,
     dm_add_missing_variables,
     moving_average,
 )
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 
 def compute_stock_fts(DM, years_ots, years_fts):
@@ -479,8 +480,9 @@ def bld_energy_workflow(DM_energy, dm_clm, dm_floor_area, cdm_const):
     # Energy demand
     # cooling demand x tech x efficiency (we assume the technology is the heat-pump)
     # ! FIXME add efficiency specific for cooling
-    arr = dm_floor_area[:, :, "bld_cooling", :, :] / (
-        dm_eff[:, :, "bld_heating-efficiency", np.newaxis, :, "heat-pump"]
+    arr = (
+        dm_floor_area[:, :, "bld_cooling", :, :]
+        / (dm_eff[:, :, "bld_heating-efficiency", np.newaxis, :, "heat-pump"])
     )
 
     dm_energy.add(
@@ -1189,7 +1191,7 @@ def bld_fuel_switch_workflow(DM_fuel_switch, dm_fuel_switch, baseyear):
 
     # Use these newly computed shares to project the demand_hot_water in GWh for both residential and non-residential
     idx = dm_fuel_switch.idx
-    # sum over fuel type, mantain residential & non-residential split
+    # sum over fuel type, maintain residential & non-residential split
     arr = np.nansum(
         dm_fuel_switch.array[:, :, idx["bld_hot-water-demand"], :, :], axis=-2
     )
@@ -1432,7 +1434,6 @@ def compute_emissions_per_fuel_type_from_energy(
     fuel_category: str,
     output_label="services_CO2-emissions_heating",
 ):
-
     # Filter fossil fuels
     cdm_emission = cdm_const["emissions"]
 
@@ -1462,7 +1463,6 @@ def compute_emissions_per_fuel_type_from_energy(
 def bld_hotwater_workflow(
     DM_hotwater, dm_heating, cdm_const, dm_lfs, years_ots, years_fts
 ):
-
     dm_hw_eff = DM_hotwater["efficiency"].copy()
     dm_hw_eff = compute_eff_fts_based_on_heat_eff(
         dm_heating, dm_hw_eff, years_ots, years_fts
@@ -1510,7 +1510,6 @@ def bld_hotwater_workflow(
 
 
 def bld_services_workflow(DM_services, dm_heating, cdm_const, years_ots, years_fts):
-
     dm_eff = DM_services["services_efficiencies"].copy()
     dm_eff = compute_eff_fts_based_on_heat_eff(
         dm_heating, dm_eff, years_ots, years_fts, var_name="bld_services_efficiency"

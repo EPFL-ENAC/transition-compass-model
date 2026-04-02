@@ -1,21 +1,21 @@
-import numpy as np
+import os
 import pickle
-import pandas as pd
 import zipfile
 
+import numpy as np
+import pandas as pd
+from _database.pre_processing.api_routines_CH import get_data_api_CH
+
 from transition_compass_model.model.common.auxiliary_functions import (
-    moving_average,
-    linear_fitting,
     create_years_list,
-    extrapolate_missing_years_based_on_per_capita,
-    rename_cantons,
     dm_add_missing_variables,
+    extrapolate_missing_years_based_on_per_capita,
+    linear_fitting,
+    moving_average,
+    rename_cantons,
     save_url_to_file,
 )
-from _database.pre_processing.api_routines_CH import get_data_api_CH
 from transition_compass_model.model.common.data_matrix_class import DataMatrix
-
-import os
 
 
 def compute_avg_floor_area(dm_floor_area, years_ots):
@@ -596,7 +596,6 @@ def extract_EP2050_floor_area_by_type(file_url, zip_name, file_pickle):
             dm = pickle.load(handle)
 
     except OSError:
-
         extract_dir = os.path.splitext(zip_name)[0]  # 'data/EP2050_sectors'
         if not os.path.exists(extract_dir):
             save_url_to_file(file_url, zip_name)

@@ -1,7 +1,6 @@
 """Buildings module."""
 
-from . import interfaces
-from . import workflows
+from . import interfaces, workflows
 
 __all__ = [
     "interfaces",

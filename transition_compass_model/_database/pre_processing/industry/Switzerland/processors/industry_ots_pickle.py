@@ -1,6 +1,7 @@
 # import pickle
 import os
 import pickle
+
 from transition_compass_model.model.common.auxiliary_functions import create_years_list
 
 # import numpy as np
@@ -124,7 +125,6 @@ def run(DM_input, years_ots):
 
 
 if __name__ == "__main__":
-
     # get country ots fts
     years_ots = create_years_list(1990, 2023, 1)
 

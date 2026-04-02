@@ -1,20 +1,18 @@
 # packages
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from transition_compass_model.model.common.auxiliary_functions import my_pickle_dump
-import pandas as pd
-import pickle
 import os
-import numpy as np
+import pickle
 import warnings
-import eurostat
+
+import numpy as np
+
+from transition_compass_model.model.common.auxiliary_functions import my_pickle_dump
 
 # from _database.pre_processing.api_routine_Eurostat import get_data_api_eurostat
 warnings.simplefilter("ignore")
+
 import plotly.io as pio
-import re
 
 pio.renderers.default = "browser"
-import subprocess
 
 # file
 

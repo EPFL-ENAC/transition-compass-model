@@ -1,27 +1,26 @@
-from transition_compass_model.model.transport_module import transport
-from transition_compass_model.model.lifestyles_module import lifestyles
-from transition_compass_model.model.buildings_module import buildings
+import copy
+import math
+import time
 
-from transition_compass_model.model.forestry_module import forestry
+# from model.district_heating_module import district_heating
+from transition_compass_model.model.agriculture_module import agriculture
+from transition_compass_model.model.ammonia_module import ammonia
+from transition_compass_model.model.buildings_module import buildings
+from transition_compass_model.model.climate_module import climate
 
 # from model.minerals_module import minerals
 from transition_compass_model.model.common.interface_class import Interface
-# from model.district_heating_module import district_heating
-from transition_compass_model.model.agriculture_module import agriculture
 from transition_compass_model.model.emissions_module import emissions
-from transition_compass_model.model.climate_module import climate
-
-from transition_compass_model.model.ammonia_module import ammonia
+from transition_compass_model.model.forestry_module import forestry
 from transition_compass_model.model.industry_module import industry
+
 # from model.energy_module import energy
 # from model.power_module import power
 # from model.landuse_module import land_use
 # from model.oilrefinery_module import refinery
 from transition_compass_model.model.lca_module import lca
-
-import math
-import copy
-import time
+from transition_compass_model.model.lifestyles_module import lifestyles
+from transition_compass_model.model.transport_module import transport
 
 
 def runner(lever_setting, years_setting, DM_in, sectors, logger):
@@ -103,24 +102,20 @@ def runner(lever_setting, years_setting, DM_in, sectors, logger):
         )
     if "emissions" in sectors:
         start_time = time.time()
-        TPE["emissions"] = emissions(
-            years_setting, interface
-        )
+        TPE["emissions"] = emissions(years_setting, interface)
         logger.info(
             "Execution time Emissions: {0:.3g} s".format(time.time() - start_time)
         )
     if "lca" in sectors:
         start_time = time.time()
-        TPE["lca"] = lca(lever_setting, years_setting, DM_input['lca'], interface)
-        logger.info(
-            "Execution time LCA: {0:.3g} s".format(time.time() - start_time)
-        )
+        TPE["lca"] = lca(lever_setting, years_setting, DM_input["lca"], interface)
+        logger.info("Execution time LCA: {0:.3g} s".format(time.time() - start_time))
 
     # if "energy" in sectors:
     #     start_time = time.time()
     #     TPE["energy"] = energy(lever_setting, years_setting, country_list, interface)
     #     logger.info("Execution time Energy: {0:.3g} s".format(time.time() - start_time))
-        
+
     # start_time = time.time()
     # TPE['agriculture'] = agriculture(lever_setting, years_setting, interface)
     # logger.info('Execution time Agriculture: {0:.3g} s'.format(time.time() - start_time))

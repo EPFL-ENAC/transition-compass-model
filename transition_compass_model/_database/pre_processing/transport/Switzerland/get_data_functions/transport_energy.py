@@ -1,9 +1,11 @@
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-import pickle
-from transition_compass_model.model.common.auxiliary_functions import save_url_to_file
 import os
-import pandas as pd
+import pickle
 import zipfile
+
+import pandas as pd
+
+from transition_compass_model.model.common.auxiliary_functions import save_url_to_file
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 
 def extract_EP2050_transport_energy_demand(file_url, zip_name, file_pickle):
@@ -13,7 +15,6 @@ def extract_EP2050_transport_energy_demand(file_url, zip_name, file_pickle):
             dm = pickle.load(handle)
 
     except OSError:
-
         extract_dir = os.path.splitext(zip_name)[0]  # 'data/EP2050_sectors'
         if not os.path.exists(extract_dir):
             save_url_to_file(file_url, zip_name)
@@ -104,7 +105,6 @@ def extract_EP2050_transport_energy_demand_rail(file_url, zip_name, file_pickle)
             dm = pickle.load(handle)
 
     except OSError:
-
         extract_dir = os.path.splitext(zip_name)[0]  # 'data/EP2050_sectors'
         if not os.path.exists(extract_dir):
             save_url_to_file(file_url, zip_name)

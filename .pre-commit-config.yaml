@@ -18,3 +18,4 @@ repos:
       - id: codespell
         types_or: [python, markdown]
         additional_dependencies: [tomli]
+        exclude: _database/

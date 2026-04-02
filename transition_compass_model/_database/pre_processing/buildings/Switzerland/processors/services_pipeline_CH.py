@@ -1,25 +1,20 @@
 # Non Residential aka Services
 
-import _database.pre_processing.buildings.Switzerland.get_data_functions.services_CH as fser
-from transition_compass_model.model.common.auxiliary_functions import (
-    linear_fitting,
-    create_years_list,
-    load_pop,
-    dm_add_missing_variables,
-    save_url_to_file,
-)
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
+import os
+import re
 
+import _database.pre_processing.buildings.Switzerland.get_data_functions.services_CH as fser
+import numpy as np
 from _database.pre_processing.buildings.Switzerland.processors.hot_water_pipeline_CH import (
     run as hotwater_run,
 )
-from _database.pre_processing.buildings.Switzerland.processors.heating_technology_pipeline_CH import (
-    run as heating_tech_run,
-)
 
-import numpy as np
-import re
-import os
+from transition_compass_model.model.common.auxiliary_functions import (
+    create_years_list,
+    dm_add_missing_variables,
+    linear_fitting,
+)
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 
 def rename_cantons(dm):

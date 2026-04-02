@@ -1,11 +1,13 @@
-import pandas as pd
-import numpy as np
 import os
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from transition_compass_model.model.common.auxiliary_functions import create_years_list
+
+import numpy as np
+import pandas as pd
 from _database.pre_processing.industry.Switzerland.get_data_functions.data_emissions import (
     get_emissions_data,
 )
+
+from transition_compass_model.model.common.auxiliary_functions import create_years_list
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 
 def emissions_calib(current_file_directory, years_ots, years_fts):
@@ -78,7 +80,6 @@ def run(years_ots, years_fts):
 
 
 if __name__ == "__main__":
-
     years_ots = create_years_list(1990, 2023, 1)
     years_fts = create_years_list(2025, 2050, 5)
 

@@ -1,7 +1,6 @@
 """Data module."""
 
-from . import datamatrix
-from . import interface
+from . import datamatrix, interface
 
 __all__ = [
     "datamatrix",

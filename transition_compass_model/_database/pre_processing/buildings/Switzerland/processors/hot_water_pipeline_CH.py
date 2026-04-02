@@ -1,19 +1,18 @@
 import os
 
-from transition_compass_model.model.common.auxiliary_functions import (
-    create_years_list,
-    save_url_to_file,
-    load_pop,
-    dm_add_missing_variables,
-    linear_fitting,
-)
-import numpy as np
-
 import _database.pre_processing.buildings.Switzerland.get_data_functions.hot_water_CH as hw
+import numpy as np
 from _database.pre_processing.buildings.Switzerland.get_data_functions.floor_area_CH import (
     extract_nb_of_apartments_per_building_type,
 )
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    create_years_list,
+    dm_add_missing_variables,
+    linear_fitting,
+    load_pop,
+    save_url_to_file,
+)
 
 
 def adjust_tech_mix(dm_tech_mix, dm_apt):

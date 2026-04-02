@@ -1,9 +1,9 @@
-import pandas as pd
-import eurostat
-import pycountry
-import numpy as np
 import os
 
+import eurostat
+import numpy as np
+import pandas as pd
+import pycountry
 
 
 # Function for converting Eurostat country codes to English names using pycountry
@@ -456,9 +456,7 @@ eu27_columns = [
 ]  # Where there are still 0 values
 
 for year in eu27_data["timescale"].unique():
-    for (
-        column
-    ) in (
+    for column in (
         eu27_columns
     ):  # Assuming eu27_columns includes columns that might need recalculation
         if column not in calculated_columns:
@@ -598,9 +596,7 @@ df[
         "export[%]",
         "littered[%]",
     ]
-].apply(
-    lambda x: x.clip(lower=0).fillna(0)
-)
+].apply(lambda x: x.clip(lower=0).fillna(0))
 
 # Filter columns containing '%' and the 'geoscale' and 'timescale' columns for the final output
 columns_to_include = [

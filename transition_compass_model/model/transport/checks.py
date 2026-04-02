@@ -1,6 +1,5 @@
-import pickle
-import json
 import os
+import pickle
 import warnings
 
 warnings.simplefilter("ignore")
@@ -10,7 +9,6 @@ pio.renderers.default = "browser"
 
 from transition_compass_model.model.common.auxiliary_functions import (
     difference_with_data,
-    difference_with_data_graph,
 )
 
 
@@ -22,7 +20,6 @@ def check_transport_EU(
     year_end=2021,
     years_calibration=[2019],
 ):
-
     DM = {}
 
     #################
@@ -609,7 +606,6 @@ def check_transport_CH(
     year_end=2021,
     years_calibration=[2019],
 ):
-
     DM = {}
 
     ###############

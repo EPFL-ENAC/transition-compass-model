@@ -1,8 +1,10 @@
-import pandas as pd
 import os
 import warnings
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
+
 import numpy as np
+import pandas as pd
+
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 
 def find_git_root():
@@ -324,7 +326,6 @@ def update_database_from_db_old(filename, db_new, folderpath="default"):
 def read_database_fxa(
     filename, folderpath="default", db_format=False, filter_dict=None
 ):
-
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
     if folderpath == "default":
         folderpath = os.path.join(current_file_directory, "../../_database/data/csv/")
@@ -494,7 +495,7 @@ def database_to_df(df_db, lever, level="all"):
     )
     if len(df_db) - len_init < 0:
         print(
-            f"Duplicates found, use .duplicated on dataframe to check which lines are repeated"
+            "Duplicates found, use .duplicated on dataframe to check which lines are repeated"
         )
     # Extract ots
     df_db_ots = (df_db.loc[(df_db["level"] == 0) & (df_db["lever"] == lever)]).copy()
@@ -585,7 +586,7 @@ def update_database_from_db(db_old, db_new):
 
 
 def csv_database_reformat(filename):
-    # Change format of database .csv file (drop useless colums)
+    # Change format of database .csv file (drop useless columns)
     root = find_git_root()
     folder = "_database/data/csv/"
     file = folder + filename

@@ -1,13 +1,19 @@
 # ======================  IMPORT PACKAGES & DATA  ===================================================================================================================================================
 
 import pickle
+
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-#from plot import plot_transport_variable_2
-from transition_compass_model.model.common.auxiliary_functions import linear_fitting, my_pickle_dump, create_years_list, filter_DM, add_dummy_country_to_DM, sort_pickle
-import os
 
+# from plot import plot_transport_variable_2
+from transition_compass_model.model.common.auxiliary_functions import (
+    add_dummy_country_to_DM,
+    create_years_list,
+    filter_DM,
+    linear_fitting,
+    my_pickle_dump,
+    sort_pickle,
+)
 from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 

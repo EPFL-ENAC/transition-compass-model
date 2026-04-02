@@ -1,25 +1,27 @@
-import requests
-import re
-import numpy as np
 import warnings
+
+import numpy as np
 
 warnings.simplefilter("ignore")
 import os
-import pandas as pd
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from transition_compass_model.model.common.auxiliary_functions import linear_fitting
 import pickle
+
+import pandas as pd
 import plotly.io as pio
+
+from transition_compass_model.model.common.auxiliary_functions import linear_fitting
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 pio.renderers.default = "browser"
 
 from _database.pre_processing.industry.Switzerland.get_data_functions.data_product_net_import import (
     get_import_export_chf,
+    get_io_data,
     get_price_data,
     get_price_index_data,
-    get_io_data,
 )
-from transition_compass_model.model.common.auxiliary_functions import create_years_list, load_pop
+
+from transition_compass_model.model.common.auxiliary_functions import create_years_list
 
 # you need to do material net import (%), production for sectors not considered (kt), packages (something/capita),
 # product net import (%), waste management operation (%), calibration material production (kt),
@@ -738,7 +740,6 @@ def run(years_ots, years_fts):
 
 
 if __name__ == "__main__":
-
     years_ots = create_years_list(1990, 2023, 1)
     years_fts = create_years_list(2025, 2050, 5)
 

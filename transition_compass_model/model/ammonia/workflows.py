@@ -1,11 +1,16 @@
-import numpy as np
 import re
-from transition_compass_model.model.common.auxiliary_functions import cdm_to_dm
-from transition_compass_model.model.common.auxiliary_functions import calibration_rates, cost, energy_switch
+
+import numpy as np
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    calibration_rates,
+    cdm_to_dm,
+    cost,
+    energy_switch,
+)
 
 
 def product_production(dm_agriculture, dm_import):
-
     # net import [%] is net import [unit] / demand [unit]
     # production [unit] = demand [unit] - net import [unit]
 
@@ -24,7 +29,6 @@ def product_production(dm_agriculture, dm_import):
 
 
 def apply_material_decomposition(dm_production_fert, cdm_matdec_fert):
-
     countries = dm_production_fert.col_labels["Country"]
     years = dm_production_fert.col_labels["Years"]
 
@@ -46,7 +50,6 @@ def apply_material_decomposition(dm_production_fert, cdm_matdec_fert):
 def material_production(
     dm_material_efficiency, dm_material_net_import, dm_material_demand
 ):
-
     ######################
     ##### EFFICIENCY #####
     ######################
@@ -103,7 +106,6 @@ def material_production(
 def calibration_material_production(
     DM_cal, dm_material_production_bymat, DM_material_production, years_setting
 ):
-
     # get calibration series
     dm_cal_sub = DM_cal["material-production"].copy()
     materials = dm_material_production_bymat.col_labels["Categories1"]
@@ -131,14 +133,12 @@ def calibration_material_production(
 
 
 def energy_demand(dm_material_production_bytech, CDM_const):
-
     # this is by material-technology and carrier
 
     feedstock = ["excl-feedstock", "feedstock"]
     DM_energy_demand = {}
 
     for f in feedstock:
-
         # get constants for energy demand for material production by technology
         cdm_temp = CDM_const["energy_" + f]
 
@@ -183,7 +183,6 @@ def calibration_energy_demand(
     DM_energy_demand,
     years_setting,
 ):
-
     # this is by material-technology and carrier
 
     # get calibration rates
@@ -225,7 +224,6 @@ def calibration_energy_demand(
 
 
 def technology_development(dm_technology_development, dm_energy_demand_bytechcarr):
-
     # get energy demand after technology development (tech dev improves energy efficiency)
     dm_energy_demand_bytechcarr.array = dm_energy_demand_bytechcarr.array * (
         1 - dm_technology_development.array[..., np.newaxis]
@@ -236,7 +234,6 @@ def technology_development(dm_technology_development, dm_energy_demand_bytechcar
 
 
 def apply_energy_switch(dm_energy_carrier_mix, dm_energy_demand_bytechcarr):
-
     # this is by material-technology and carrier
 
     # energy demand for electricity [TWh] = (energy demand [TWh] * electricity share) + energy demand coming from switch to electricity [TWh]
@@ -341,7 +338,6 @@ def add_specific_energy_demands(
     DM_energy_demand,
     dict_groupby,
 ):
-
     # get demand for biomaterial from feedstock
     dm_energy_demand_feedstock_bycarr = dm_energy_demand_feedstock_bytechcarr.group_all(
         "Categories1", inplace=False
@@ -431,7 +427,6 @@ def emissions(
     dm_energy_demand_exclfeedstock_bytechcarr,
     dm_material_production_bytech,
 ):
-
     # get emission factors
     cdm_temp1 = cdm_const_emission_factor_process
     cdm_temp2 = cdm_const_emission_factor
@@ -516,7 +511,6 @@ def carbon_capture(
     DM_emissions,
     dict_groupby,
 ):
-
     # get carbon capture
     dm_temp = dm_ots_fts_cc.copy()
 
@@ -624,7 +618,6 @@ def carbon_capture(
 def calibration_emissions(
     DM_cal, dm_emissions_bygas, dm_emissions_bygastech, DM_emissions, years_setting
 ):
-
     # get calibration rates
     DM_emissions["calib_rates_bygas"] = calibration_rates(
         dm=dm_emissions_bygas,
@@ -655,7 +648,6 @@ def compute_costs(
     dm_material_production_bytech,
     dm_emissions_capt_w_cc_bytech,
 ):
-
     ###############################
     ##### MATERIAL PRODUCTION #####
     ###############################

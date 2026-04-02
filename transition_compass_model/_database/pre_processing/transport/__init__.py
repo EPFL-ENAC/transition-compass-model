@@ -1,7 +1,6 @@
 """Preprocessing for Transport."""
 
-from . import EU
-from . import Switzerland
+from . import EU, Switzerland
 
 __all__ = [
     "EU",

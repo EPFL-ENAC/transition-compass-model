@@ -1,14 +1,22 @@
-
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from transition_compass_model.model.common.constant_data_matrix_class import ConstantDataMatrix
-from _database.pre_processing.api_routine_Eurostat import get_data_api_eurostat
-from transition_compass_model.model.common.auxiliary_functions import linear_fitting, moving_average, create_years_list, eurostat_iso2_dict, my_pickle_dump, cdm_to_dm
-
 import pickle
+import warnings
+
 import numpy as np
 import pandas as pd
+from _database.pre_processing.api_routine_Eurostat import get_data_api_eurostat
 
-import warnings
+from transition_compass_model.model.common.auxiliary_functions import (
+    cdm_to_dm,
+    create_years_list,
+    eurostat_iso2_dict,
+    linear_fitting,
+    moving_average,
+    my_pickle_dump,
+)
+from transition_compass_model.model.common.constant_data_matrix_class import (
+    ConstantDataMatrix,
+)
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 warnings.simplefilter("ignore")
 import plotly.io as pio
@@ -3031,7 +3039,7 @@ for cat, tint in cat_Tint.items():
     ] = tint
     dm_Tint_heat.array[
         :, :, idx["bld_Tint-heating"], idx["single-family-households"], idx[cat]
-    ] = (tint - 1)
+    ] = tint - 1
 DM_buildings["ots"]["heatcool-behaviour"] = dm_Tint_heat.filter(
     {
         "Years": years_ots,
@@ -3110,13 +3118,13 @@ for lev in range(4):
         dm_rr.filter({"Years": years_fts})
     )
 ##
-DM_buildings["ots"]["building-renovation-rate"][
-    "bld_renovation-redistribution"
-] = dm_renov_distr.copy()
+DM_buildings["ots"]["building-renovation-rate"]["bld_renovation-redistribution"] = (
+    dm_renov_distr.copy()
+)
 # FTS
-DM_buildings["fts"]["building-renovation-rate"][
-    "bld_renovation-redistribution"
-] = dict()
+DM_buildings["fts"]["building-renovation-rate"]["bld_renovation-redistribution"] = (
+    dict()
+)
 dm_renov_distr.add(np.nan, dim="Years", dummy=True, col_label=years_fts)
 dm_renov_distr.fill_nans(dim_to_interp="Years")
 for lev in range(4):
@@ -3154,9 +3162,9 @@ dm_demolition_rate.fill_nans("Years")
 dm_demolition_rate = dm_demolition_rate.filter(
     {"Categories1": ["single-family-households", "multi-family-households"]}
 )
-DM_buildings["ots"]["building-renovation-rate"][
-    "bld_demolition-rate"
-] = dm_demolition_rate.copy()
+DM_buildings["ots"]["building-renovation-rate"]["bld_demolition-rate"] = (
+    dm_demolition_rate.copy()
+)
 
 # Compute average demolition rate in the last 10 years and forecast to future
 idx = dm_demolition_rate.idx
@@ -3229,9 +3237,9 @@ dm_temp = dm_temp.filter(
     {"Categories1": ["multi-family-households", "single-family-households"]}
 )
 
-DM_buildings["ots"]["heating-technology-fuel"][
-    "bld_heating-technology"
-] = dm_temp.copy()
+DM_buildings["ots"]["heating-technology-fuel"]["bld_heating-technology"] = (
+    dm_temp.copy()
+)
 dm_temp.add(np.nan, dim="Years", dummy=True, col_label=years_fts)
 dm_temp.fill_nans("Years")
 dm_heating_cat_fts = dm_temp.filter({"Years": years_fts}, inplace=False)
@@ -3240,9 +3248,9 @@ DM_buildings["fts"]["heating-technology-fuel"] = dict()
 DM_buildings["fts"]["heating-technology-fuel"]["bld_heating-technology"] = dict()
 for lev in range(4):
     lev = lev + 1
-    DM_buildings["fts"]["heating-technology-fuel"]["bld_heating-technology"][
-        lev
-    ] = dm_heating_cat_fts
+    DM_buildings["fts"]["heating-technology-fuel"]["bld_heating-technology"][lev] = (
+        dm_heating_cat_fts
+    )
 
 dm_temp = dm_heating_cat.filter({"Categories1": ["dhw"]})
 dm_temp.group_all("Categories1")

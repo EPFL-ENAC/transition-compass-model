@@ -1,5 +1,5 @@
-from statsmodels.robust.scale import mad
 import numpy as np
+from statsmodels.robust.scale import mad
 
 
 # fix jumps
@@ -15,7 +15,6 @@ def fix_jumps(ts, mad_multiple=3, consec_do_nothing=False, consec_fill_with_nan=
     ts = ts.astype(float)
 
     if (not all(np.isnan(ts))) and (not all(ts == 0)):
-
         # drop zeroes before first non zero
         first_nonzero = np.where(ts != 0)[0][0]
         zeroes = np.where(ts == 0)[0]
@@ -40,11 +39,9 @@ def fix_jumps(ts, mad_multiple=3, consec_do_nothing=False, consec_fill_with_nan=
 
         # correct jumps with mean between before and after
         if len(jumps) > 0:
-
             # correct
             corrected_ts = ts_nonzero.copy()
             for i in range(0, len(jumps)):
-
                 # if it's the first position
                 if jumps[i] == 0:
                     if len(jumps) > 1:

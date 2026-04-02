@@ -1,14 +1,19 @@
-import pandas as pd
-
-from _database.pre_processing.api_routines_CH import get_data_api_CH
-from transition_compass_model.model.common.auxiliary_functions import create_years_list, linear_fitting, my_pickle_dump, sort_pickle
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-import pickle
 import os
-import numpy as np
+import pickle
 import re
-import requests
 import zipfile
+
+import numpy as np
+import pandas as pd
+import requests
+from _database.pre_processing.api_routines_CH import get_data_api_CH
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    create_years_list,
+    linear_fitting,
+    sort_pickle,
+)
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 
 def has_numbers(inputString):
@@ -21,7 +26,6 @@ def extract_national_energy_demand(table_id, file):
         with open(file, "rb") as handle:
             dm_energy = pickle.load(handle)
     except OSError:
-
         structure, title = get_data_api_CH(table_id, mode="example", language="fr")
 
         # Remove freight transport energy demand
@@ -118,7 +122,6 @@ def extract_employees_per_sector_canton(table_id, file):
         with open(file, "rb") as handle:
             dm_employees = pickle.load(handle)
     except OSError:
-
         structure, title = get_data_api_CH(table_id, mode="example", language="fr")
 
         filter = {
@@ -163,7 +166,6 @@ def extract_service_surface_area_by_canton(table_id, file):
         with open(file, "rb") as handle:
             dm_service_area = pickle.load(handle)
     except OSError:
-
         structure, title = get_data_api_CH(table_id, mode="example", language="fr")
 
         cantons_list = [

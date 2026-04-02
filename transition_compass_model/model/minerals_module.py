@@ -6,23 +6,27 @@ Created on Thu May  9 16:29:51 2024
 @author: echiarot
 """
 
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from transition_compass_model.model.common.constant_data_matrix_class import ConstantDataMatrix
-from transition_compass_model.model.common.io_database import read_database_fxa
-from transition_compass_model.model.common.interface_class import Interface
-from transition_compass_model.model.common.auxiliary_functions import (
-    filter_geoscale,
-    cdm_to_dm,
-    simulate_input,
-    calibration_rates,
-)
-from transition_compass_model.model.common.auxiliary_functions import material_switch, material_decomposition
-import pandas as pd
-import pickle
 import os
-import numpy as np
+import pickle
 import re
 import warnings
+
+import numpy as np
+import pandas as pd
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    calibration_rates,
+    cdm_to_dm,
+    filter_geoscale,
+    material_decomposition,
+    simulate_input,
+)
+from transition_compass_model.model.common.constant_data_matrix_class import (
+    ConstantDataMatrix,
+)
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
+from transition_compass_model.model.common.interface_class import Interface
+from transition_compass_model.model.common.io_database import read_database_fxa
 
 warnings.simplefilter("ignore")
 
@@ -46,7 +50,6 @@ def relative_reserve(minerals, dm, reserve_starting_year, mineral_type, range_ma
     output["Years"] = 2050
 
     for k in range(len(minerals)):
-
         # get names of reserves and mineral variables
         variabs_reserve = [prefix_1 + i for i in minerals]
         variabs_mineral = [prefix_2 + i for i in minerals]
@@ -515,7 +518,6 @@ def product_demand(DM_minerals, DM_buildings, DM_pow, DM_tra, CDM_const):
 
 
 def product_import(DM_ind):
-
     # get imports and rename
     dm_import = DM_ind["product-net-import"]
     dm_import.rename_col_regex(str1="_product-net-import", str2="", dim="Variables")
@@ -1021,7 +1023,6 @@ def mineral_demand_split(
     }
 
     for key in DM_temp.keys():
-
         variables = DM_temp[key].col_labels["Categories3"]
         variables_missing = np.array(minerals)[
             [i not in variables for i in minerals]
@@ -1150,7 +1151,6 @@ def mineral_demand_split(
     DM_temp = {"electr": dm_electr_cotvph_mindec, "batt": dm_electr_batt_mindec}
 
     for key in DM_temp.keys():
-
         variables = DM_temp[key].col_labels["Categories3"]
         variables_missing = np.array(minerals)[
             [i not in variables for i in minerals]
@@ -1343,7 +1343,6 @@ def mineral_demand_split(
     DM_temp = {"energy": dm_energy_tech_mindec, "batt": dm_energy_batt_mindec}
 
     for key in DM_temp.keys():
-
         variables = DM_temp[key].col_labels["Categories3"]
         variables_missing = np.array(minerals)[
             [i not in variables for i in minerals]
@@ -1425,7 +1424,6 @@ def mineral_demand_split(
     }
 
     for key in DM_mindec.keys():
-
         variables = DM_mindec[key].col_labels["Categories3"]
         variables_missing = np.array(minerals)[
             [i not in variables for i in minerals]
@@ -2365,7 +2363,6 @@ def variables_for_tpe(
 
 
 def simulate_lifestyles_to_minerals_input():
-
     dm = simulate_input(from_sector="lifestyles", to_sector="minerals")
     dm.rename_col("lfs_pop_population", "lfs_population_total", "Variables")
 
@@ -2373,7 +2370,6 @@ def simulate_lifestyles_to_minerals_input():
 
 
 def simulate_transport_to_minerals_input():
-
     dm_tra = simulate_input(from_sector="transport", to_sector="minerals")
 
     # demand for infrastructure [km]
@@ -2389,7 +2385,6 @@ def simulate_transport_to_minerals_input():
 
 
 def simulate_agriculture_to_minerals_input():
-
     dm = simulate_input(from_sector="agriculture", to_sector="minerals")
 
     return dm
@@ -2487,7 +2482,6 @@ def simulate_industry_to_minerals_input():
 
 
 def simulate_power_to_minerals_input():
-
     dm = simulate_input(from_sector="storage", to_sector="minerals")
 
     # rename
@@ -2555,7 +2549,6 @@ def simulate_power_to_minerals_input():
 
 
 def simulate_buildings_to_minerals_input():
-
     dm = simulate_input(from_sector="buildings", to_sector="minerals")
 
     dict_rename = {
@@ -2644,21 +2637,18 @@ def simulate_buildings_to_minerals_input():
 
 
 def simulate_refinery_to_minerals_input():
-
     dm = simulate_input(from_sector="refinery", to_sector="minerals")
 
     return dm
 
 
 def simulate_ccus_to_minerals_input():
-
     dm = simulate_input(from_sector="ccus", to_sector="minerals")
 
     return dm
 
 
 def minerals(interface=Interface(), calibration=False):
-
     # directories
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
     minerals_data_file = os.path.join(

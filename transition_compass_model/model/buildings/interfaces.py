@@ -1,7 +1,7 @@
 import os
-import numpy as np
 import pickle
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
+
+import numpy as np
 
 
 def bld_power_interface(dm_appliances, dm_energy, dm_fuel, dm_light_heat):
@@ -28,7 +28,6 @@ def bld_power_interface(dm_appliances, dm_energy, dm_fuel, dm_light_heat):
 
 
 def bld_emissions_interface(dm_emissions_heating, write_pickle=False):
-
     # TODO: we are missing appliances emissions
 
     dm_out = dm_emissions_heating.groupby(
@@ -103,7 +102,6 @@ def bld_emissions_interface(dm_emissions_heating, write_pickle=False):
 
 
 def bld_industry_interface(DM_floor, dm_appliances):
-
     dm_domapp = dm_appliances.filter(
         {
             "Categories1": [
@@ -203,7 +201,6 @@ def bld_agriculture_interface(dm_agriculture):
 def bld_TPE_interface(
     DM_energy, DM_area, DM_services, DM_appliances, DM_light, DM_hotwater
 ):
-
     dm_tpe = DM_energy["energy-emissions-by-class"].flattest()
     dm_tpe.append(DM_energy["energy-demand-heating"].flattest(), dim="Variables")
     dm_tpe.append(DM_energy["energy-demand-cooling"].flattest(), dim="Variables")

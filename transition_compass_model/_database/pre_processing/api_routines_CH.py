@@ -1,5 +1,6 @@
-import requests
 import numpy as np
+import requests
+
 from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 

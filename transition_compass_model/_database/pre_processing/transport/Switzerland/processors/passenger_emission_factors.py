@@ -1,8 +1,11 @@
 ################################
 ####    EMISSION FACTORS   #####
 ################################
-from transition_compass_model.model.common.constant_data_matrix_class import ConstantDataMatrix
 import numpy as np
+
+from transition_compass_model.model.common.constant_data_matrix_class import (
+    ConstantDataMatrix,
+)
 
 
 def create_emissions_factors_cdm(emis, mapping_cat):

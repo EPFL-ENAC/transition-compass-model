@@ -1,15 +1,18 @@
-import numpy as np
+import os
+import pickle
 
-from transport_demand_pipeline import run as demand_pkm_vkm_run
 from _database.pre_processing.transport.Switzerland.get_data_functions.demand_pkm_vkm import (
     extract_EP2050_transport_vkm_demand,
 )
-import os
-import pickle
-from transition_compass_model.model.common.auxiliary_functions import create_years_list, load_pop
 from passenger_fleet_pipeline import run as passenger_fleet_run
 from passenger_renewal_rate_and_waste_pipeline import (
     run as passenger_ren_rate_waste_adj_run,
+)
+from transport_demand_pipeline import run as demand_pkm_vkm_run
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    create_years_list,
+    load_pop,
 )
 
 
@@ -88,7 +91,6 @@ def run(dm_vkm, dm_LDV_fleet_stock, dm_new_LDV_fleet, years_ots):
 
 
 if __name__ == "__main__":
-
     # get years ots
     years_ots = create_years_list(1990, 2023, 1)
     country_list = ["Switzerland", "Vaud"]

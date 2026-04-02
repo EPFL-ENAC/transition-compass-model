@@ -1,7 +1,6 @@
 """Preprocessing for Minerals."""
 
-from . import eu
-from . import old
+from . import eu, old
 
 __all__ = [
     "eu",

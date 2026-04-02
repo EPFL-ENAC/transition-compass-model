@@ -1,13 +1,18 @@
-from transition_compass_model.model.common.auxiliary_functions import create_years_list, linear_fitting
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-import pandas as pd
-import numpy as np
 import os
+
+import numpy as np
+import pandas as pd
+from _database.pre_processing.transport.Switzerland.get_data_functions import utils
 from _database.pre_processing.transport.Switzerland.get_data_functions.aviation_part1 import (
     get_pkm_cap_aviation,
     get_world_pop,
 )
-from _database.pre_processing.transport.Switzerland.get_data_functions import utils
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    create_years_list,
+    linear_fitting,
+)
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 
 def compute_pkm_cap_aviation(
@@ -185,7 +190,6 @@ def run(years_ots):
 
 
 if __name__ == "__main__":
-
     years_ots = create_years_list(1990, 2023, 1)
 
     print("Running preliminary aviation pipeline")

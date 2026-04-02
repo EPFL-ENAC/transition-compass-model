@@ -1,7 +1,8 @@
 # import packages
 import os
-import warnings
 import pickle
+import warnings
+
 import numpy as np
 
 warnings.simplefilter("ignore")

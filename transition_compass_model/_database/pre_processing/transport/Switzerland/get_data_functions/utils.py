@@ -1,7 +1,11 @@
-from transition_compass_model.model.common.auxiliary_functions import linear_fitting, dm_add_missing_variables
-import pandas as pd
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
 import numpy as np
+import pandas as pd
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    dm_add_missing_variables,
+    linear_fitting,
+)
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 
 def fill_var_nans_based_on_var_curve(dm, var_nan, var_ref, keep_all_vars=False):

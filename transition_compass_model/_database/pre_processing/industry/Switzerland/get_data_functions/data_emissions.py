@@ -1,6 +1,7 @@
-import pandas as pd
 import os
+
 import numpy as np
+import pandas as pd
 
 
 def get_emissions_data(current_file_directory, ghg):

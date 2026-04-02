@@ -1,12 +1,14 @@
 # packages
-import pickle
 import os
-import numpy as np
+import pickle
 import warnings
 
+import numpy as np
+
 warnings.simplefilter("ignore")
-from transition_compass_model.model.common.auxiliary_functions import linear_fitting
 import pandas as pd
+
+from transition_compass_model.model.common.auxiliary_functions import linear_fitting
 
 # directories
 current_file_directory = os.getcwd()

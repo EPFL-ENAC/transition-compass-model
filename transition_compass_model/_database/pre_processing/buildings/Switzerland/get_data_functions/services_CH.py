@@ -1,8 +1,9 @@
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-import numpy as np
-from _database.pre_processing.api_routines_CH import get_data_api_CH
-import pickle
 import os
+import pickle
+
+from _database.pre_processing.api_routines_CH import get_data_api_CH
+
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 
 def extract_national_energy_demand(table_id, file):
@@ -10,7 +11,6 @@ def extract_national_energy_demand(table_id, file):
         with open(file, "rb") as handle:
             dm_energy = pickle.load(handle)
     except OSError:
-
         structure, title = get_data_api_CH(table_id, mode="example", language="fr")
 
         # Remove freight transport energy demand
@@ -107,7 +107,6 @@ def extract_employees_per_sector_canton(table_id, file):
         with open(file, "rb") as handle:
             dm_employees = pickle.load(handle)
     except OSError:
-
         structure, title = get_data_api_CH(table_id, mode="example", language="fr")
 
         filter = {

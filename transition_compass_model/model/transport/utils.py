@@ -1,4 +1,5 @@
 import numpy as np
+
 from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 
@@ -63,7 +64,6 @@ def evaluate_at_tmlife(dm, tmlife_arr, col_name):
 
 
 def compute_fts_tech_split(dm_mode, dm_tech, cols):
-
     rr_col = cols["renewal-rate"]
     tot_col = cols["tot"]
     waste_col = cols["waste"]
@@ -222,7 +222,6 @@ def add_biofuel_efuel(dm_energy, dm_fuel_shares, mapping_cat):
 
 
 def rename_and_group(dm_new_cat, groups, dict_end, grouped_var="tra_total-energy"):
-
     # Sum columns using the same fuel
     i = 0
     for fuel in groups:

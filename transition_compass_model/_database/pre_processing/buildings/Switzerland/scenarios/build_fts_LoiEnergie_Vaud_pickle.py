@@ -1,16 +1,15 @@
-import numpy as np
+import os
 import pickle
 
-from transition_compass_model.model.common.auxiliary_functions import (
-    my_pickle_dump,
-    create_years_list,
-    sort_pickle,
-    load_pop,
-)
+import numpy as np
 from _database.pre_processing.api_routines_CH import get_data_api_CH
 
-
-import os
+from transition_compass_model.model.common.auxiliary_functions import (
+    create_years_list,
+    load_pop,
+    my_pickle_dump,
+    sort_pickle,
+)
 
 
 def extract_stock_floor_area(table_id, file):
@@ -191,12 +190,12 @@ def run(DM_buildings, dm_pop, global_var, country_list, lev=4):
     dm_rr_fts_2 = compute_renovation_loi_energie(
         dm_stock_area, dm_num_bld, dm_stock_cat, env_cat_mfh, env_cat_sfh, DM_buildings
     )
-    DM_buildings["fts"]["building-renovation-rate"]["bld_renovation-rate"][
-        3
-    ] = dm_rr_fts_2
-    DM_buildings["fts"]["building-renovation-rate"]["bld_renovation-rate"][
-        4
-    ] = dm_rr_fts_2
+    DM_buildings["fts"]["building-renovation-rate"]["bld_renovation-rate"][3] = (
+        dm_rr_fts_2
+    )
+    DM_buildings["fts"]["building-renovation-rate"]["bld_renovation-rate"][4] = (
+        dm_rr_fts_2
+    )
 
     # Chauffage de l'eau chaude
 
@@ -250,9 +249,9 @@ def run(DM_buildings, dm_pop, global_var, country_list, lev=4):
 
     dm_heating_cat_fts_2.fill_nans("Years")
     dm_heating_cat_fts_2.normalise("Categories3")
-    DM_buildings["fts"]["heating-technology-fuel"]["bld_heating-technology"][
-        lev
-    ] = dm_heating_cat_fts_2
+    DM_buildings["fts"]["heating-technology-fuel"]["bld_heating-technology"][lev] = (
+        dm_heating_cat_fts_2
+    )
 
     this_dir = os.path.dirname(os.path.abspath(__file__))
     # !FIXME: use the actual values and not the calibration factor

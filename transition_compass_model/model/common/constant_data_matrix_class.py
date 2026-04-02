@@ -1,6 +1,8 @@
 import re
+
 import numpy as np
 import pandas as pd
+
 from transition_compass_model.model.common.io_database import read_database
 
 # ConstantDataMatrix is a class used to deal with constants in a way that is similar to DataMatrix class.
@@ -22,7 +24,6 @@ from transition_compass_model.model.common.io_database import read_database
 
 
 class ConstantDataMatrix:
-
     def __init__(self, col_labels={}, units={}, idx={}):
         self.array = None
         self.dim_labels = ["Variables"]  # list
@@ -49,15 +50,14 @@ class ConstantDataMatrix:
         return
 
     def __repr__(self):
-
         if len(self.col_labels) == 1:
-            return f'ConstantDataMatrix with shape {self.array.shape} and variables {self.col_labels["Variables"]}'
+            return f"ConstantDataMatrix with shape {self.array.shape} and variables {self.col_labels['Variables']}"
         if len(self.col_labels) == 2:
-            return f'ConstantDataMatrix with shape {self.array.shape}, variables {self.col_labels["Variables"]} and categories1 {self.col_labels["Categories1"]}'
+            return f"ConstantDataMatrix with shape {self.array.shape}, variables {self.col_labels['Variables']} and categories1 {self.col_labels['Categories1']}"
         if len(self.col_labels) == 3:
-            return f'ConstantDataMatrix with shape {self.array.shape}, variables {self.col_labels["Variables"]}, categories1 {self.col_labels["Categories1"]} and categories2 {self.col_labels["Categories2"]}'
+            return f"ConstantDataMatrix with shape {self.array.shape}, variables {self.col_labels['Variables']}, categories1 {self.col_labels['Categories1']} and categories2 {self.col_labels['Categories2']}"
         if len(self.col_labels) == 4:
-            return f'ConstantDataMatrix with shape {self.array.shape}, variables {self.col_labels["Variables"]}, categories1 {self.col_labels["Categories1"]}, categories2 {self.col_labels["Categories2"]} and categories3 {self.col_labels["Categories3"]}'
+            return f"ConstantDataMatrix with shape {self.array.shape}, variables {self.col_labels['Variables']}, categories1 {self.col_labels['Categories1']}, categories2 {self.col_labels['Categories2']} and categories3 {self.col_labels['Categories3']}"
 
     def read_data(self, constant, num_cat):
         dims = []
@@ -556,7 +556,7 @@ class ConstantDataMatrix:
         # Check that units are the same
         if dim != "Variables":
             if self.units != data2.units:
-                raise ValueError(f"The units should be the same")
+                raise ValueError("The units should be the same")
         # Check that across the dimension where you want to append the labels are different
         cols1 = set(self.col_labels[dim])
         cols2 = set(data2.col_labels[dim])
@@ -677,7 +677,7 @@ class ConstantDataMatrix:
         # or dm_grouped = dm_to_group.group_all(dim='Categories1', inplace=False)
         # when inplace = False dm_to_group remains unchanged and the grouped dm is return as output
         if "Categories" not in dim:
-            raise ValueError(f"You can only use group_all() on Categories")
+            raise ValueError("You can only use group_all() on Categories")
         if inplace:
             dm = self
         else:

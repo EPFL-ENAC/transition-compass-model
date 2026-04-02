@@ -1,21 +1,22 @@
 """Pre Processing module."""
 
-from . import WorldBank_data_extract
-from . import api_routine_Eurostat
-from . import api_routines_CH
-from . import fix_jumps
-from . import routine_JRC
-
-from . import agriculture_land_use
-from . import buildings
-from . import climate
-from . import industry
-from . import lca
-from . import lifestyles
-from . import minerals
-from . import oilrefinery
-from . import power
-from . import transport
+from . import (
+    WorldBank_data_extract,
+    agriculture_land_use,
+    api_routine_Eurostat,
+    api_routines_CH,
+    buildings,
+    climate,
+    fix_jumps,
+    industry,
+    lca,
+    lifestyles,
+    minerals,
+    oilrefinery,
+    power,
+    routine_JRC,
+    transport,
+)
 
 __all__ = [
     "WorldBank_data_extract",

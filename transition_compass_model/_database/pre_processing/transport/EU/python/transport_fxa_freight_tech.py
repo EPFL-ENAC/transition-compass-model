@@ -1,11 +1,13 @@
 # packages
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from transition_compass_model.model.common.auxiliary_functions import linear_fitting
-import pandas as pd
-import pickle
 import os
-import numpy as np
+import pickle
 import warnings
+
+import numpy as np
+import pandas as pd
+
+from transition_compass_model.model.common.auxiliary_functions import linear_fitting
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 warnings.simplefilter("ignore")
 import plotly.io as pio
@@ -13,7 +15,11 @@ import plotly.io as pio
 pio.renderers.default = "browser"
 
 from _database.pre_processing.routine_JRC import get_jrc_data
-from transition_compass_model.model.common.auxiliary_functions import eurostat_iso2_dict, jrc_iso2_dict
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    eurostat_iso2_dict,
+    jrc_iso2_dict,
+)
 
 # directories
 current_file_directory = os.getcwd()
@@ -430,8 +436,11 @@ dm_fleet.sort("Country")
 dm_fleet.array[dm_fleet.array == 0] = np.nan
 
 # save raw data for check on fleet
-f = os.path.join(current_file_directory, '../data/datamatrix/intermediate_files/jrc_freight_fleet_calib.pickle')
-with open(f, 'wb') as handle:
+f = os.path.join(
+    current_file_directory,
+    "../data/datamatrix/intermediate_files/jrc_freight_fleet_calib.pickle",
+)
+with open(f, "wb") as handle:
     pickle.dump(dm_fleet, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 ###################
