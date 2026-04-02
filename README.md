@@ -156,9 +156,10 @@ parent-dir/
 ```
 
 ```bash
-cd speed-to-zero
-make install       # Detects sibling model and installs as editable
-make run           # Start app — model changes are reflected immediately
+cd speed-to-zero/backend
+make install-local   # Installs deps + editable model from sibling folder
+cd ..
+make run             # Start app — model changes are reflected immediately
 ```
 
 Verify which model is active:
@@ -169,7 +170,7 @@ cd speed-to-zero/backend && make check-model
 # Remote mode: path points inside .venv/lib/.../site-packages/
 ```
 
-See [DEVELOPMENT.md](DEVELOPMENT.md) for full details (IDE setup, switching between local/remote model, etc.).
+See [DEVELOPMENT.md](DEVELOPMENT.md) for full details (IDE setup, switching between local/remote model, etc.) and [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution workflow (branching, commits, pull requests).
 
 ## Versioning and Releases
 
