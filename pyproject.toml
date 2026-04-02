@@ -39,6 +39,7 @@ dev = [
     "mypy>=1.11.0",
     "pre-commit>=3.0.0",
     "pytest>=8.0.0",
+    "codespell>=2.3.0",
 ]
 
 [tool.setuptools.packages.find]
@@ -66,5 +67,5 @@ ignore_missing_imports = true
 exclude = ["tests", "old", ".venv"]
 
 [tool.codespell]
-skip = "_database/*"
+skip = "*/_database/*"
 ignore-words-list = "classe,ans,vie,variante,habitant,habitants,ot,ois,ore,tre,fo,caf,reste,mesure,calculs,categorie,formating,dowload,comute,lenght,blanck,syntetic,catpure,crate,arrray,moteur,correspondance,temporarely,substracting,fallow,exlcuded,mangement"
