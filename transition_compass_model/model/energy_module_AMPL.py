@@ -1,38 +1,26 @@
-from amplpy import AMPL, add_to_path
-
-# from typing import List, Dict
-from transition_compass_model.model.energy.energyscopepyomo.ses_pyomo import (
-    load_data,
-    build_model,
-    make_highs,
-    attach,
-    solve,
-    extract_results,
-)
-import pyomo.environ as pyo
-from transition_compass_model.model.common.interface_class import Interface
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
+import json
 import os
-from transition_compass_model.model.common.auxiliary_functions import (
-    filter_DM,
-    create_years_list,
-    filter_geoscale,
-    filter_country_and_load_data_from_pickles,
-    dm_add_missing_variables,
-    return_lever_data,
-)
 import pickle
+import re
+
 import numpy as np
 import pandas as pd
+from amplpy import AMPL, add_to_path
+
 import transition_compass_model.model.energy.interfaces as inter
 import transition_compass_model.model.energy.utils as utils
-import re
-from transition_compass_model.model.common.config_loader import load_lever_config
+from transition_compass_model.model.common.auxiliary_functions import (
+    create_years_list,
+    dm_add_missing_variables,
+    filter_DM,
+)
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
+from transition_compass_model.model.common.interface_class import Interface
 
+# from typing import List, Dict
 
 
 def define_sets(ampl):
-
     # Declare sets using declareSet()
     # Assign values to sets
     ampl.getSet("PERIODS").setValues(list(range(1, 13)))
@@ -217,7 +205,6 @@ def define_sets(ampl):
 
 
 def read_2050_data(ampl, DM, country, endyr):
-
     define_sets(ampl)
     for key in DM.keys():
         dm = DM[key].filter({"Country": [country], "Years": [endyr]})
@@ -397,7 +384,6 @@ def extract_sankey_energy_flow(DM):
 
 
 def extract_2050_output(ampl, country_prod, endyr, years_fts, DM_energy):
-
     DM = utils.get_ampl_output(ampl, country_prod, endyr)
 
     # From ses_eval.mod
@@ -491,7 +477,6 @@ def extract_2050_output(ampl, country_prod, endyr, years_fts, DM_energy):
 
 
 def create_future_country_trend(DM_2050, DM_input, years_ots, years_fts):
-
     # Capacity trend - Country level
     dm_cap_2050 = DM_2050["installed_GW"].copy()
     dm_cap = DM_input["cal-capacity"].copy()
@@ -663,7 +648,6 @@ def downscale_country_to_canton(
 def balance_demand_prod_with_net_import(
     dm_prod_cap_cntr, dm_demand_trend, share_of_pop
 ):
-
     dm_prod = dm_prod_cap_cntr.filter({"Variables": ["pow_production"]})
     dm_prod.drop("Categories1", ["Net-import", "Waste"])
     dm_prod.group_all("Categories1", inplace=True)
@@ -769,7 +753,7 @@ def energyscope(data_path, DM_tra, DM_bld, DM_ind, years_ots, years_fts, country
     # ampl.getParameter('avail').setValues({'NG_CCS': 0})
     ampl.getParameter("avail").setValues({"COAL_CCS": 0})
 
-    # Solve the model (togliere comando “solve" dal mod)
+    # Solve the model (togliere commando “solve" dal mod)
     print("Before solve")
     ampl.solve()
     print("After solve")
@@ -801,7 +785,6 @@ def energyscope(data_path, DM_tra, DM_bld, DM_ind, years_ots, years_fts, country
 
 
 def energy(lever_setting, years_setting, country_list, interface=Interface()):
-
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
     years_fts = create_years_list(years_setting[2], years_setting[3], years_setting[4])
     years_ots = create_years_list(years_setting[0], years_setting[1], 1)
@@ -896,7 +879,7 @@ def local_energy_run():
 # database_from_csv_to_datamatrix()
 # print('In transport, the share of waste by fuel/tech type does not seem right. Fix it.')
 # print('Apply technology shares before computing the stock')
-# print('For the efficiency, use the new methodology developped for Building (see overleaf on U-value)')
+# print('For the efficiency, use the new methodology developed for Building (see overleaf on U-value)')
 if __name__ == "__main__":
     results_run = local_energy_run()
 # local_energy_run()

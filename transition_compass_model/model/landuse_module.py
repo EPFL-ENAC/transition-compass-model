@@ -2,34 +2,32 @@
 # -*- coding: utf-8 -*-
 
 
-import pandas as pd
+import json
+import os
+import pickle
 from pathlib import Path
 
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from transition_compass_model.model.common.constant_data_matrix_class import ConstantDataMatrix
-from transition_compass_model.model.common.io_database import (
-    read_database_fxa,
-    read_database_to_ots_fts_dict_w_groups,
-    edit_database,
-    database_to_df,
-    dm_to_database,
-)
-from transition_compass_model.model.common.interface_class import Interface
+import numpy as np
+import pandas as pd
+from scipy.optimize import linprog
+
 from transition_compass_model.model.common.auxiliary_functions import (
-    filter_geoscale,
     calibration_rates,
-    create_years_list,
-)
-from transition_compass_model.model.common.auxiliary_functions import (
+    filter_country_and_load_data_from_pickles,
     read_level_data,
     simulate_input,
-    filter_country_and_load_data_from_pickles,
 )
-from scipy.optimize import linprog
-import pickle
-import os
-import numpy as np
-
+from transition_compass_model.model.common.constant_data_matrix_class import (
+    ConstantDataMatrix,
+)
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
+from transition_compass_model.model.common.interface_class import Interface
+from transition_compass_model.model.common.io_database import (
+    database_to_df,
+    dm_to_database,
+    read_database_fxa,
+    read_database_to_ots_fts_dict_w_groups,
+)
 
 
 def init_years_lever():
@@ -42,7 +40,6 @@ def init_years_lever():
 
 # DatabaseToDatamatrix
 def database_from_csv_to_datamatrix():
-
     # Read database
 
     # Set years range
@@ -154,7 +151,13 @@ def database_from_csv_to_datamatrix():
     # CalibrationDataToDatamatrix
 
     # Data - Calibration
-    file = Path(__file__).parents[1] / "_database" / "data" / "csv" / "land-use_calibration.csv"
+    file = (
+        Path(__file__).parents[1]
+        / "_database"
+        / "data"
+        / "csv"
+        / "land-use_calibration.csv"
+    )
     lever = "none"
     df_db = pd.read_csv(file)
     df_ots, df_fts = database_to_df(df_db, lever, level="all")
@@ -260,7 +263,6 @@ def database_from_csv_to_datamatrix():
 
 
 def read_data(DM_landuse, lever_setting):
-
     # Read fts based on lever_setting
     DM_ots_fts = read_level_data(DM_landuse, lever_setting)
 
@@ -313,7 +315,6 @@ def read_data(DM_landuse, lever_setting):
 def get_interface(
     current_file_directory, interface, from_sector, to_sector, country_list
 ):
-
     if interface.has_link(from_sector=from_sector, to_sector=to_sector):
         DM = interface.get_link(from_sector=from_sector, to_sector=to_sector)
     else:
@@ -503,7 +504,6 @@ def wood_workflow(dm_wood, dm_lgn, DM_ind, dm_cal_wood, years_setting):
 
 # CalculationLeaf LAND ALLOCATION
 def land_allocation_workflow(DM_land_use, dm_land_use):
-
     # TOTAL LAND DYNAMICS ----------------------------------------------------------------------------------------------
     # Appending cropland and grassland to DM_land_use FIXME use calibrated land
     dm_land_use = dm_land_use.filter({"Variables": ["agr_lus_land"]})
@@ -642,10 +642,9 @@ def land_allocation_workflow(DM_land_use, dm_land_use):
 
 
 def land_use_change(dm_need, dm_excess):
-
     # check that dm_need == dm_excess
     if abs(dm_need.array.sum(axis=-1) - dm_excess.array.sum(axis=-1)).sum() > 1e-5:
-        raise ValueError(f"Total land need and total land excess do not match")
+        raise ValueError("Total land need and total land excess do not match")
 
     # Normalise dm_need
     dm_need_norm = dm_need.copy()
@@ -678,7 +677,6 @@ def land_use_change(dm_need, dm_excess):
 
 
 def land_use_change_old(dm_need, dm_excess, dm_matrix):
-
     arr_to_solve = dm_matrix.array
     arr_to_crop = dm_need.array
     arr_excess = dm_excess.array
@@ -729,7 +727,6 @@ def land_use_change_old(dm_need, dm_excess, dm_matrix):
 
 # CalculationLeaf LAND USE MATRIX
 def land_matrix_workflow(DM_land_use, years_setting):
-
     # LAND USE INITIAL AREA --------------------------------------------------------------------------------------------
 
     # Land initial area per land type [ha] = lus_land from previous year
@@ -896,7 +893,6 @@ def land_matrix_workflow(DM_land_use, years_setting):
 
 # CalculationLeaf CARBON DYNAMICS
 def land_carbon_dynamics_workflow(DM_land_use):
-
     # SOIL CARBON STOCK ------------------------------------------------------------------------------------------------
 
     # Mineral soil [ha] = Land use matrix [ha] * mineral content per soil type [%]
@@ -1070,7 +1066,6 @@ def land_carbon_dynamics_workflow(DM_land_use):
 
 # CalculationLeaf FORESTRY
 def forestry_workflow(DM_land_use, dm_wood, dm_land_use):
-
     # AGROFORESTRY CARBON STOCK ----------------------------------------------------------------------------------------
 
     # (KNIME : previous step to compute carbon emissions factor cropland/grassland [tC/ha])
@@ -1199,7 +1194,6 @@ def forestry_workflow(DM_land_use, dm_wood, dm_land_use):
 
 # CalculationLeaf BIOMASS EMISSIONS
 def forestry_biomass_emissions_workflow(DM_land_use, CDM_const):
-
     # FORESTRY LOSSES --------------------------------------------------------------------------------------------------
 
     # Total yield forestry biomass losses from natural causes [m3/ha] = sum (yield losses from natural causes [m3/ha])
@@ -1295,7 +1289,6 @@ def forestry_biomass_emissions_workflow(DM_land_use, CDM_const):
 
 
 def simulate_industry_to_landuse_input():
-
     dm_ind = simulate_input(from_sector="industry", to_sector="agriculture")
 
     DM_ind = {}
@@ -1318,7 +1311,6 @@ def simulate_industry_to_landuse_input():
 
 
 def simulate_agriculture_to_landuse_input():
-
     dm_lus = simulate_input(from_sector="agriculture", to_sector="landuse")
 
     dm_wood = dm_lus.filter(
@@ -1342,7 +1334,6 @@ def simulate_agriculture_to_landuse_input():
 
 
 def landuse_emissions_interface(DM_land_use, write_xls=False):
-
     # Emission from converted land
     # (WARNING : this version accounts for the land rem within the land converted which differs from Knime)
     dm_ems = DM_land_use["land_man_gap"].filter(
@@ -1351,7 +1342,6 @@ def landuse_emissions_interface(DM_land_use, write_xls=False):
     dm_ems = dm_ems.flatten(sep="-")
 
     if write_xls is True:
-
         current_file_directory = os.path.dirname(os.path.abspath(__file__))
         dm_ems = dm_ems.write_df()
         dm_ems.to_excel(
@@ -1365,7 +1355,6 @@ def landuse_emissions_interface(DM_land_use, write_xls=False):
 
 
 def landuse_TPE(DM_land_use, dm_wood_TPE):
-
     # Land allocation
     dm_land_allocation = DM_land_use["land_man_use"].filter({"Variables": ["lus_land"]})
     df = dm_land_allocation.write_df()
@@ -1390,7 +1379,6 @@ def landuse_TPE(DM_land_use, dm_wood_TPE):
 def land_use(
     lever_setting, years_setting, DM_input, interface=Interface(), calibration=False
 ):
-
     # current_file_directory = os.path.dirname(os.path.abspath(__file__))
     # landuse_data_file = os.path.join(current_file_directory, '../_database/data/datamatrix/geoscale/landuse.pickle')
     # DM_ots_fts, DM_land_use, CDM_const = read_data(landuse_data_file, lever_setting)
@@ -1463,7 +1451,6 @@ def land_use(
 
 
 def land_use_local_run():
-
     # Configures initial input for model run
     f = open("../config/lever_position.json")
     lever_setting = json.load(f)[0]

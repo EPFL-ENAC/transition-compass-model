@@ -1,21 +1,17 @@
 # Import the Packages
 
+import json
 import os  # operating system (e.g., look for workspace)
-
-# Import Class
-from transition_compass_model.model.common.data_matrix_class import DataMatrix  # Class for the model inputs
-from transition_compass_model.model.common.constant_data_matrix_class import (
-    ConstantDataMatrix,
-)  # Class for the constant inputs
-from transition_compass_model.model.common.interface_class import Interface
 
 # ImportFunctions
 from transition_compass_model.model.common.auxiliary_functions import (
-    read_level_data,
-    filter_geoscale,
+    filter_country_and_load_data_from_pickles,
     my_pickle_dump,
+    read_level_data,
 )
-from transition_compass_model.model.common.auxiliary_functions import filter_country_and_load_data_from_pickles
+
+# Import Class
+from transition_compass_model.model.common.interface_class import Interface
 
 
 # init years and lever
@@ -30,7 +26,6 @@ def init_years_lever():
 
 #  Reading the Pickle
 def read_data(DM_lfs, lever_setting):
-
     # Get ots fts based on lever_setting
     DM_ots_fts = read_level_data(DM_lfs, lever_setting)
 
@@ -42,7 +37,6 @@ def read_data(DM_lfs, lever_setting):
 def lifestyles(
     lever_setting, years_setting, DM_input, interface=Interface(), write_pickle=False
 ):
-
     # get population data
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
     DM_pop = read_data(DM_input, lever_setting)

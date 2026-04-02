@@ -1,25 +1,17 @@
-import pandas as pd
-
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from transition_compass_model.model.common.interface_class import Interface
-from transition_compass_model.model.common.constant_data_matrix_class import ConstantDataMatrix
-from transition_compass_model.model.common.io_database import (
-    read_database,
-    read_database_fxa,
-    read_database_to_ots_fts_dict,
-)
-from transition_compass_model.model.common.auxiliary_functions import compute_stock, filter_geoscale
-from transition_compass_model.model.common.auxiliary_functions import (
-    read_level_data,
-    filter_country_and_load_data_from_pickles,
-)
-import pickle
+import json
 import os
+import pickle
+
 import numpy as np
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    filter_country_and_load_data_from_pickles,
+    read_level_data,
+)
+from transition_compass_model.model.common.interface_class import Interface
 
 
 def read_data(DM_forestry, lever_setting):
-
     dict_const = DM_forestry["constant"]
     dict_fxa = DM_forestry["fxa"]
 
@@ -60,7 +52,6 @@ def read_data(DM_forestry, lever_setting):
 # Calculation Tree - Wood demand in m3:
 #####################################################################################################################
 def wood_demand_m3(dm_wood_demand, DM_wood_conversion):
-
     #################################################################################################################
     # Provides the Wood demand in m3
     # 1. Wood product in tonnes (e.g., timber) to express in wood category (e.g., saw-logs) in tonnes given the yields
@@ -172,7 +163,6 @@ def wood_demand_m3(dm_wood_demand, DM_wood_conversion):
 
 
 def fuelwood_demand_m3(dm_fuelwood_demand, DM_wood_conversion):
-
     #################################################################################################################
     # Provides the Fuel wood demand in m3
     # 1. Wood product per wood type (coniferous and non-coniferous) in GWh
@@ -242,7 +232,6 @@ def fuelwood_demand_m3(dm_fuelwood_demand, DM_wood_conversion):
 
 
 def wood_supply(dm_forest_area, DM_forestry, DM_ots_fts):
-
     #################################################################################################################
     # Provides the Fuel wood supply in m3
     # 1. Share of forest exploited (% of ha)
@@ -403,7 +392,6 @@ def forestry_to_tpe(DM_supply, DM_power, DM_industry, DM_ots_fts):
 
 
 def forestry(lever_setting, years_setting, DM_input, interface=Interface()):
-
     ##############################################################
     # Load the datamatrix of Forestry: the following is computed in the pre-processing, and includes ots, fts, fxa, cp
     ##############################################################

@@ -1,19 +1,17 @@
-import pandas as pd
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from transition_compass_model.model.common.interface_class import Interface
+import json
+import os
+import pickle
+import warnings
 
+import transition_compass_model.model.buildings.interfaces as inter
+import transition_compass_model.model.buildings.workflows as wkf
 from transition_compass_model.model.common.auxiliary_functions import (
-    read_level_data,
-    filter_country_and_load_data_from_pickles,
     create_years_list,
     dm_add_missing_variables,
-    my_pickle_dump,
+    filter_country_and_load_data_from_pickles,
+    read_level_data,
 )
-import pickle
-import os
-import warnings
-import transition_compass_model.model.buildings.workflows as wkf
-import transition_compass_model.model.buildings.interfaces as inter
+from transition_compass_model.model.common.interface_class import Interface
 
 warnings.simplefilter("ignore")
 

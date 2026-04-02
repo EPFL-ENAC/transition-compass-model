@@ -1,29 +1,32 @@
 #######################################################################################################################
 # SECTION: Import Packages, Classes & Functions
 #######################################################################################################################
-import numpy as np
-import pickle  # read/write the data in pickle
+import json
 import os  # operating system (e.g., look for workspace)
-import pandas as pd
+import pickle  # read/write the data in pickle
 import warnings
 
-# Import Class
-from transition_compass_model.model.common.data_matrix_class import DataMatrix  # Class for the model inputs
+import numpy as np
+import pandas as pd
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    filter_geoscale,
+    simulate_input,
+)
 from transition_compass_model.model.common.constant_data_matrix_class import (
     ConstantDataMatrix,
 )  # Class for the constant inputs
+
+# Import Class
+from transition_compass_model.model.common.data_matrix_class import (
+    DataMatrix,
+)  # Class for the model inputs
 from transition_compass_model.model.common.interface_class import Interface
 
 # ImportFunctions
 from transition_compass_model.model.common.io_database import (
-    read_database,
     read_database_fxa,
 )  # read functions for levers & fixed assumptions
-from transition_compass_model.model.common.auxiliary_functions import (
-    read_level_data,
-    filter_geoscale,
-    simulate_input,
-)
 
 warnings.simplefilter("ignore")
 #######################################################################################################################
@@ -120,8 +123,7 @@ def simulate_power_to_refinery_input():
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
     f = os.path.join(
         current_file_directory,
-        "../_database/data/xls/"
-        "All-Countries-interface_from-power-to-oil-refinery.xlsx",
+        "../_database/data/xls/All-Countries-interface_from-power-to-oil-refinery.xlsx",
     )
     df = pd.read_excel(f)
     dm_power = DataMatrix.create_from_df(df, num_cat=1)
@@ -137,8 +139,7 @@ def simulate_buildings_to_refinery_input():
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
     f = os.path.join(
         current_file_directory,
-        "../_database/data/xls/"
-        "All-Countries-interface_from-buildings-to-oil-refinery.xlsx",
+        "../_database/data/xls/All-Countries-interface_from-buildings-to-oil-refinery.xlsx",
     )
     df = pd.read_excel(f, sheet_name="default")
     dm_buildings = DataMatrix.create_from_df(df, num_cat=1)
@@ -153,8 +154,7 @@ def simulate_transport_to_refinery_input():
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
     f = os.path.join(
         current_file_directory,
-        "../_database/data/xls/"
-        "All-Countries-interface_from-transport-to-oil-refinery.xlsx",
+        "../_database/data/xls/All-Countries-interface_from-transport-to-oil-refinery.xlsx",
     )
     df = pd.read_excel(f, sheet_name="default")
     dm_transport = DataMatrix.create_from_df(df, num_cat=1)
@@ -169,8 +169,7 @@ def simulate_industry_to_refinery_input():
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
     f = os.path.join(
         current_file_directory,
-        "../_database/data/xls/"
-        "All-Countries-interface_from-industry-to-oil-refinery.xlsx",
+        "../_database/data/xls/All-Countries-interface_from-industry-to-oil-refinery.xlsx",
     )
     df = pd.read_excel(f)
     dm_industry = DataMatrix.create_from_df(df, num_cat=1)
@@ -182,7 +181,6 @@ def simulate_industry_to_refinery_input():
 # LocalInterfaces - Ammonia
 #######################################################################################################################
 def simulate_ammonia_to_refinery_input():
-
     dm_ammonia = simulate_input("ammonia", "oil-refinery", num_cat=1)
 
     return dm_ammonia
@@ -192,7 +190,6 @@ def simulate_ammonia_to_refinery_input():
 # LocalInterfaces - Agriculture
 #######################################################################################################################
 def simulate_agriculture_to_refinery_input():
-
     dm_agriculture = simulate_input("agriculture", "oil-refinery", num_cat=1)
 
     return dm_agriculture
@@ -202,7 +199,6 @@ def simulate_agriculture_to_refinery_input():
 # CalculationTree - Module - sub flow
 #######################################################################################################################
 def fuel_production_workflow(DM_refinery, DM_fuel_demand):
-
     def check_unit(dm, unit):
         for var in dm.col_labels["Variables"]:
             if dm.units[var] != unit:
@@ -403,7 +399,6 @@ def fuel_production_workflow(DM_refinery, DM_fuel_demand):
 
 
 def primary_demand(DM_refinery_out):
-
     dm_temp = DM_refinery_out["fossil-demand"].copy()
     dm_fos = dm_temp.groupby(
         {"fos_primary-demand": ".*"}, dim="Variables", regex=True, inplace=False
@@ -419,7 +414,6 @@ def primary_demand(DM_refinery_out):
 
 
 def variables_to_tpe(DM_refinery_out, dm_fos):
-
     dm_temp = DM_refinery_out["fossil-demand"].copy()
     dm_temp.rename_col("pow_energy-demand", "elc_energy-demand", "Variables")
     dm_temp.rename_col("coal", "solid-ff-coal", "Categories1")
@@ -436,7 +430,6 @@ def variables_to_tpe(DM_refinery_out, dm_fos):
 
 
 def oilrefinery_emissions_interface(DM_refinery_out):
-
     dm_temp = DM_refinery_out["fossil-emissions"].copy()
     dm_temp.group_all("Categories1")
     dm_temp.groupby({"fos_emissions-CO2": ".*"}, "Variables", regex=True, inplace=True)

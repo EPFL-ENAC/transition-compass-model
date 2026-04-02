@@ -1,26 +1,26 @@
-import numpy as np
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
-from scipy.interpolate import interp1d, CubicSpline
-from transition_compass_model.model.common.io_database import (
-    read_database,
-    update_database_from_db,
-    database_to_dm,
-    dm_to_database,
-)
-from transition_compass_model.model.common.constant_data_matrix_class import ConstantDataMatrix
-import pandas as pd
 import os
+import pickle
 import re
 from os import listdir
 from os.path import isfile, join
-import pickle
-from scipy.stats import linregress
-import requests
+
 import deepl
+import numpy as np
+import pandas as pd
+import requests
+from scipy.interpolate import CubicSpline, interp1d
+from scipy.stats import linregress
+
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
+from transition_compass_model.model.common.io_database import (
+    database_to_dm,
+    dm_to_database,
+    read_database,
+    update_database_from_db,
+)
 
 
 def add_missing_ots_years(dm, startyear, baseyear):
-
     # Add all years as np.nan
     years_ots = list(range(startyear, baseyear + 1))
     years_missing = list(set(years_ots) - set(dm.col_labels["Years"]))
@@ -108,7 +108,7 @@ def adjust_trend(dm, baseyear, expected_trend):
     # Takes a DataMatrix containing ots and fts, the baseyear and the expected_trend
     # if the actual trend is not following the expected trend it sets the 2050 value to the same at the 2015 value
     # (actually it sets it to the mean value of the last few years)
-    if expected_trend == None:
+    if expected_trend is None:
         return dm
     # perform a mean over the last years
     last_ots_years = slice(
@@ -268,9 +268,9 @@ def filter_geoscale(geo_pattern):
                                 ].keys():
                                     dm = DM_module[key][lever_name][group][level_val]
                                     dm_geo = dm.filter_w_regex({"Country": geo_pattern})
-                                    DM_module_geo[key][lever_name][group][
-                                        level_val
-                                    ] = dm_geo
+                                    DM_module_geo[key][lever_name][group][level_val] = (
+                                        dm_geo
+                                    )
                 elif key == "ots":
                     for lever_name in DM_module[key].keys():
                         # if there are groups
@@ -400,7 +400,6 @@ def cdm_to_dm(cdm, countries_list, years_list):
 
 
 def simulate_input(from_sector, to_sector, num_cat=0):
-
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
 
     # get file
@@ -421,7 +420,6 @@ def simulate_input(from_sector, to_sector, num_cat=0):
 
 
 def material_decomposition(dm, cdm):
-
     num_dim = len(dm.dim_labels)
     # raise error
     if num_dim <= 3 or num_dim > 5:
@@ -476,7 +474,6 @@ def material_decomposition(dm, cdm):
 def difference_with_data(
     dm_model, dm_data, year_start, year_end, years_show, category_operation="Variables"
 ):
-
     # if dm_model and dm_data do not have the same dimension return an error
     if len(dm_model.dim_labels) != len(dm_data.dim_labels):
         raise ValueError("dm_model and dm_data must have the same dimensions")
@@ -542,12 +539,10 @@ def calibration_rates(
     # all datamartix should have the same shape
 
     if np.all(np.isnan(dm_cal.array)):
-
         dm_cal_sub = dm_cal.copy()
         dm_cal_sub.array[...] = 1
 
     else:
-
         # if dm and dm_cal do not have the same dimension return an error
         if len(dm.dim_labels) != len(dm_cal.dim_labels):
             raise ValueError("dm and dm_cal must have the same dimensions")
@@ -622,7 +617,6 @@ def calibration_rates(
 
 
 def cost(dm_activity, dm_cost, cost_type, baseyear=2015, unit_cost=True):
-
     # error if there are more activities
     if len(dm_activity.col_labels["Variables"]) > 1:
         raise ValueError("This function works only for one activity at the time")
@@ -675,7 +669,6 @@ def cost(dm_activity, dm_cost, cost_type, baseyear=2015, unit_cost=True):
     )[0].tolist()
 
     if any(keep_LR):
-
         # set damatrixes
         keep = np.array(dm_activity.col_labels[activity_last_cat])[keep_LR].tolist()
         dm_activity_LR = dm_activity.filter({activity_last_cat: keep})
@@ -754,7 +747,6 @@ def cost(dm_activity, dm_cost, cost_type, baseyear=2015, unit_cost=True):
     keep_LE = (dm_cost.array[0, :, idx["evolution-method"], ...] == 1)[0].tolist()
 
     if any(keep_LE):
-
         # set damatrixes
         keep = np.array(dm_activity.col_labels[activity_last_cat])[keep_LE].tolist()
         dm_activity_LE = dm_activity.filter({activity_last_cat: keep})
@@ -819,7 +811,7 @@ def cost(dm_activity, dm_cost, cost_type, baseyear=2015, unit_cost=True):
     )
     dm_cost.add(arr_temp, dim="Variables", col_label=cost_type, unit="MEUR")
 
-    # substitue inf with nan
+    # substitute inf with nan
     dm_cost.array[dm_cost.array == np.inf] = np.nan
 
     # return
@@ -837,13 +829,12 @@ def material_switch(
     switch_ratio_prefix,
     dict_for_output=None,
 ):
-
     # this function does a material switch between materials
     # dm contains the data on the products' material decomposition (obtained with the function material_decomposition())
     # dm_ots_fts contains the lever data with the material switch percentages
-    # cdm_const constains the constants for the switch ratios
+    # cdm_const contains the constants for the switch ratios
     # material_in is the material that will be switched from
-    # material_out is the material that will be swiched to
+    # material_out is the material that will be switched to
     # product is the product for which we are doing the material switch
     # switch_percentage_prefix is the prefix for the product in the dm_ots_fts
     # switch_ratio_prefix is the prefix for the material switch ratio in cdm_const
@@ -891,7 +882,6 @@ def material_switch(
     idx_temp2 = dm_temp2.idx
     idx_temp3 = dm_temp3.idx
     for i in range(len(material_out)):
-
         # get material in-to-out
         arr_temp = (
             dm_temp.array[:, :, :, :, idx_temp[material_in]]
@@ -966,7 +956,6 @@ def energy_switch(
     carrier_out,
     dm_energy_carrier_mix_prefix,
 ):
-
     # this function does the energy switch
     # dm_energy_demand is the dm with technologies (cat1) and energy carriers (cat2)
     # dm_energy_carrier_mix is the dm with technologies (cat1) and % for the switches (cat2)
@@ -1111,7 +1100,6 @@ def linear_fitting(
     dm.fill_nans(dim_to_interp="Years")
 
     if based_on is not None:
-
         mask_orig = ~np.isnan(dm_orig.array)
         dm.array[mask_orig] = dm_orig.array[mask_orig]
 
@@ -1180,7 +1168,6 @@ def linear_forecast_BAU(
 
 
 def linear_forecast_BAU_w_noise(dm_ots, start_t, years_ots, years_fts):
-
     # Linear trend + noise
     if "Categories1" in dm_ots.dim_labels:
         raise ValueError(
@@ -1515,7 +1502,6 @@ def return_lever_data(lever_name, DM_input, DM_out=None):
 
 
 def load_pop(country_list, years_list, lev=1):
-
     this_dir = os.path.dirname(os.path.abspath(__file__))
     filepath = os.path.join(
         this_dir, "../../_database/data/datamatrix/lifestyles.pickle"
@@ -1599,7 +1585,7 @@ def df_excel_to_dm(
     df_filter = df_filter.apply(lambda col: pd.to_numeric(col, errors="coerce"))
     # df_filter = df_filter.applymap(lambda x: pd.to_numeric(x, errors='coerce'))
     df_filter.reset_index(inplace=True)
-    # Keep only first 10 caracters
+    # Keep only first 10 characters
     df_filter["Variables"] = df_filter["Variables"].replace(names_dict)
     if keep_first:
         df_filter = df_filter.drop_duplicates(subset=["Variables"], keep="first")

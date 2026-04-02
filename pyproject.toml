@@ -49,19 +49,16 @@ include = ["transition_compass_model*"]
 "*" = ["**/*.pickle", "**/*.json", "**/*.csv", "**/*.xlsx", "**/*.mod"]
 
 [tool.ruff]
-line-length = 127
+line-length = 88
 target-version = "py312"
+exclude = ["**/pre_processing/**"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]
-ignore = ["E501"]
+ignore = ["E501", "E402", "E741", "F841", "E712"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["transition_compass_model"]
-
-[tool.black]
-line-length = 127
-target-version = ["py312"]
 
 [tool.mypy]
 python_version = "3.12"

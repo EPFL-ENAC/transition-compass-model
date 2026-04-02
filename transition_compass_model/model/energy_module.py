@@ -1,32 +1,29 @@
-from transition_compass_model.model.energy.energyscopepyomo.ses_pyomo import (
-    load_data,
-    build_model,
-    make_highs,
-    attach,
-    solve,
-    extract_results,
-    build_model_structure,
-    set_constraints,
-)
-import pyomo.environ as pyo
-from transition_compass_model.model.common.interface_class import Interface
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
+import json
 import os
-from transition_compass_model.model.common.auxiliary_functions import (
-    filter_DM,
-    create_years_list,
-    filter_geoscale,
-    filter_country_and_load_data_from_pickles,
-    dm_add_missing_variables,
-    return_lever_data,
-)
 import pickle
+import re
+
 import numpy as np
+import pyomo.environ as pyo
+
 import transition_compass_model.model.energy.interfaces as inter
 import transition_compass_model.model.energy.utils as utils
-import re
-import json
-from transition_compass_model.model.common.config_loader import load_lever_config
+from transition_compass_model.model.common.auxiliary_functions import (
+    create_years_list,
+    dm_add_missing_variables,
+    filter_DM,
+)
+from transition_compass_model.model.common.data_matrix_class import DataMatrix
+from transition_compass_model.model.common.interface_class import Interface
+from transition_compass_model.model.energy.energyscopepyomo.ses_pyomo import (
+    attach,
+    build_model_structure,
+    load_data,
+    make_highs,
+    set_constraints,
+    solve,
+)
+
 
 def capture_model_state(model, filename):
     """Capture all model parameters and their values"""
@@ -43,7 +40,7 @@ def capture_model_state(model, filename):
                     # Use pyo.value() to handle expressions
                     val = pyo.value(param[idx])
                     param_data["values"][str(idx)] = val
-                except:
+                except Exception:
                     # If it still fails, store as string
                     param_data["values"][str(idx)] = str(param[idx])
             param_data["count"] = len(param)
@@ -52,7 +49,7 @@ def capture_model_state(model, filename):
                 param_data["values"] = (
                     pyo.value(param) if param.value is not None else None
                 )
-            except:
+            except Exception:
                 param_data["values"] = str(param)
             param_data["count"] = 1
         param_data["mutable"] = param.mutable
@@ -277,7 +274,6 @@ def extract_sankey_energy_flow(DM):
 
 
 def extract_2050_output_pyomo(m, country_prod, endyr, years_fts, DM_energy):
-
     # DM.keys = {'installed_GW', 'installed_N', 'emissions', 'storage_in',
     # 'storage_out', 'monthly_operation_GW', 'Losses'}
     DM = utils.get_pyomo_output(m, country_prod, endyr)
@@ -392,7 +388,6 @@ def extract_2050_output_pyomo(m, country_prod, endyr, years_fts, DM_energy):
 
 
 def create_future_country_production_trend(DM_2050, DM_input, years_ots, years_fts):
-
     # Capacity trend - Country level
     dm_cap_2050 = DM_2050["installed_GW"].copy()
     dm_cap = DM_input["cal-capacity"].copy()
@@ -576,7 +571,6 @@ def downscale_country_to_canton(
 def balance_demand_prod_with_net_import(
     dm_prod_cap_cntr, dm_losses, dm_net_import, dm_demand_trend, share_of_pop
 ):
-
     dm_prod = dm_prod_cap_cntr.filter({"Variables": ["pow_production"]})
     # dm_prod.drop('Categories1', ['Net-import', 'Waste'])
     dm_prod.group_all("Categories1", inplace=True)
@@ -767,7 +761,6 @@ def energyscope_pyomo(
 
 
 def energy(lever_setting, years_setting, country_list, interface=Interface()):
-
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
     years_fts = create_years_list(years_setting[2], years_setting[3], years_setting[4])
     years_ots = create_years_list(years_setting[0], years_setting[1], 1)
@@ -880,7 +873,7 @@ def local_energy_run():
 # database_from_csv_to_datamatrix()
 # print('In transport, the share of waste by fuel/tech type does not seem right. Fix it.')
 # print('Apply technology shares before computing the stock')
-# print('For the efficiency, use the new methodology developped for Building (see overleaf on U-value)')
+# print('For the efficiency, use the new methodology developed for Building (see overleaf on U-value)')
 if __name__ == "__main__":
     results_run = local_energy_run()
 # local_energy_run()

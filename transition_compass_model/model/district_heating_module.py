@@ -1,27 +1,31 @@
 # Import Python packages
-import pandas as pd
-import pickle
+import json
 import os
-import numpy as np
+import pickle
 import warnings
+
+import numpy as np
+import pandas as pd
+
+from transition_compass_model.model.common.auxiliary_functions import (
+    cost,
+    read_level_data,
+)
+from transition_compass_model.model.common.constant_data_matrix_class import (
+    ConstantDataMatrix,
+)
 
 # Import classes
 from transition_compass_model.model.common.data_matrix_class import DataMatrix
 from transition_compass_model.model.common.interface_class import Interface
-from transition_compass_model.model.common.constant_data_matrix_class import ConstantDataMatrix
 
 # Import functions
 from transition_compass_model.model.common.io_database import (
-    read_database,
     read_database_fxa,
-    read_database_w_filter,
-    update_database_from_db_old,
-)
-from transition_compass_model.model.common.io_database import (
     read_database_to_ots_fts_dict,
     read_database_to_ots_fts_dict_w_groups,
+    update_database_from_db_old,
 )
-from transition_compass_model.model.common.auxiliary_functions import read_level_data, cost
 
 warnings.simplefilter("ignore")
 
@@ -111,7 +115,6 @@ def dummy_countries_industry():
 
 
 def database_from_csv_to_datamatrix():
-
     # Read database
     # Set years range
     years_setting, lever_setting = init_years_lever()
@@ -216,7 +219,6 @@ def database_from_csv_to_datamatrix():
 
 
 def read_data(data_file, lever_setting):
-
     with open(data_file, "rb") as handle:
         DM_district_heating = pickle.load(handle)
 
@@ -240,7 +242,6 @@ def read_data(data_file, lever_setting):
 
 
 def simulate_power_to_district_heating_input():
-
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
     file = "All-Countries-interface_from-power-to-district-heating.xlsx"
     file_path = os.path.join(current_file_directory, "../_database/data/xls/", file)
@@ -264,7 +265,6 @@ def simulate_power_to_district_heating_input():
 
 
 def simulate_industry_to_district_heating_input():
-
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
     file = "All-Countries-interface_from-industry-to-district-heating.xlsx"
     file_path = os.path.join(current_file_directory, "../_database/data/xls/", file)
@@ -280,7 +280,6 @@ def simulate_industry_to_district_heating_input():
 
 
 def simulate_buildings_to_district_heating_input():
-
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
     file = "All-Countries-interface_from-buildings-to-district-heating.xlsx"
     file_path = os.path.join(current_file_directory, "../_database/data/xls/", file)
@@ -302,7 +301,6 @@ def simulate_buildings_to_district_heating_input():
 
 
 def dhg_energy_demand_workflow(dm_dhg, dm_bld, dm_pow, dm_ind):
-
     # technology-fuel-% * efficiency-by-fuel
     dm_dhg.operation(
         "bld_heat-district-efficiency",
@@ -445,7 +443,7 @@ def dhg_emissions_workflow(DM_energy, dm_CO2_coef, cdm_emission_fact):
     )
     # Put 0 instead of nan in emission factor
     cdm_emission_fact.array = np.nan_to_num(cdm_emission_fact.array)
-    # Mutiply energy-demand by fuel by emission factor by fuel and GHG
+    # Multiply energy-demand by fuel by emission factor by fuel and GHG
     idx_h = dm_heat_by_fuel.idx
     idx_c = cdm_emission_fact.idx
     arr = (
@@ -509,7 +507,6 @@ def dhg_emissions_workflow(DM_energy, dm_CO2_coef, cdm_emission_fact):
 
 
 def dhg_costs_workflow(dm_fuel, dm_pipes, dm_cap, dm_rr, dm_price, cdm_cost, baseyear):
-
     # Capacity factor from daily to yearly
     dm_cap.array = dm_cap.array * 8760
     dm_fuel.append(dm_cap, dim="Variables")
@@ -594,7 +591,6 @@ def dhg_costs_workflow(dm_fuel, dm_pipes, dm_cap, dm_rr, dm_price, cdm_cost, bas
 
 
 def dhg_TPE_interface(DM_energy, DM_emissions):
-
     # Compute total energy demand
     dm_energy_added = DM_energy["added-district-heating"].copy()
     dm_energy_added.groupby(
@@ -641,7 +637,6 @@ def dhg_TPE_interface(DM_energy, DM_emissions):
 
 
 def district_heating(lever_setting, years_setting, interface=Interface()):
-
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
     district_heating_data_file = os.path.join(
         current_file_directory,

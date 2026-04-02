@@ -2,26 +2,35 @@
 # SECTION: Import Packages, Classes & Functions
 #######################################################################################################################
 
-import numpy as np
-import pickle  # read/write the data in pickle
+import json
 import os  # operating system (e.g., look for workspace)
+import pickle  # read/write the data in pickle
+
+import numpy as np
 import pandas as pd
 
-# Import Class
-from transition_compass_model.model.common.data_matrix_class import DataMatrix  # Class for the model inputs
+from transition_compass_model.model.common.auxiliary_functions import (
+    filter_geoscale,
+    read_level_data,
+    simulate_input,
+)
 from transition_compass_model.model.common.constant_data_matrix_class import (
     ConstantDataMatrix,
 )  # Class for the constant inputs
-from transition_compass_model.model.common.auxiliary_functions import (
-    read_level_data,
-    filter_geoscale,
-    simulate_input,
+
+# Import Class
+from transition_compass_model.model.common.data_matrix_class import (
+    DataMatrix,
+)  # Class for the model inputs
+from transition_compass_model.model.common.hourly_data_functions import (
+    hourly_data_reader,
 )
+from transition_compass_model.model.common.interface_class import Interface
 
 # ImportFunctions
-from transition_compass_model.model.common.io_database import read_database_to_ots_fts_dict
-from transition_compass_model.model.common.hourly_data_functions import hourly_data_reader
-from transition_compass_model.model.common.interface_class import Interface
+from transition_compass_model.model.common.io_database import (
+    read_database_to_ots_fts_dict,
+)
 
 #######################################################################################################################
 # ModelSetting - Power
@@ -333,13 +342,13 @@ def database_from_csv_to_datamatrix():
 
     cdm_const_cat0 = ConstantDataMatrix.extract_constant(
         "interactions_constants",
-        pattern="cp_timestep_hours-a-year|" "cp_carbon-capture_power-self-consumption",
+        pattern="cp_timestep_hours-a-year|cp_carbon-capture_power-self-consumption",
         num_cat=0,
     )
 
     cdm_const_cat1 = ConstantDataMatrix.extract_constant(
         "interactions_constants",
-        pattern="cp_power-unit-self-consumption|" "cp_fuel-based-power-efficiency",
+        pattern="cp_power-unit-self-consumption|cp_fuel-based-power-efficiency",
         num_cat=1,
     )
 
@@ -493,7 +502,6 @@ def read_data(data_file, lever_setting):
 # LocalInterfaces - Climate
 #######################################################################################################################
 def simulate_climate_to_power_input():
-
     dm_climate = simulate_input(from_sector="climate", to_sector="power", num_cat=1)
 
     return dm_climate
@@ -509,7 +517,7 @@ def simulate_buildings_to_power_input():
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
     f = os.path.join(
         current_file_directory,
-        "../_database/data/xls/" "All-Countries-interface_from-buildings-to-power.xlsx",
+        "../_database/data/xls/All-Countries-interface_from-buildings-to-power.xlsx",
     )
     df = pd.read_excel(f)
     dm = DataMatrix.create_from_df(df, num_cat=2)
@@ -541,7 +549,7 @@ def simulate_transport_to_power_input():
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
     f = os.path.join(
         current_file_directory,
-        "../_database/data/xls/" "All-Countries-interface_from-transport-to-power.xlsx",
+        "../_database/data/xls/All-Countries-interface_from-transport-to-power.xlsx",
     )
     df = pd.read_excel(f)
     dm_tra = DataMatrix.create_from_df(df, num_cat=0)
@@ -563,7 +571,7 @@ def simulate_industry_to_power_input():
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
     f = os.path.join(
         current_file_directory,
-        "../_database/data/xls/" "All-Countries-interface_from-industry-to-power.xlsx",
+        "../_database/data/xls/All-Countries-interface_from-industry-to-power.xlsx",
     )
     df = pd.read_excel(f, sheet_name="default")
     dm = DataMatrix.create_from_df(df, num_cat=0)
@@ -596,7 +604,7 @@ def simulate_ammonia_to_power_input():
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
     f = os.path.join(
         current_file_directory,
-        "../_database/data/xls/" "All-Countries-interface_from-ammonia-to-power.xlsx",
+        "../_database/data/xls/All-Countries-interface_from-ammonia-to-power.xlsx",
     )
     df = pd.read_excel(f, sheet_name="default")
     dm = DataMatrix.create_from_df(df, num_cat=0)
@@ -628,8 +636,7 @@ def simulate_agriculture_to_power_input():
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
     f = os.path.join(
         current_file_directory,
-        "../_database/data/xls/"
-        "All-Countries-interface_from-agriculture-to-power.xlsx",
+        "../_database/data/xls/All-Countries-interface_from-agriculture-to-power.xlsx",
     )
     df = pd.read_excel(f, sheet_name="default")
     dm = DataMatrix.create_from_df(df, num_cat=0)
@@ -649,7 +656,6 @@ def simulate_agriculture_to_power_input():
 # CalculationTree - Power - Yearly Production
 #######################################################################################################################
 def yearly_production_workflow(dm_climate, dm_capacity, dm_ccus, cdm_const):
-
     ######################################
     # CalculationLeafs - Gross electricity production [GWh]
     ######################################
@@ -869,8 +875,7 @@ def yearly_production_workflow(dm_climate, dm_capacity, dm_ccus, cdm_const):
 
     dm_production_np = dm_yearly_production.filter_w_regex(
         {
-            "Categories1": "hydroelectric|solar-csp|geothermal|marine|"
-            "oil|gas|coal|biomass|biogas|nuclear"
+            "Categories1": "hydroelectric|solar-csp|geothermal|marine|oil|gas|coal|biomass|biogas|nuclear"
         }
     )
 
@@ -900,7 +905,6 @@ def yearly_production_workflow(dm_climate, dm_capacity, dm_ccus, cdm_const):
 def hourly_production_workflow(
     dm_production_np, dm_production_p, DM_production_profiles, baseyear
 ):
-
     ######################################
     # CalculationLeafs - Hourly production per technology (wind & solar)[GWh]
     ######################################
@@ -995,7 +999,6 @@ def yearly_demand_workflow(
     dm_ind_hydrogen,
     dm_amm_hydrogen,
 ):
-
     def check_unit(dm, unit):
         for var in dm.col_labels["Variables"]:
             if dm.units[var] != unit:
@@ -1072,7 +1075,6 @@ def yearly_demand_workflow(
 # CalculationTree - Power - Hourly demand
 #######################################################################################################################
 def hourly_demand_workflow(DM_yearly_demand, DM_demand_profiles, baseyear):
-
     ######################################
     # CalculationLeafs - Hourly profiles per sector [GWh]
     ######################################
@@ -1234,7 +1236,6 @@ def hourly_demand_workflow(DM_yearly_demand, DM_demand_profiles, baseyear):
 # CalculationTree - Power - Storage
 #######################################################################################################################
 def storage_workflow(dm_hourly_demand, dm_hourly_production):
-
     ######################################
     # CalculationLeafs - Hourly equilibrium [GWh]
     ######################################
@@ -1287,7 +1288,6 @@ def storage_workflow(dm_hourly_demand, dm_hourly_production):
 
 
 def emissions_workflow(dm_gross_production, cdm_emissions_fact):
-
     cdm_emissions_fact.sort("Categories2")
     dm_gross_production.filter(
         {"Categories1": cdm_emissions_fact.col_labels["Categories2"]}, inplace=True
@@ -1314,8 +1314,7 @@ def emissions_workflow(dm_gross_production, cdm_emissions_fact):
 
 
 def pow_refinery_interface(dm_gross_production):
-
-    # !FIXME once we figure out the trade, we should include the electricty produced from fossil abroad
+    # !FIXME once we figure out the trade, we should include the electricity produced from fossil abroad
     dm_fossil_production = dm_gross_production.filter(
         {"Categories1": ["coal", "oil", "gas", "nuclear"]}
     )

@@ -1,19 +1,18 @@
-from transition_compass_model.model.common.interface_class import Interface
-
-from transition_compass_model.model.common.auxiliary_functions import (
-    read_level_data,
-    filter_country_and_load_data_from_pickles,
-)
-import pickle
 import os
+import pickle
 
+import transition_compass_model.model.transport.checks as checks
 import transition_compass_model.model.transport.interfaces as inter
 import transition_compass_model.model.transport.workflows as wkf
-import transition_compass_model.model.transport.checks as checks
+from transition_compass_model.model.common.auxiliary_functions import (
+    filter_country_and_load_data_from_pickles,
+    read_level_data,
+)
+from transition_compass_model.model.common.config_loader import load_lever_config
+from transition_compass_model.model.common.interface_class import Interface
 
 
 def read_data(DM_transport, lever_setting):
-
     dict_fxa = DM_transport["fxa"]
     dm_freight_tech = dict_fxa["freight_tech"]
     dm_passenger_tech = dict_fxa["passenger_tech"]
@@ -76,7 +75,6 @@ def read_data(DM_transport, lever_setting):
 
 
 def transport(lever_setting, years_setting, DM_input, interface=Interface()):
-
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
     DM_passenger, DM_freight, DM_other, cdm_const = read_data(DM_input, lever_setting)
 
@@ -227,6 +225,6 @@ def local_transport_run():
 # database_from_csv_to_datamatrix()
 # print('In transport, the share of waste by fuel/tech type does not seem right. Fix it.')
 # print('Apply technology shares before computing the stock')
-# print('For the efficiency, use the new methodology developped for Building (see overleaf on U-value)')
+# print('For the efficiency, use the new methodology developed for Building (see overleaf on U-value)')
 if __name__ == "__main__":
     results_run = local_transport_run()
