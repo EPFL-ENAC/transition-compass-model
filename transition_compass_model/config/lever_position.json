@@ -80,8 +80,6 @@
     "lever_residential-heat-profile": 1,
     "lever_non-residential-cooling-profile": 1,
     "lever_residential-cooling-profile": 1,
-    "lever_eol-waste-management": 1,
-    "lever_eol-material-recovery": 1,
     "lever_harvest-rate": 2,
     "lever_footprint": 1
   }

@@ -152,6 +152,14 @@ def run(DM_transport_new, country_list, years_ots, years_fts):
 
     # Load existing DM_transport
     this_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # temporary just for faster running of transport_fts_pcv2.py
+    pickle_file = os.path.join(
+        this_dir, "../../../../data/datamatrix/transport_wo_aviation.pickle"
+    )
+    my_pickle_dump(DM_new=DM_transport_wo_aviation, local_pickle_file=pickle_file)
+    sort_pickle(pickle_file)
+
     pickle_file = os.path.join(this_dir, "../../../../data/datamatrix/transport.pickle")
     with open(pickle_file, "rb") as handle:
         DM_transport = pickle.load(handle)

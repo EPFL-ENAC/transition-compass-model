@@ -4,11 +4,11 @@ import pickle
 from _database.pre_processing.transport.Switzerland.get_data_functions.demand_pkm_vkm import (
     extract_EP2050_transport_vkm_demand,
 )
-from passenger_fleet_pipeline import run as passenger_fleet_run
-from passenger_renewal_rate_and_waste_pipeline import (
+from processors.passenger_fleet_pipeline import run as passenger_fleet_run
+from processors.passenger_renewal_rate_and_waste_pipeline import (
     run as passenger_ren_rate_waste_adj_run,
 )
-from transport_demand_pipeline import run as demand_pkm_vkm_run
+from processors.transport_demand_pipeline import run as demand_pkm_vkm_run
 
 from transition_compass_model.model.common.auxiliary_functions import (
     create_years_list,

@@ -216,5 +216,7 @@ __marimo__/
 .streamlit/secrets.toml
 
 
+transition_compass_model/_database/data/datamatrix/transport_wo_aviation.pickle
+
 CLAUDE.md
 .claude/*
