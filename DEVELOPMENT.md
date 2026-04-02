@@ -111,17 +111,17 @@ git clone https://github.com/EPFL-ENAC/leure-speed-to-zero.git speed-to-zero
 git clone https://github.com/2050Calculators/transition-compass-model.git transition-compass-model
 
 # 2. Install the app using the local model folder (editable install)
-cd speed-to-zero/backend
-make install-local
+cd speed-to-zero
+make install-dev
 ```
 
-`make install-local` runs `uv sync --frozen` (installs all locked dependencies) then overrides `transition-compass-model` with an editable install pointing at `../../transition-compass-model`. Any change you make to the model files is immediately active — no reinstall needed.
+`make install-dev` runs `uv sync --frozen` (installs all locked dependencies) then overrides `transition-compass-model` with an editable install pointing at `../../transition-compass-model`. Any change you make to the model files is immediately active — no reinstall needed.
 
 ### Verify which model is active
 
 ```bash
-# From speed-to-zero/backend/
-make check-model
+# From speed-to-zero/
+cd backend && make check-model
 # prints: Model source: /path/to/transition_compass_model/__init__.py
 ```
 
@@ -131,6 +131,7 @@ make check-model
 ### Switch back to the remote (git-pinned) model
 
 ```bash
+# From speed-to-zero/
 make install
 # runs `uv sync --frozen` — restores the version pinned in uv.lock, drops editable install
 ```

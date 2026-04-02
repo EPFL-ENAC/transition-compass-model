@@ -70,18 +70,20 @@ After cloning, LFS files are fetched automatically. If you see small pointer fil
 
 ## Install
 
-> **Note**: `pip install git+https://...` does **not** support Git LFS — it will install pointer files instead of actual data. Install from a local clone instead:
-
-```bash
-git clone https://github.com/2050Calculators/transition-compass-model.git
-cd transition-compass-model
-pip install .
-```
+> **Note on Git LFS**: `pip install git+https://...` does **not** support Git LFS — it will install pointer files instead of real data. To use this package:
+>
+> - **Development / research** — install from a local clone (recommended):
+>   ```bash
+>   git clone https://github.com/2050Calculators/transition-compass-model.git
+>   cd transition-compass-model
+>   pip install .
+>   ```
+> - **As a `uv` dependency** (e.g. in another project or app) — works if [`git lfs install`](https://git-lfs.com/) has been run on the machine. This is how [speed-to-zero](https://github.com/EPFL-ENAC/leure-speed-to-zero) consumes the model in production.
 
 Or pin to a specific release tag:
 
 ```bash
-git clone --branch v1.0.0 https://github.com/2050Calculators/transition-compass-model.git
+git clone --branch v1.2.3 https://github.com/2050Calculators/transition-compass-model.git
 cd transition-compass-model
 pip install .
 ```
@@ -156,16 +158,16 @@ parent-dir/
 ```
 
 ```bash
-cd speed-to-zero/backend
-make install-local   # Installs deps + editable model from sibling folder
-cd ..
-make run             # Start app — model changes are reflected immediately
+cd speed-to-zero
+make install-dev   # Installs deps + editable model from sibling folder
+make run           # Start app — model changes are reflected immediately
 ```
 
 Verify which model is active:
 
 ```bash
-cd speed-to-zero/backend && make check-model
+# From speed-to-zero/
+cd backend && make check-model
 # Local mode:  path points to ../../transition-compass-model/
 # Remote mode: path points inside .venv/lib/.../site-packages/
 ```
