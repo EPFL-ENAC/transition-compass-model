@@ -57,16 +57,31 @@ transition_compass_model/
 
 Given a set of policy lever values (integers 1–4 representing ambition levels), `interactions.py` runs the relevant sector modules and returns time-series results for emissions, energy demand, and environmental indicators.
 
-## Install
+## Git LFS
+
+This repository uses [Git LFS](https://git-lfs.com/) to store binary data files (`.pickle`, `.pdf`) on an [ENAC IT self-hosted server](https://enac-it-git-lfs.epfl.ch). You need Git LFS installed for a working clone:
 
 ```bash
-pip install git+https://github.com/2050Calculators/transition-compass-model.git
+# Install Git LFS (once per machine)
+git lfs install
+```
+
+After cloning, LFS files are fetched automatically. If you see small pointer files instead of real data, run `git lfs pull`.
+
+## Install
+
+> **Note**: `pip install git+https://...` does **not** support Git LFS — it will install pointer files instead of actual data. Install from a local clone instead:
+
+```bash
+git clone https://github.com/2050Calculators/transition-compass-model.git
+pip install ./transition-compass-model
 ```
 
 Or pin to a specific release tag:
 
 ```bash
-pip install git+https://github.com/2050Calculators/transition-compass-model.git@v1.0.0
+git clone --branch v1.0.0 https://github.com/2050Calculators/transition-compass-model.git
+pip install ./transition-compass-model
 ```
 
 ## Usage
@@ -101,6 +116,7 @@ To customise lever settings, edit `transition_compass_model/config/lever_positio
 ### Standalone (model only)
 
 ```bash
+git lfs install  # If not already done
 git clone https://github.com/2050Calculators/transition-compass-model.git
 cd transition-compass-model
 make install     # Install deps + activate pre-commit hooks
