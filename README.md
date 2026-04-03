@@ -70,23 +70,19 @@ After cloning, LFS files are fetched automatically. If you see small pointer fil
 
 ## Install
 
-> **Note on Git LFS**: `pip install git+https://...` does **not** support Git LFS — it will install pointer files instead of real data. To use this package:
->
-> - **Development / research** — install from a local clone (recommended):
->   ```bash
->   git clone https://github.com/2050Calculators/transition-compass-model.git
->   cd transition-compass-model
->   pip install .
->   ```
-> - **As a `uv` dependency** (e.g. in another project or app) — works if [`git lfs install`](https://git-lfs.com/) has been run on the machine. This is how [speed-to-zero](https://github.com/EPFL-ENAC/leure-speed-to-zero) consumes the model in production.
-
-Or pin to a specific release tag:
+The package is published on [PyPI](https://pypi.org/project/transition-compass-model/):
 
 ```bash
-git clone --branch v1.2.3 https://github.com/2050Calculators/transition-compass-model.git
-cd transition-compass-model
-pip install .
+pip install transition-compass-model
 ```
+
+Pin to a specific version:
+
+```bash
+pip install transition-compass-model==1.2.3
+```
+
+> **Note**: Binary data files (`.pickle`) are bundled directly in the PyPI wheel — no Git LFS required.
 
 ## Usage
 
@@ -188,8 +184,8 @@ Releases follow [Semantic Versioning](https://semver.org/): `vMAJOR.MINOR.PATCH`
 
 1. Commit and push all model changes to `main`
 2. Tag and push: `git tag v1.2.3 && git push origin v1.2.3`
-3. GitHub Actions dispatches a `model-updated` event to the app repo
-4. A bump PR is created automatically in speed-to-zero (`chore/bump-model-v1.2.3 → dev`)
+3. GitHub Actions publishes the new version to PyPI and dispatches a `model-updated` event to the app repo
+4. A bump PR is created automatically in speed-to-zero (`chore/bump-model-v1.2.3 → dev`) — pins the new PyPI version and regenerates the lock file
 5. Review and merge the PR — CI validates the build, then deploys
 
 ## License
