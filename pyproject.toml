@@ -5,11 +5,16 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "transition-compass-model"
 version = "0.1.0"
-description = "Leure Transition Compass Model - Speed to Zero"
+description = "Multi-sector climate pathway calculation engine for modeling policy impacts on emissions, energy, and environmental indicators"
 readme = "README.md"
+license = "Apache-2.0"
 requires-python = ">=3.12"
-
-
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+    "Programming Language :: Python :: 3.12",
+]
 dependencies = [
     "amply>=0.1.6",
     "amplpy>=0.13.0",
@@ -31,6 +36,10 @@ dependencies = [
     "statsmodels>=0.14.0",
     "tqdm>=4.67.3",
 ]
+
+[project.urls]
+Homepage = "https://github.com/2050Calculators/transition-compass-model"
+Repository = "https://github.com/2050Calculators/transition-compass-model"
 
 [dependency-groups]
 dev = [

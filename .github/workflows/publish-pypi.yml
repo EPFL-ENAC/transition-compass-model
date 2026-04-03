@@ -1,0 +1,62 @@
+name: Publish to PyPI
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Verify LFS files are real (not pointers)
+        run: |
+          find . -name "*.pickle" -exec file {} + | head -5
+          pickle_count=$(find . -name "*.pickle" | wc -l)
+          echo "Found $pickle_count pickle files"
+          if [ "$pickle_count" -lt 10 ]; then
+            echo "ERROR: Expected at least 10 pickle files, got $pickle_count"
+            exit 1
+          fi
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install build dependencies
+        run: uv pip install --system build
+
+      - name: Build package
+        run: python -m build
+
+      - name: Verify wheel contains data
+        run: |
+          unzip -l dist/*.whl | grep -c '\.pickle' | xargs -I{} echo "Pickle files in wheel: {}"
+          unzip -l dist/*.whl | grep '\.pickle' | head -5
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
