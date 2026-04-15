@@ -46,7 +46,6 @@ def join_ots_fts_Yasser_dataset(dm_ots, dm_fts, years_fts):
 
 
 def extract_CDD_HDD_from_Yasser_dataset(years_fts):
-
     ots_folder = "data/historical_meteoswiss/"
     fts_folder = "data/ch2018_climate_models/"
     swiss_file_CDD = ots_folder + "historical_meteoswiss_national_CDD.csv"
@@ -88,7 +87,7 @@ def extract_CDD_HDD_from_Yasser_dataset(years_fts):
             else:
                 dm_all = dm
         if "dm_HCDD" in locals():
-            dm_HCDD.append(dm_all, dim="Variables")
+            dm_HCDD.append(dm_all, dim="Variables")  # noqa: F823
         else:
             dm_HCDD = dm_all.copy()
         del dm_all
@@ -141,7 +140,7 @@ def extract_days_Tbase_from_Yasser_dataset(years_fts):
             else:
                 dm_all = dm
         if "dm_N" in locals():
-            dm_N.append(dm_all, dim="Variables")
+            dm_N.append(dm_all, dim="Variables")  # noqa: F823
         else:
             dm_N = dm_all.copy()
         del dm_all
@@ -149,7 +148,6 @@ def extract_days_Tbase_from_Yasser_dataset(years_fts):
 
 
 def dummy_update_DM_module_baseyear(DM_old):
-
     DM_new = {"ots": dict(), "fts": dict()}
     # key = 'fts', 'ots'
     for lever in DM_old["ots"]:
@@ -179,7 +177,6 @@ def dummy_update_DM_module_baseyear(DM_old):
 
 
 def filter_country_DM(cntr_list, DM):
-
     for lever in DM["ots"]:
         for dm_name in DM["ots"][lever]:
             dm_ots = DM["ots"][lever][dm_name]

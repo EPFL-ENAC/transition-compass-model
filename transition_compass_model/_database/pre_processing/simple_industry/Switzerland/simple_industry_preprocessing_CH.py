@@ -6,7 +6,7 @@ import zipfile
 import numpy as np
 import pandas as pd
 import requests
-from _database.pre_processing.api_routines_CH import get_data_api_CH
+from _database.pre_processing.api_routines_CH import get_data_api_CH  # type: ignore
 
 from transition_compass_model.model.common.auxiliary_functions import (
     create_years_list,
@@ -21,7 +21,6 @@ def has_numbers(inputString):
 
 
 def extract_national_energy_demand(table_id, file):
-
     try:
         with open(file, "rb") as handle:
             dm_energy = pickle.load(handle)
@@ -117,7 +116,6 @@ def extract_national_energy_demand(table_id, file):
 
 
 def extract_employees_per_sector_canton(table_id, file):
-
     try:
         with open(file, "rb") as handle:
             dm_employees = pickle.load(handle)
@@ -315,7 +313,6 @@ def save_url_to_file(file_url, local_filename):
 
 
 def clean_df_EP2050(df, keep_list):
-
     # Set the new header
     df.drop(columns=["zurück", "Unnamed: 2"], inplace=True)
     df.columns = df.iloc[10]
@@ -339,7 +336,6 @@ def clean_df_EP2050(df, keep_list):
 
 
 def extract_EP2050_industry_data(file_url, zip_name, keep_years):
-
     extract_dir = os.path.splitext(zip_name)[0]  # 'data/EP2050_sectors'
     if not os.path.exists(extract_dir):
         save_url_to_file(file_url, zip_name)
@@ -388,8 +384,7 @@ def extract_EP2050_industry_data(file_url, zip_name, keep_years):
     return dm
 
 
-def extract_EP2050_industry_data(file_url, zip_name, keep_years):
-
+def extract_EP2050_industry_data(file_url, zip_name, keep_years):  # noqa: F811
     extract_dir = os.path.splitext(zip_name)[0]  # 'data/EP2050_sectors'
     if not os.path.exists(extract_dir):
         save_url_to_file(file_url, zip_name)
@@ -515,12 +510,12 @@ def create_industry_energy_demand_by_canton_fuel_enduse(dm_c_s_f, dm_end_use):
     dm_cantons_ind_wo_process = dm_c_s_f.filter(
         {"Categories1": ["industry-wo-process-heat"]}
     )
-    dm_end_use_process = dm_end_use.filter({"Categories1": ["process-heat"]})
+    dm_end_use_process = dm_end_use.filter({"Categories1": ["process-heat"]})  # noqa: F841
     dm_end_use_others = dm_end_use.copy()
     dm_end_use_others.drop("Categories1", "process-heat")
 
     # For OTHERS (non process heat)
-    dm_cantons_end_use_wo_process = distribute_fuels_by_end_use(
+    dm_cantons_end_use_wo_process = distribute_fuels_by_end_use(  # noqa: F841
         dm_cantons_ind_wo_process, dm_end_use_others
     )
 
@@ -554,7 +549,7 @@ def extract_heating_technologies(table_id, file):
         }
         unit_all = ["number"] * len(structure["Catégorie de bâtiment"])
         dm_heating = None
-        tot_bld = 0
+        tot_bld = 0  # noqa: F841
         for a in structure["Source d'énergie de l'eau chaude"]:
             filter["Source d'énergie de l'eau chaude"] = [a]
             dm_heating_t = get_data_api_CH(
@@ -631,7 +626,7 @@ def extract_hotwater_technologies(table_id, file):
         }
         unit_all = ["number"] * len(structure["Catégorie de bâtiment"])
         dm_hw = None
-        tot_bld = 0
+        tot_bld = 0  # noqa: F841
         for a in structure["Source d'énergie du chauffage"]:
             filter["Source d'énergie du chauffage"] = [a]
             dm_hw_t = get_data_api_CH(
@@ -746,7 +741,6 @@ def map_services_eud_by_canton(dm_employees_mapped, dm_services_end_use):
 def split_fuel_demand_by_eud(
     dm_water, dm_space_heat, dm_industry_eud_canton, cantonal=True
 ):
-
     dm_fuel_split = dm_water.copy()
     dm_fuel_split.append(dm_space_heat, dim="Categories1")
 
@@ -997,7 +991,7 @@ def run():
     dm_industry_energy_end_use.change_unit(
         "ind_energy-end-use", old_unit="PJ", new_unit="TWh", factor=3.6, operator="/"
     )
-    dm_industry_energy_end_use_fts = dm_industry_energy_end_use.filter(
+    dm_industry_energy_end_use_fts = dm_industry_energy_end_use.filter(  # noqa: F841
         {"Years": years_fts}
     )
     dm_industry_energy_end_use.filter({"Years": years_ots}, inplace=True)
@@ -1197,7 +1191,7 @@ def run():
     )
 
     # dm_fuels_eud_cantons.flattest().datamatrix_plot({'Country': ['Switzerland']})
-    DM = {"ind-serv-energy-demand": dm_fuels_eud_cantons}
+    DM = {"ind-serv-energy-demand": dm_fuels_eud_cantons}  # noqa: F841
 
     # file_industry = '../../../data/interface/industry_to_energy.pickle'
     # with open(file_industry, 'wb') as handle:

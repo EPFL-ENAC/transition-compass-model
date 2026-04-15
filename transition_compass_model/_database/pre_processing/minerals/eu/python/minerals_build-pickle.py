@@ -173,4 +173,4 @@ for name in dm_names:
 f = os.path.join(
     current_file_directory, "../../../../data/datamatrix/minerals_new.pickle"
 )
-my_pickle_dump(DM_minerals, f)
+my_pickle_dump(DM_minerals, f)  # noqa: F821

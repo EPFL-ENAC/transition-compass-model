@@ -56,7 +56,7 @@ df_wst = df_wst.rename(columns={"geoscale": "Country", "timescale": "Years"})
 
 # fix countries
 df1 = df_wst.sort_values(by=["Country"])
-np.array(countries)
+np.array(countries)  # noqa: F821
 df1["Country"].unique()
 df1.loc[df1["Country"] == "Czechia", "Country"] = "Czech Republic"
 df1 = df1.loc[df1["Country"] != "Iceland", :]

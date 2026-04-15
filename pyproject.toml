@@ -61,7 +61,6 @@ include = ["transition_compass_model*"]
 [tool.ruff]
 line-length = 88
 target-version = "py312"
-exclude = ["**/pre_processing/**"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]

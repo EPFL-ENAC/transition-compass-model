@@ -1,21 +1,19 @@
 # ======================  IMPORT PACKAGES & DATA  ========================================================
-import copy
+import os
 import pickle
+
 import numpy as np
 import pandas as pd
+from _database.pre_processing.transport.Switzerland.get_data_functions import utils
+
 from transition_compass_model.model.common.auxiliary_functions import (
     linear_fitting,
     my_pickle_dump,
     sort_pickle,
-    dm_add_missing_variables,
 )
-import os
-from _database.pre_processing.transport.Switzerland.get_data_functions import utils
-from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 
 def define_variables_for_lever(DM_transport, lever: int):
-
     dm_modal_share_lever = DM_transport["fts"]["passenger_modal-share"][lever].filter(
         {"Country": ["Vaud"]}
     )
@@ -29,7 +27,6 @@ def define_variables_for_lever(DM_transport, lever: int):
 
 
 def update_lever_in_loop(key, cat, dm_modal_ots_cat, idx_ots, dict_ratio, array_lever):
-
     dm_modal_share_lever, idx, dm_modal_share_lever, dm_modal_share_lever_tmp = (
         array_lever
     )
@@ -48,7 +45,6 @@ def update_lever_in_loop(key, cat, dm_modal_ots_cat, idx_ots, dict_ratio, array_
 
 
 def run(DM_transport):
-
     DM_fts = {"fts": dict()}
 
     # ======================  MODAL_SHARE  ========================================================

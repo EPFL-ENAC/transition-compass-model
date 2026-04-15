@@ -21,7 +21,6 @@ def has_numbers(inputString):
 
 
 def extract_national_energy_demand(table_id, file):
-
     try:
         with open(file, "rb") as handle:
             dm_energy = pickle.load(handle)
@@ -117,7 +116,6 @@ def extract_national_energy_demand(table_id, file):
 
 
 def extract_employees_per_sector_canton(table_id, file):
-
     try:
         with open(file, "rb") as handle:
             dm_employees = pickle.load(handle)
@@ -287,7 +285,7 @@ def map_national_energy_demand_by_sector_to_cantons(dm_energy, dm_employees):
         np.nan,
         dummy=True,
         dim="Years",
-        col_label=list(set(years_ots) - set(dm_employees_mapped.col_labels["Years"])),
+        col_label=list(set(years_ots) - set(dm_employees_mapped.col_labels["Years"])),  # noqa: F821
     )
     dm_employees_mapped.sort("Years")
     dm_employees_mapped.fill_nans("Years")
@@ -315,7 +313,6 @@ def save_url_to_file(file_url, local_filename):
 
 
 def clean_df_EP2050(df, keep_list):
-
     # Set the new header
     df.drop(columns=["zurück", "Unnamed: 2"], inplace=True)
     df.columns = df.iloc[10]
@@ -339,14 +336,13 @@ def clean_df_EP2050(df, keep_list):
 
 
 def extract_EP2050_industry_data(file_url, zip_name, keep_years):
-
     extract_dir = os.path.splitext(zip_name)[0]  # 'data/EP2050_sectors'
     if not os.path.exists(extract_dir):
         save_url_to_file(file_url, zip_name)
 
         # Extract the file
         os.makedirs(extract_dir, exist_ok=True)
-        with zipfile.ZipFile(local_filename, "r") as zip_ref:
+        with zipfile.ZipFile(local_filename, "r") as zip_ref:  # noqa: F821
             zip_ref.extractall(extract_dir)
 
     file_industry = (
@@ -388,8 +384,7 @@ def extract_EP2050_industry_data(file_url, zip_name, keep_years):
     return dm
 
 
-def extract_EP2050_industry_data(file_url, zip_name, keep_years):
-
+def extract_EP2050_industry_data(file_url, zip_name, keep_years):  # noqa: F811
     extract_dir = os.path.splitext(zip_name)[0]  # 'data/EP2050_sectors'
     if not os.path.exists(extract_dir):
         save_url_to_file(file_url, zip_name)
@@ -746,7 +741,6 @@ def map_services_eud_by_canton(dm_employees_mapped, dm_services_end_use):
 def split_fuel_demand_by_eud(
     dm_water, dm_space_heat, dm_industry_eud_canton, cantonal=True
 ):
-
     dm_fuel_split = dm_water.copy()
     dm_fuel_split.append(dm_space_heat, dim="Categories1")
 
@@ -814,7 +808,7 @@ def add_process_heat_demand(dm_fuels_eud_cantons, dm_fuels_cantons, cantonal=Tru
     dm_ind_fuels.add(
         np.nan,
         dim="Years",
-        col_label=list(set(years_ots) - set(dm_ind_fuels.col_labels["Years"])),
+        col_label=list(set(years_ots) - set(dm_ind_fuels.col_labels["Years"])),  # noqa: F821
         dummy=True,
     )
     dm_ind_fuels.fill_nans("Years")
@@ -946,7 +940,7 @@ def adjust_based_on_FSO_energy_consumption(
     dm_OFS_fuels.filter({"Country": dm_eud_shares.col_labels["Country"]}, inplace=True)
 
     # Add missing years
-    missing_years = list(set(years_ots) - set(dm_OFS_fuels.col_labels["Years"]))
+    missing_years = list(set(years_ots) - set(dm_OFS_fuels.col_labels["Years"]))  # noqa: F821
     dm_OFS_fuels.add(np.nan, dim="Years", col_label=missing_years, dummy=True)
     dm_OFS_fuels.fill_nans("Years")
     dm_OFS_fuels.sort("Years")
