@@ -1356,7 +1356,6 @@ wheels = [
 
 [[package]]
 name = "transition-compass-model"
-version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "amplpy" },
