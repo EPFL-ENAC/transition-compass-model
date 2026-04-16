@@ -2,7 +2,7 @@
 
 import sys as _sys
 
-from . import _database, model
+from . import model
 
 
 def _register_compat_aliases():
@@ -26,6 +26,5 @@ def _register_compat_aliases():
 _register_compat_aliases()
 
 __all__ = [
-    "_database",
     "model",
 ]
