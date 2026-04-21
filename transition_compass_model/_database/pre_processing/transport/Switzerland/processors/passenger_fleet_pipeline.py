@@ -5,13 +5,13 @@
 import os
 
 import numpy as np
-from _database.pre_processing.transport.Switzerland.get_data_functions import (
+
+from transition_compass_model._database.pre_processing.transport.Switzerland.get_data_functions import (
     passenger_fleet as get_data,
 )
-from _database.pre_processing.transport.Switzerland.processors.transport_demand_pipeline import (
+from transition_compass_model._database.pre_processing.transport.Switzerland.processors.transport_demand_pipeline import (
     run as demand_pkm_vkm_run,
 )
-
 from transition_compass_model.model.common.auxiliary_functions import (
     create_years_list,
     load_pop,
@@ -117,7 +117,6 @@ def compute_passenger_new_fleet(table_id_new_veh, file_new_veh_ots1, file_new_ve
 
 
 def allocate_other_to_new_technologies(dm_fleet, dm_new_tech):
-
     dm_fleet_other = dm_fleet.filter({"Categories2": ["Other"]})
     # dm_fleet_other.group_all('Categories2')
     dm_fleet_other.filter({"Years": dm_new_tech.col_labels["Years"]}, inplace=True)

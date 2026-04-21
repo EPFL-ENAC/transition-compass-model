@@ -1,13 +1,15 @@
 import os
 
 import numpy as np
-from _database.pre_processing.transport.Switzerland.get_data_functions import utils
-from _database.pre_processing.transport.Switzerland.get_data_functions.demand_pkm_vkm import (
+
+from transition_compass_model._database.pre_processing.transport.Switzerland.get_data_functions import (
+    utils,
+)
+from transition_compass_model._database.pre_processing.transport.Switzerland.get_data_functions.demand_pkm_vkm import (
     get_transport_demand_pkm,
     get_transport_demand_vkm,
     get_travel_demand_region_microrecencement,
 )
-
 from transition_compass_model.model.common.auxiliary_functions import (
     create_years_list,
     dm_add_missing_variables,
@@ -23,7 +25,6 @@ from transition_compass_model.model.common.data_matrix_class import DataMatrix
 def extrapolate_missing_pkm_cap_based_on_pkm_CH(
     dm_pkm_cap_MRMT, dm_pkm_CH, dm_pop, years_ots
 ):
-
     # pkm_cap = pkm (CH) / pop
     arr_pkm_cap = dm_pkm_CH[...] / dm_pop["Switzerland", np.newaxis, :, :, np.newaxis]
     dm_pkm_CH.add(
@@ -138,13 +139,34 @@ def compute_vkm_CH_VD(dm_vkm_CH, dm_pkm_CH, dm_pkm):
 
 
 def run(dm_pop_ots, years_ots):
+    """
+    This function runs the whole pipeline to compute transport demand in pkm and vkm for Switzerland and Vaud, based on the following data sources:
+    -  FSO, 2024. Transport de personnes: prestations de transport. FSO number :  je-f-11.04.01.02
+    -  FSO, 2024. Transport de personnes: prestations kilométriques et mouvements des véhicules. FSO number: je-f-11.04.01.01
+    Recensement micro régional de la mobilité et des transports (MRMT)
+        - FSO, 2021. Recensement micro régional de la mobilité et des transports (MRMT). FSO number: su-f-11.04.03-MZ-2021-T01.xlsx
+        - FSO, 2015. Recensement micro régional de la mobilité et des transports (MRMT). FSO number: su-f-11.04.03-MZ-2015-T01.xls
+        - FSO, 2010. Recensement micro régional de la mobilité et des transports (MRMT). FSO number: su-f-11.04.03-MZ-2010-T00.xls
+
+    The function first reads the data, then adjusts the pkm/cap values for Vaud based on the official values for 2015 and 2021, and finally extrapolates the missing years based on the pkm curve of Switzerland.
+    The vkm is then computed based on the occupancy rate (pkm/vkm) of Switzerland, which is applied to both Switzerland and Vaud.
+
+    Args:
+        dm_pop_ots: DataMatrix with population data for Switzerland and Vaud, in cap
+        years_ots: list of years for which to compute the demand, in OTS (1990-2023)
+
+    Returns:
+        dm_pkm_cap: DataMatrix with pkm/cap for Switzerland and Vaud, in pkm/cap
+        dm_pkm: DataMatrix with pkm for Switzerland and Vaud, in pkm
+        dm_vkm: DataMatrix with vkm for Switzerland and Vaud, in vkm
+    """
 
     this_dir = os.path.dirname(os.path.abspath(__file__))
 
     # SECTION Transport demand ots for pkm, vkm
     #### Passenger transport demand pkm - Switzerland only
     # Data source: FSO, 2024. Transport de personnes: prestations de transport. FSO number: je-f-11.04.01.02
-    file_url = "https://dam-api.bfs.admin.ch/hub/api/dam/assets/32253177/master"
+    file_url = "https://dam-api.bfs.admin.ch/hub/api/dam/assets/36202626/master"
     local_filename = os.path.join(this_dir, "../data/tra_pkm_CH.xlsx")
     dm_pkm_CH = get_transport_demand_pkm(file_url, local_filename, years_ots)
 
@@ -154,6 +176,8 @@ def run(dm_pop_ots, years_ots):
     local_filename = os.path.join(this_dir, "../data/tra_vkm_CH.xlsx")
     dm_vkm_CH = get_transport_demand_vkm(file_url, local_filename, years_ots)
 
+    # Comportement de la population en matière de transports, tableaux de synthèse - Résultats du Microrecensement mobilité et transports 2021
+    # Distance journalière moyenne en Suisse par personne selon le moyen de transport et le motif de déplacement (en km)
     # 2021: https://www.bfs.admin.ch/bfs/de/home/statistiken/kataloge-datenbanken.assetdetail.24267706.html
     # 2015: https://www.bfs.admin.ch/asset/de/2503926
     # 2010: https://www.bfs.admin.ch/asset/de/291635

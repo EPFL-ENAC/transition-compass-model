@@ -223,3 +223,6 @@ CLAUDE.md
 
 # For Mac
 .DS_Store
+
+#data folder
+transition_compass_model/_database/pre_processing/transport/Switzerland/data

@@ -4,8 +4,10 @@ import pickle
 
 import numpy as np
 import pandas as pd
-from _database.pre_processing.transport.Switzerland.get_data_functions import utils
 
+from transition_compass_model._database.pre_processing.transport.Switzerland.get_data_functions import (
+    utils,
+)
 from transition_compass_model.model.common.auxiliary_functions import (
     linear_fitting,
     my_pickle_dump,
@@ -14,7 +16,6 @@ from transition_compass_model.model.common.auxiliary_functions import (
 
 
 def run(DM_transport):
-
     DM_fts = {"fts": dict()}
 
     # ======================  MODAL_SHARE  ========================================================
