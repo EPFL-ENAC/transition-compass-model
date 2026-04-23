@@ -224,3 +224,6 @@ CLAUDE.md
 # For Mac
 .DS_Store
 transition_compass_model/.vscode/launch.json
+
+#data folder
+transition_compass_model/_database/pre_processing/transport/Switzerland/data

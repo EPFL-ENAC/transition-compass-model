@@ -1,12 +1,11 @@
 ########################
 ####    LIFETIME    ####
 ########################
-from src.api.routes import country_list
 
 from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 
-def run(mode_cat, tech_cat, years_ots, years_fts, country_years):
+def run(mode_cat, tech_cat, years_ots, years_fts, country_list):
     # region Reflection on the renewal-rate and lifetime
     # When the stock is constant, the renewal-rate is 1/lifetime. This gives a logical sense to the renewal-rate.
     # For the ots, the renewal-rate is simply computed as waste/stock, and its value is often far from what we believe

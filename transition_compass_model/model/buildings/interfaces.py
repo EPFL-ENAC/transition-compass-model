@@ -280,6 +280,37 @@ def bld_TPE_interface(
         {"title": "Energy Demand for Space Heating", "value": value, "unit": "TWh"}
     )
 
+    # Energy demand total heating  (hotwater + space heating residential + services)
+    # TODO : add a plot for the total energy demand for heating (hot water + space heating for residential + services) and the share of ambient heat and other tech in it.
+    dm_energy_global = (
+        DM_energy["energy-demand-heating"]
+        .filter({"Variables": ["bld_energy-demand_heating"]})
+        .copy()
+    )
+    dm_hw_copy = dm_hw.copy()
+    dm_hw_copy.add(0, "Categories1", ["other-tech", "ambient-heat"], dummy=True)
+    dm_energy_global.append(dm_hw_copy, dim="Variables")
+    dmservices_flat = (
+        DM_services["services_energy-consumption"]
+        .filter({"Categories1": ["hot-water", "space-heating"]})
+        .flatten()
+        .flatten()
+    )
+    dmservices_flat.deepen()
+    dmservices_flat.add(0, "Categories1", ["other-tech", "ambient-heat"], dummy=True)
+    dm_energy_global.append(dmservices_flat, dim="Variables")
+    dm_energy_comsumption_tot = dm_energy_global.groupby(
+        {
+            "energy_consumption": [
+                "bld_services_energy-consumption_hot-water",
+                "bld_services_energy-consumption_space-heating",
+                "bld_energy-demand_heating",
+                "bld_hot-water_energy-demand",
+            ]
+        },
+        dim="Variables",
+    )
+
     # A-C buildings buildings %
     dm_area = DM_area["floor-area-cat"].normalise("Categories1", inplace=False)
     value = (

@@ -3,8 +3,10 @@ import os
 import pickle
 
 import numpy as np
-from _database.pre_processing.transport.Switzerland.get_data_functions import utils
 
+from transition_compass_model._database.pre_processing.transport.Switzerland.get_data_functions import (
+    utils,
+)
 from transition_compass_model.model.common.auxiliary_functions import (
     create_years_list,
     dm_add_missing_variables,
@@ -33,7 +35,6 @@ def forecast_vkm_cap(dm_km, years_fts):
 
 
 def run(DM_transport_new, country_list, years_ots, years_fts):
-
     # SECTION Modal-share and Transport demand pkm fts
     # pkm/cap * modal-share[%]
     dm_pkm_cap_tot = DM_transport_new["ots"]["pkm"].copy()
