@@ -207,6 +207,17 @@ def get_public_transport_data(file_url, local_filename, years_ots):
 
 
 def run(dm_pkm, years_ots):
+    """
+    Run the passenger fleet pipeline.
+
+    Args:
+        dm_pkm (DataMatrix): DataMatrix of passenger demand in pkm, used to downscale public fleet to Vaud
+        years_ots (list): List of years for which to compute the fleet data
+
+    Returns:
+        dm_private_fleet (DataMatrix): DataMatrix of private passenger fleet data
+        dm_public_fleet (DataMatrix): DataMatrix of public passenger fleet data
+    """
     this_dir = os.path.dirname(os.path.abspath(__file__))
 
     # SECTION New vehicle fleet and technology share LDV, 2W ots
