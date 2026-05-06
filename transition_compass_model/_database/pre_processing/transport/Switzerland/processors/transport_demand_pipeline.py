@@ -99,6 +99,7 @@ def extrapolate_missing_pkm_cap_based_on_pkm_CH(
         unit="pkm/cap",
     )
 
+    # dm_pkm_cap_new_VD.rename_col("tra_pkm-cap_MRMT", "tra_pkm-cap_official", dim="Variables")
     # Keep only "official" data
     dm_pkm_cap_new_CH.filter({"Variables": ["tra_pkm-cap_official"]}, inplace=True)
     dm_pkm_cap_new_VD.filter({"Variables": ["tra_pkm-cap_official"]}, inplace=True)

@@ -4,8 +4,10 @@ import pickle
 
 import numpy as np
 import pandas as pd
-from _database.pre_processing.transport.Switzerland.get_data_functions import utils
 
+from transition_compass_model._database.pre_processing.transport.Switzerland.get_data_functions import (
+    utils,
+)
 from transition_compass_model.model.common.auxiliary_functions import (
     linear_fitting,
     my_pickle_dump,
@@ -44,7 +46,7 @@ def update_lever_in_loop(key, cat, dm_modal_ots_cat, idx_ots, dict_ratio, array_
     return dm_modal_share_lever, idx, dm_modal_share_lever, dm_modal_share_lever_tmp
 
 
-def run(DM_transport):
+def run(DM_transport, country_list, years_ots, years_fts):
     DM_fts = {"fts": dict()}
 
     # ======================  MODAL_SHARE  ========================================================
@@ -128,7 +130,7 @@ def run(DM_transport):
 
     dm_modal_share_3.array[
         idx_fts["Vaud"],
-        idx_fts[2030],
+        idx_fts[2035],
         idx_fts["tra_passenger_modal-share"],
         idx_fts["bike"],
     ] = 0.10

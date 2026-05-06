@@ -263,6 +263,9 @@ def bld_TPE_interface(
     )
     dm_emission_global.rename_col("Variables", "bld_CO2-emissions", "Variables")
     dm_tpe.append(dm_emission_global.flattest(), dim="Variables")
+    dm_emission_global.change_unit(
+        "bld_CO2-emissions", factor=1e6, old_unit="Mt", new_unit="t"
+    )
 
     dm_emission_global.group_all("Categories1", inplace=True)
     value = dm_emission_global[0, yr, "bld_CO2-emissions"]
@@ -310,6 +313,7 @@ def bld_TPE_interface(
         },
         dim="Variables",
     )
+    # dm_energy_comsumption_tot.change_unit("energy_consumption", factor=1e6, old_unit="TWh", new_unit="MWh")
 
     # A-C buildings buildings %
     dm_area = DM_area["floor-area-cat"].normalise("Categories1", inplace=False)

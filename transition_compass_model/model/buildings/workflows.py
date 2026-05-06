@@ -433,7 +433,7 @@ def bld_energy_workflow(DM_energy, dm_clm, dm_floor_area, cdm_const):
     dm_A = DM_energy["surface-to-floorarea"]
 
     # Power per degree
-    # 24 * Us * A * m2
+    #  Us * A * m2
     arr_W_K = (
         dm_floor_area[:, :, "bld_floor-area_stock", :, :]
         * dm_uvalue[:, :, "bld_u-value", :, :]

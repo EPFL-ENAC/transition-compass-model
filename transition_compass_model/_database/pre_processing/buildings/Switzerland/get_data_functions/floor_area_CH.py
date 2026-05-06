@@ -356,6 +356,88 @@ def extract_bld_new_buildings_2(table_id, file):
     return dm_new_area
 
 
+def extract_energy_reference_area(
+    dm_stock_tot, country_list, cat_map_sfh, cat_map_mfh, file_path=""
+):
+    """Download data from https://www.housing-stat.ch/fr/data/supply/public.html and extract the energy reference area per building category.
+    This is the area used to compute the energy demand of new buildings, as it corresponds to the area that needs to be heated/cooled.
+    It is different from the dwelling area, as it does include staircases, hallways etc ...
+    To get the documentation of the data check https://www.housing-stat.ch/catalog/fr/4.3/final
+
+    Args:
+        years_ots (_type_): _description_
+        file_path (str, optional): _description_. Defaults to "".
+    """
+    # TODO: automatize the download and extraction of the data, currently I downloaded it manually and saved it as an csv
+    file_path = "transition_compass_model/_database/pre_processing/buildings/Switzerland/data/cadastre_regener.csv"
+
+    df = pd.read_csv(file_path)
+
+    # 1110 single_family_households
+    # 1122 and 1121 multi_family_households
+    # 1130 multi_family_households Bâtiments résidentiels pour collectivités, y compris les résidences et résidences-services pour les personnes âgées, les étudiants, les enfants et d'autres groupes sociaux: par exemple, maisons de retraite, foyers pour travailleurs, foyers pour étudiants, orphelinats, foyers pour sans-abri etc.
+
+    single_multi_code = {
+        "single-family-households": ["Maisons_individuelles"],
+        "multi-family-households": [
+            "Immeubles_a_trois_logements_et_plus",
+            "Maisons_a_deux_logements",
+            "Habitat communautaire",
+        ],
+    }
+
+    dic_ERA = {}
+    for keys, values in single_multi_code.items():
+        df_single = df[df["gklas"].isin(values)]
+        dic_ERA[keys] = df_single["gebf"].sum()
+
+    # For iterating over cantons
+    # file_path = "transition_compass_model/_database/pre_processing/buildings/Switzerland/data/gebaeude_batiment_edificio.csv"
+    # df = pd.read_csv(file_path,usecols = ["GSTAT", "GDEKT", "GKLAS", "GEBF"],sep = "	")
+    # We only keep existing buildings
+    #
+    # df = df[df["GSTAT"]==1004]
+    # #We translate canotn abbreviations by full name country_list
+    # with open("transition_compass_model/_database/pre_processing/buildings/Switzerland/data/Correspondance_canton_name.json", "r") as f:
+    #     cantons_correspondance = json.load(f)
+    # df["GDEKT"] = df["GDEKT"].map(cantons_correspondance)
+    # dic_ERA = {}
+    # single_multi_code = {"sfh" : [1110.], "mfh" : [1122.,1121.,1130.]}
+    # for keys,values in single_multi_code.items():
+    #     df_single = df[df["GKLAS"].isin(values)]
+    #     #GEBF is the column for energy referance area
+    #     dic_ERA[keys] = df_single.groupby("GDEKT")["GEBF"].sum()
+    # dic_ERA["sfh"].loc["Switzerland"] = dic_ERA["sfh"].sum()
+    # dic_ERA["mfh"].loc["Switzerland"] = dic_ERA["mfh"].sum()
+
+    # TODO : test filtering per year of construction to see if improved accuracy
+    # Copilot can you put it in a numpy array with the same order as in dm_stock_tot and with the same categories (sfh and mfh) ?
+
+    # Build an array aligned with dm_stock_tot ordering:
+    # rows -> country_list order, columns -> [sfh, mfh]
+    # arr_era = np.zeros((len(dm_stock_tot.col_labels["Country"]), 2))
+    # for i, country in enumerate(dm_stock_tot.col_labels["Country"]):
+    #     arr_era[i, 0] = dic_ERA["mfh"].get(country, np.nan)
+    #     arr_era[i, 1] = dic_ERA["sfh"].get(country, np.nan)
+
+    # dm_era = DataMatrix(
+    #     col_labels={
+    #         "Country": dm_stock_tot.col_labels["Country"],
+    #         "Years": [2023],
+    #         "Variables": ["bld_energy-reference-area"],
+    #         "Categories1": [
+    #             "multi-family-households",
+    #             "single-family-households",
+    #         ],
+    #     },
+    #     units={"bld_energy-reference-area": "m2"},
+    # )
+    # dm_era.array[:, 0, 0, 0] = arr_era[:, 0]
+    # dm_era.array[:, 0, 0, 1] = arr_era[:, 1]
+
+    return dic_ERA
+
+
 def compute_bld_floor_area_new(
     dm_bld_new_buildings_1, dm_bld_new_buildings_2, dm_bld_area_stock, dm_pop, years_ots
 ):

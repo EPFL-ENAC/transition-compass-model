@@ -36,6 +36,7 @@ dependencies = [
     "statsmodels>=0.14.0",
     "tqdm>=4.67.3",
     "xlrd>=2.0.2",
+    "odfpy>=1.4.1",
 ]
 
 [project.urls]

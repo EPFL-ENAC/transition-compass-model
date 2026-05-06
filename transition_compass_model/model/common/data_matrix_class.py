@@ -1069,7 +1069,9 @@ class DataMatrix:
             raise ValueError("Only * and / operators are possible in change_unit")
         return
 
-    def datamatrix_plot(self, selected_cols={}, title="title", stacked=None):
+    def datamatrix_plot(
+        self, selected_cols={}, title="title", stacked=None, rename_cols={}
+    ):
         if stacked is not None:
             stacked = "one"
 
@@ -1092,15 +1094,30 @@ class DataMatrix:
 
         years_idx = [i[x] for x in plot_cols["Years"]]
         # Create an empty figure
-        fig = px.line(
-            x=plot_cols["Years"], labels={"x": "Years", "y": "Values"}, title=title
-        )
+        if len(set(self.units.values())) > 1:
+            fig = px.line(
+                x=plot_cols["Years"], labels={"x": "Years", "y": "Values"}, title=title
+            )
+        else:
+            fig = px.line(
+                x=plot_cols["Years"],
+                labels={"x": "Years", "y": list(self.units.values())[0]},
+                title=title,
+            )
         fig.data[0]["y"] = np.nan * np.ones(shape=np.shape(fig.data[0]["y"]))
+        # add y label using unit
+
         if dims == 3:
             for c in plot_cols["Country"]:
                 for v in plot_cols["Variables"]:
                     y_values = self.array[i[c], years_idx, i[v]]
-                    label = c + "_" + v
+                    if rename_cols == "end":
+                        label = v.split("_")[-1]
+                    elif v not in rename_cols.keys():
+                        label = c + "_" + v
+                    else:
+                        label = rename_cols[v]
+
                     fig.add_scatter(
                         x=plot_cols["Years"],
                         y=y_values,
@@ -1121,7 +1138,6 @@ class DataMatrix:
                             mode="lines",
                             stackgroup=stacked,
                         )
-
         fig.show()
 
         return
