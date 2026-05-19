@@ -481,6 +481,7 @@ def compute_heating_mix_F_E_D_categories(
     dm_heating_tech.switch_categories_order("Categories2", "Categories3")
     dm_heating_tech_old.switch_categories_order("Categories3", "Categories1")
     dm_heating_tech_old.switch_categories_order("Categories2", "Categories3")
+    # only keep category D, E and F
     dm_tmp = dm_heating_tech.filter(
         {"Categories1": dm_heating_tech_old.col_labels["Categories1"]}
     )

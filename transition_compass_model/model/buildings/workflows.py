@@ -441,7 +441,7 @@ def bld_energy_workflow(DM_energy, dm_clm, dm_floor_area, cdm_const):
     )
     dm_floor_area.add(arr_W_K, dim="Variables", col_label="bld_power-per-K", unit="W/K")
     # Yearly heating energy demand
-    # W/K x HDD x 24
+    # Wh= W/K x HDD x 24
     arr_energy = (
         dm_floor_area[:, :, "bld_power-per-K", :, :]
         * dm_Tint[:, :, "bld_HDD-adj", :, :]

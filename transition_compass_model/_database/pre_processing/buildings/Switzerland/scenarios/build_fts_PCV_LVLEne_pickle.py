@@ -140,6 +140,7 @@ def compute_renovation_loi_energie(
         {"Country": ["Vaud"], "Categories2": ["F"]}
     )
 
+    # append the area in meter square to the datamatrix with the number of buildings.
     dm_num_bld.append(dm_stock_area, dim="Variables")
     dm_bld = replace_years_by_corresponding_categories(
         dm_num_bld, env_cat_sfh, env_cat_mfh
@@ -152,16 +153,18 @@ def compute_renovation_loi_energie(
             "Categories2": ["F"],
         }
     )
+    # Categories 2 is the CECB category as it filtered with only F we just remove a useless dimension
     dm_num_bld_F.group_all(dim="Categories2")
-
     dm_num_bld_per_size_F.group_all(dim="Categories2")
     dm_num_bld_F.append(dm_num_bld_per_size_F, dim="Variables")
 
+    # We filter only for multi-family household sbecause they are probably the only one with superficy higher than 750 m2
     dm_num_bld_F.filter(
         {"Years": [2023], "Categories1": ["multi-family-households"]}, inplace=True
     )
     dm_num_bld_F.group_all(dim="Categories1")
 
+    # Iterate in the size of buildings and compute the ratio of number of buildings it correspond to
     for col in dm_num_bld_per_size_F.col_labels["Variables"]:
         dm_num_bld_F.operation(
             col,
@@ -180,7 +183,8 @@ def compute_renovation_loi_energie(
     percent_building_renvoated_100_149 = (
         1 - (array_per_surface[-2:].sum() - 0.20) / array_per_surface[-2]
     )
-
+    # We want to convert the number of building to the floor area that need to be renovated, and we assume that the average size of building bigger than 150m2 is 175m2
+    # and the average size of building between 100 and 149 is 124.5 m2
     area_necessary_renovated = (
         dm_num_bld_F.array[idx["Vaud"], idx[2023], idx["150+"]] * 175
     )
@@ -209,6 +213,7 @@ def compute_renovation_loi_energie(
     yrs_fts = [yr for yr in dm_rr_fts_2.col_labels["Years"] if yr <= 2040]
     idx_fts = [idx[yr] for yr in yrs_fts]
 
+    # get the proportion of renovation for E buildings (not influenced by energy law) to add to the renovation rate of F buildings, as we assume that some of the renovation that would have been done in E will be done in F because of the energy law
     ren_redistribution = DM_buildings["fts"]["building-renovation-rate"][
         "bld_renovation-redistribution"
     ][2].copy()
@@ -314,8 +319,12 @@ def run(
     env_cat_sfh = construction_period_envelope_cat_sfh
 
     # Recompute stock_cat from DM_buildings
-    dm_floor_cap = DM_buildings["ots"]["floor-intensity"].filter(
-        {"Variables": ["lfs_floor-intensity_space-cap"], "Country": country_list}
+    dm_floor_cap = (
+        DM_buildings["ots"]["floor-intensity"]
+        .filter(
+            {"Variables": ["lfs_floor-intensity_space-cap"], "Country": country_list}
+        )
+        .copy()
     )
     dm_bld_mix = (
         DM_buildings["ots"]["building-renovation-rate"]["bld_building-mix"]
@@ -368,24 +377,6 @@ def run(
         DM_buildings["fts"]["building-renovation-rate"][
             "bld_renovation-redistribution"
         ][lever] = renov_distrib_fts_3.copy()
-    # # Chauffage de l'eau chaude
-
-    # dm_hot_water_fxa = DM_buildings["fxa"]["hot-water"]["hw-tech-mix"].copy()
-
-    # idx_hot_water = dm_hot_water_fxa.idx
-    # dm_hot_water_fxa.array[
-    #     idx_hot_water["Vaud"],
-    #     idx_hot_water[2025] : idx_hot_water[2035],
-    #     idx_hot_water["bld_hw_tech-mix"],
-    #     idx_hot_water["electricity"],
-    # ] = np.nan
-    # dm_hot_water_fxa.array[
-    #     idx_hot_water["Vaud"],
-    #     idx_hot_water[2035] :,
-    #     idx_hot_water["bld_hw_tech-mix"],
-    #     idx_hot_water["electricity"],
-    # ] = 0
-    # DM_buildings["fxa"]["hot-water"]["hw-tech-mix"] = dm_hot_water_fxa
 
     # SECTION: Loi energy - Heating tech
     # Plus de gaz, mazout, charbon dans les prochain 15-20 ans. Pas de gaz, mazout, charbon dans les nouvelles constructions
@@ -423,27 +414,27 @@ def run(
     # dm_heating_cat_fts_2.array[idx['Vaud'], :, idx['bld_heating-mix'], :, idx['B'], idx_fossil] = 0
     dm_heating_cat_fts_2.array[
         idx["Vaud"],
-        1 : idx[2040],
+        1 : idx[2045],
         idx["bld_heating-mix"],
         :,
         *np.ix_(idx_new_cat, idx_fossil),
     ] = np.nan
     dm_heating_cat_fts_2.array[
         idx["Vaud"],
-        idx[2040] :,
+        idx[2045] :,
         idx["bld_heating-mix"],
         :,
         *np.ix_(idx_new_cat, idx_fossil),
     ] = 0
     dm_heating_cat_fts_2.array[
         idx["Vaud"],
-        1 : idx[2045],
+        1 : idx[2050],
         idx["bld_heating-mix"],
         :,
         *np.ix_(idx_old_cat, idx_fossil),
     ] = np.nan
     dm_heating_cat_fts_2.array[
-        idx["Vaud"], idx[2045] :, idx["bld_heating-mix"], :, :, idx_fossil
+        idx["Vaud"], idx[2050] :, idx["bld_heating-mix"], :, :, idx_fossil
     ] = 0
 
     dm_heating_cat_fts_2.fill_nans("Years")

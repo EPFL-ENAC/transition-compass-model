@@ -231,3 +231,4 @@ emissions_scope1.csv
 emissions_scope1_with_adj_factor.csv
 /transition_compass_model/_database/pre_processing/buildings/Switzerland/data
 transition_compass_model/_database/pre_processing/plots.ipynb
+transition_compass_model/_database/pre_processing/plot_helper.py

@@ -376,6 +376,11 @@ def extract_energy_reference_area(
     # 1110 single_family_households
     # 1122 and 1121 multi_family_households
     # 1130 multi_family_households Bâtiments résidentiels pour collectivités, y compris les résidences et résidences-services pour les personnes âgées, les étudiants, les enfants et d'autres groupes sociaux: par exemple, maisons de retraite, foyers pour travailleurs, foyers pour étudiants, orphelinats, foyers pour sans-abri etc.
+    # df = df[df["gkat"].isin(['Batiments_exclusivement_a_usage_d_habitation','Batiment_d_habitation_a_usage_annexe'])]
+
+    dic_ERA = {}
+    # dic_ERA["single-family-households"] = df[df["gklas"] == "Maisons_individuelles"]["gebf"].sum()
+    # dic_ERA["multi-family-households"] = df[df["gklas"] != "Maisons_individuelles"]["gebf"].sum()
 
     single_multi_code = {
         "single-family-households": ["Maisons_individuelles"],
@@ -385,8 +390,6 @@ def extract_energy_reference_area(
             "Habitat communautaire",
         ],
     }
-
-    dic_ERA = {}
     for keys, values in single_multi_code.items():
         df_single = df[df["gklas"].isin(values)]
         dic_ERA[keys] = df_single["gebf"].sum()

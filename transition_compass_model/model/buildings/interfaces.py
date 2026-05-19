@@ -263,9 +263,7 @@ def bld_TPE_interface(
     )
     dm_emission_global.rename_col("Variables", "bld_CO2-emissions", "Variables")
     dm_tpe.append(dm_emission_global.flattest(), dim="Variables")
-    dm_emission_global.change_unit(
-        "bld_CO2-emissions", factor=1e6, old_unit="Mt", new_unit="t"
-    )
+    # dm_emission_global.change_unit("bld_CO2-emissions", factor=1e6, old_unit="Mt", new_unit="t" )
 
     dm_emission_global.group_all("Categories1", inplace=True)
     value = dm_emission_global[0, yr, "bld_CO2-emissions"]

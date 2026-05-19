@@ -203,31 +203,12 @@ def run(global_vars, country_list, years_ots):
         df_WP, cantons_name_list=dm_stock_tot.col_labels["Country"]
     )
 
-    dm_era = fla.extract_energy_reference_area(
-        dm_stock_tot,
-        country_list,
-        cat_map_sfh=construction_period_envelope_cat_sfh,
-        cat_map_mfh=construction_period_envelope_cat_mfh,
-    )
     # !FIXME: You are here!
-    # dm_era[:, 2023, "bld_energy-reference-area", :]
-    arr_adj_factor_vaud = {}
-    for key in dm_era.keys():
-        arr_adj_factor_vaud[key] = (
-            dm_era[key] / dm_stock_tot["Vaud", 2023, "bld_floor-area_stock", key]
-        )
+
     # dm_stock_tot[:, :, "bld_floor-area_stock", :] = (
     #     dm_stock_tot[:, :, "bld_floor-area_stock", :] * arr_adj_factor[:, np.newaxis, :]
     # )
-
-    dm_stock_tot["Vaud", :, "bld_floor-area_stock", "multi-family-households"] = (
-        dm_stock_tot["Vaud", :, "bld_floor-area_stock", "multi-family-households"]
-        * arr_adj_factor_vaud["multi-family-households"]
-    )
-    dm_stock_tot["Vaud", :, "bld_floor-area_stock", "single-family-households"] = (
-        dm_stock_tot["Vaud", :, "bld_floor-area_stock", "single-family-households"]
-        * arr_adj_factor_vaud["single-family-households"]
-    )
+    backup_stock = dm_stock_tot.copy()
 
     arr_adj_factor = (
         dm_WP[:, 2023, "bld_floor-area_stock", :]
@@ -237,6 +218,30 @@ def run(global_vars, country_list, years_ots):
     dm_stock_tot[:, :, "bld_floor-area_stock", :] = (
         dm_stock_tot[:, :, "bld_floor-area_stock", :] * arr_adj_factor[:, np.newaxis, :]
     )
+    dm_era = fla.extract_energy_reference_area(
+        dm_stock_tot,
+        country_list,
+        cat_map_sfh=construction_period_envelope_cat_sfh,
+        cat_map_mfh=construction_period_envelope_cat_mfh,
+    )
+
+    # dm_era[:, 2023, "bld_energy-reference-area", :]
+
+    arr_adj_factor_vaud = {}
+    for key in dm_era.keys():
+        arr_adj_factor_vaud[key] = (
+            dm_era[key] / backup_stock["Vaud", 2023, "bld_floor-area_stock", key]
+        )
+
+    dm_stock_tot["Vaud", :, "bld_floor-area_stock", "multi-family-households"] = (
+        backup_stock["Vaud", :, "bld_floor-area_stock", "multi-family-households"]
+        * arr_adj_factor_vaud["multi-family-households"]
+    )
+    dm_stock_tot["Vaud", :, "bld_floor-area_stock", "single-family-households"] = (
+        backup_stock["Vaud", :, "bld_floor-area_stock", "single-family-households"]
+        * arr_adj_factor_vaud["single-family-households"]
+    )
+
     # Adjust cantonal stock by energy class
     dm_stock_cat.normalise("Categories2")
     assert (
