@@ -4,16 +4,15 @@ import pickle
 import re
 
 import numpy as np
-
-# from _database.pre_processing.api_routine_Eurostat import get_data_api_eurostat
 import plotly.io as pio
-
-from transition_compass_model.model.common.auxiliary_functions import my_pickle_dump
 
 pio.renderers.default = "browser"
 import warnings
 
 warnings.simplefilter("ignore")
+
+# from _database.pre_processing.api_routine_Eurostat import get_data_api_eurostat
+from transition_compass_model.model.common.auxiliary_functions import my_pickle_dump
 
 # directories
 current_file_directory = os.getcwd()
@@ -225,11 +224,11 @@ for i in range(0, len(files_temp)):
 # TODO: think about calibration of energy demand of ammonia manufacturing.
 # probably can be inferred from emissions and constants, though we would need the energy mix (probably we can use the one of chemicals in JRC)
 
-# drop ammonia
-DM_cal_amm["material-production"] = DM_cal["material-production"].filter(
-    {"Categories1": ["ammonia"]}
-)
-DM_cal["material-production"].drop("Categories1", "ammonia")
+# # drop ammonia
+# DM_cal_amm["material-production"] = DM_cal["material-production"].filter(
+#     {"Categories1": ["ammonia"]}
+# )
+# DM_cal["material-production"].drop("Categories1", "ammonia")
 
 DM_cal_amm["emissions"] = DM_cal["emissions_ammonia"].copy()
 DM_cal.pop("emissions_ammonia")
