@@ -1,4 +1,5 @@
 import os
+import pickle
 
 import numpy as np
 from _database.pre_processing.api_routine_Eurostat import get_data_api_eurostat
@@ -141,7 +142,6 @@ def get_pop_eurostat(code_pop, EU27_cntr_list, dict_iso2, years_ots):
 def get_pop_eurostat_fts(
     code_pop_fts, EU27_cntr_list, years_fts, dict_iso2, dm_pop_age_ots, dm_pop_tot_ots
 ):
-
     # Scenarios
     # 1- Baseline, 2- Lower mortality, 3-Lower migration, 4-Lower fertility
     # Assign levers
@@ -449,7 +449,13 @@ for lev in range(4):
     DM_lfs["fts"]["pop"]["lfs_population_"][lev] = dict_dm_pop_fts_tot[lev]
 current_file_directory = os.getcwd()
 file = os.path.join(current_file_directory, "data/lifestyles_allcountries.pickle")
-my_pickle_dump(DM_lfs, file)
+if os.path.exists(file):
+    my_pickle_dump(DM_lfs, file)
+else:
+    os.makedirs(os.path.join(current_file_directory, "data"), exist_ok=True)
+    with open(file, "wb") as handle:
+        pickle.dump(DM_lfs, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
 
 # keep only EU27
 dm_pop_age = dm_pop_age.filter({"Country": ["EU27"]})
