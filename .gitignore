@@ -227,5 +227,6 @@ CLAUDE.md
 # PDFs
 *.pdf
 
-# JSONs inside pre_processing
+# JSONs and ZIPs inside pre_processing
 transition_compass_model/_database/pre_processing/**/*.json
+transition_compass_model/_database/pre_processing/**/*.zip
