@@ -1,7 +1,7 @@
 import os
 
 import numpy as np
-from _database.pre_processing.industry.Switzerland.get_data_functions.data_product_net_import import (
+from get_data_functions.data_packaging_per_capita import (
     get_packaging_data,
 )
 
@@ -11,9 +11,8 @@ from transition_compass_model.model.common.auxiliary_functions import (
 )
 
 
-def make_dm_packaging(current_file_directory, dm_pop):
-
-    dm = get_packaging_data(current_file_directory)
+def make_dm_packaging(current_file_directory, dm_pop, years_ots):
+    dm = get_packaging_data(current_file_directory, years_ots)
 
     # # load DM_pack
     # filepath = os.path.join(current_file_directory, '../../../../data/datamatrix/lifestyles.pickle')
@@ -68,13 +67,12 @@ def make_dm_packaging(current_file_directory, dm_pop):
     return dm
 
 
-def run(dm_pop_ots):
-
+def run(dm_pop_ots, years_ots):
     # directory
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
 
     # get packaging per capita
-    dm_pack = make_dm_packaging(current_file_directory, dm_pop_ots)
+    dm_pack = make_dm_packaging(current_file_directory, dm_pop_ots, years_ots)
 
     return dm_pack
 

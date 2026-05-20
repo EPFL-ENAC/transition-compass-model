@@ -7,11 +7,11 @@ import pandas as pd
 def get_emissions_data(current_file_directory, ghg):
     filepath = os.path.join(
         current_file_directory,
-        "../data/emissions/Evolution_GHG_since_1990_2025-04.xlsx",
+        "../data/emissions/Evolution_GHG_since_1990_2026-04.xlsx",
     )
     df = pd.read_excel(filepath, sheet_name=ghg)
     df.columns = df.iloc[3, :]
-    df = df.iloc[[11, 31], :]
+    df = df.iloc[[11, 32], :]
     df.iloc[0, 1] = "process-emissions"
     df.iloc[1, 1] = "combustion-emissions"
     df = pd.melt(df, id_vars=["Cat. (1)", np.nan], var_name="Years")
