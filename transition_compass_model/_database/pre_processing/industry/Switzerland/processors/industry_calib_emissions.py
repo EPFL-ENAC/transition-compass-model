@@ -2,7 +2,7 @@ import os
 
 import numpy as np
 import pandas as pd
-from _database.pre_processing.industry.Switzerland.get_data_functions.data_emissions import (
+from get_data_functions.data_emissions import (
     get_emissions_data,
 )
 
@@ -11,7 +11,6 @@ from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 
 def emissions_calib(current_file_directory, years_ots, years_fts):
-
     # get data
     df = pd.concat(
         [
@@ -57,6 +56,7 @@ def emissions_calib(current_file_directory, years_ots, years_fts):
     )
 
     # add missing years as nan
+    dm = dm.filter({"Years": years_ots})
     years = years_ots + years_fts
     missing = np.array(years)[[y not in dm.col_labels["Years"] for y in years]].tolist()
     dm.add(np.nan, "Years", missing, dummy=True)
@@ -70,7 +70,6 @@ def emissions_calib(current_file_directory, years_ots, years_fts):
 
 
 def run(years_ots, years_fts):
-
     # directories
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
 

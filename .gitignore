@@ -223,3 +223,9 @@ CLAUDE.md
 
 # For Mac
 .DS_Store
+
+# PDFs
+*.pdf
+
+# JSONs inside pre_processing
+transition_compass_model/_database/pre_processing/**/*.json

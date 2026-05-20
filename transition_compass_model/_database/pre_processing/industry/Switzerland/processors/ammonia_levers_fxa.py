@@ -2,7 +2,7 @@ import os
 
 import numpy as np
 import pandas as pd
-from _database.pre_processing.industry.Switzerland.get_data_functions.data_ammonia_product_net_import import (
+from get_data_functions.data_ammonia_product_net_import import (
     get_ammonia_trade_data,
 )
 
@@ -22,7 +22,6 @@ def linear_fitting_per_variab(dm, variable, year_start, year_end, years):
 
 
 def make_ammonia_dms(dm, years_ots, years_fts):
-
     # make ots
     dm.add(np.nan, "Years", list(range(1990, 2001 + 1)), dummy=True)
     dm = dm.flatten()
@@ -127,7 +126,6 @@ def make_ammonia_dms(dm, years_ots, years_fts):
 
 
 def run(years_ots, years_fts):
-
     # directories
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
 
