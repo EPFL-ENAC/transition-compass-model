@@ -72,9 +72,6 @@ def time_series_chf_over_tonne(df_price, df_price_index):
     df_temp = df_price.loc[df_price["variable-calc"] == "steel, aluminium, copper", :]
     df_temp["variable-calc"] = "aluminium-pack"
     df_price = pd.concat([df_price, df_temp])
-    df_temp = df_price.loc[df_price["variable-calc"] == "wwp", :]
-    df_temp["variable-calc"] = "paper"
-    df_price = pd.concat([df_price, df_temp])
     df_temp = df_price.loc[
         df_price["variable-calc"]
         == "computer, phone, tv, fridge, freezer, dishwasher, dryer, wmachine",
@@ -549,7 +546,7 @@ def make_material_production(
 
     # get price in chf/t
     df_temp = df_price_ts.copy()
-    df_temp = df_temp.loc[df_temp["trade-flow"] == "EXP", :]
+    df_temp = df_temp.loc[df_temp["trade-flow"] == "IMP", :]
     df_temp.rename(columns={"year": "Years", "price[chf/t]": "value"}, inplace=True)
     df_temp["Country"] = "Switzerland"
     df_temp = df_temp.loc[:, ["Country", "Years", "variable-calc", "value"]]

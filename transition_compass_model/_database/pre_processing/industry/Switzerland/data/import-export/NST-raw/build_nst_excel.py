@@ -24,6 +24,7 @@ for flow, csv_file in flow_map.items():
         .reset_index(drop=True)
     )
 
+    df["NST4_txt"] = df["NST4_txt"].str.replace("\xa0", " ", regex=False)
     df["kt"] = df["Quantity_kg"] / 1e6
     df["chf-mio"] = df["Value_CHF"] / 1e6
 
