@@ -208,6 +208,7 @@ def run(global_vars, country_list, years_ots):
     # dm_stock_tot[:, :, "bld_floor-area_stock", :] = (
     #     dm_stock_tot[:, :, "bld_floor-area_stock", :] * arr_adj_factor[:, np.newaxis, :]
     # )
+    # Adjust from dwelling area to ERA
     backup_stock = dm_stock_tot.copy()
 
     arr_adj_factor = (
@@ -218,15 +219,11 @@ def run(global_vars, country_list, years_ots):
     dm_stock_tot[:, :, "bld_floor-area_stock", :] = (
         dm_stock_tot[:, :, "bld_floor-area_stock", :] * arr_adj_factor[:, np.newaxis, :]
     )
-    dm_era = fla.extract_energy_reference_area(
-        dm_stock_tot,
-        country_list,
-        cat_map_sfh=construction_period_envelope_cat_sfh,
-        cat_map_mfh=construction_period_envelope_cat_mfh,
-    )
+    # Get energy referance area from vaud canton energy cadastre data and adjust the vaud stock accordingly
+    dm_era = fla.extract_energy_reference_area()
 
     # dm_era[:, 2023, "bld_energy-reference-area", :]
-
+    # adjust factor from dwelling surface to energy referance area (ERA) for vaud canton
     arr_adj_factor_vaud = {}
     for key in dm_era.keys():
         arr_adj_factor_vaud[key] = (

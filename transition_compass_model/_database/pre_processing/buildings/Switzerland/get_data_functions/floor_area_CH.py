@@ -356,9 +356,7 @@ def extract_bld_new_buildings_2(table_id, file):
     return dm_new_area
 
 
-def extract_energy_reference_area(
-    dm_stock_tot, country_list, cat_map_sfh, cat_map_mfh, file_path=""
-):
+def extract_energy_reference_area(file_path=""):
     """Download data from https://www.housing-stat.ch/fr/data/supply/public.html and extract the energy reference area per building category.
     This is the area used to compute the energy demand of new buildings, as it corresponds to the area that needs to be heated/cooled.
     It is different from the dwelling area, as it does include staircases, hallways etc ...

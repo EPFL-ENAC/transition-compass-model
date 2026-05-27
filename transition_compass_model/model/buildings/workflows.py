@@ -597,6 +597,8 @@ def bld_energy_workflow(DM_energy, dm_clm, dm_floor_area, cdm_const):
         - dm_fuel[:, :, "bld_energy-demand_heating", "heat-pump"]
     )
 
+    # energy demand_b
+
     # Heating demand by type of building
     dm_class = dm_floor_area.group_all("Categories1", inplace=False)
     dm_class.filter({"Variables": ["bld_heating"]}, inplace=True)
@@ -646,6 +648,10 @@ def bld_energy_workflow(DM_energy, dm_clm, dm_floor_area, cdm_const):
             {"Variables": ["bld_energy-demand_heating"], "Categories1": ["wood"]}
         ),
         "refinery": dm_refinery,
+        "energy_per_cat": dm_energy.filter(
+            {"Variables": ["bld_energy-demand_heating", "bld_energy-demand_cooling"]},
+            inplace=False,
+        ),
     }
 
     return DM_energy_out

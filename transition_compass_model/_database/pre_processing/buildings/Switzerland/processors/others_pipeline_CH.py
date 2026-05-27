@@ -135,7 +135,7 @@ def run(country_list, years_ots, years_fts):
     #####     EMISSION FACTORS    ######
     ####################################
     # Obtained from OFEV file https://www.bafu.admin.ch/dam/fr/sd-web/HnIzzj6OfDUU/EF_CO2_Berichterstattung_Kantone.pdf.
-    # Electricity and heating district are treated separately. There is no coal in vaudx'
+    # Electricity and heating district are treated separately. There is no coal in vaud
     OFEV_emissions_fact = {
         "coal": 350,
         "heating-oil": 265,

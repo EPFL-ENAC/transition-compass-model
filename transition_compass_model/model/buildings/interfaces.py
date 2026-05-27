@@ -300,6 +300,19 @@ def bld_TPE_interface(
     dmservices_flat.deepen()
     dmservices_flat.add(0, "Categories1", ["other-tech", "ambient-heat"], dummy=True)
     dm_energy_global.append(dmservices_flat, dim="Variables")
+
+    # Create Categories1 dimension for appliances with heating technologies
+    dm_appliances_energy = DM_appliances.copy()
+    dm_appliances_energy.deepen()
+    dm_appliances_energy.rename_col("tot-elec-demand", "electricity", dim="Categories1")
+    other_cats = [
+        cat
+        for cat in dm_energy_global.col_labels["Categories1"]
+        if cat != "electricity"
+    ]
+    dm_appliances_energy.add(0, "Categories1", other_cats, dummy=True)
+    dm_energy_global.append(dm_appliances_energy, dim="Variables")
+
     dm_energy_comsumption_tot = dm_energy_global.groupby(
         {
             "energy_consumption": [
@@ -307,6 +320,7 @@ def bld_TPE_interface(
                 "bld_services_energy-consumption_space-heating",
                 "bld_energy-demand_heating",
                 "bld_hot-water_energy-demand",
+                "bld_appliances",
             ]
         },
         dim="Variables",
