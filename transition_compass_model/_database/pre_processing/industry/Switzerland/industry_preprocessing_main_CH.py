@@ -37,7 +37,7 @@ print("Net import share and material production")
 
 # packaging per capita
 print("Packaging per capita")
-dm_pack = packaging_per_capita_run(dm_pop_ots)
+dm_pack = packaging_per_capita_run(dm_pop_ots, years_ots)
 
 # waste management
 print("Waste management")

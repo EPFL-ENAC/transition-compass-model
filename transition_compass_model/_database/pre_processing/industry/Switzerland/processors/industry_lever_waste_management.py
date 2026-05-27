@@ -9,7 +9,7 @@ import plotly.io as pio
 
 pio.renderers.default = "browser"
 
-from _database.pre_processing.industry.Switzerland.get_data_functions.data_waste import (
+from get_data_functions.data_waste import (
     extract_waste_data_from_dechets_speciaux,
     get_data_special_waste,
     get_data_waste_vehicles,
@@ -22,7 +22,6 @@ from transition_compass_model.model.common.auxiliary_functions import (
 
 
 def get_pickle_eu(current_file_directory):
-
     filepath = os.path.join(
         current_file_directory, "../../../../data/datamatrix/industry.pickle"
     )
@@ -34,7 +33,6 @@ def get_pickle_eu(current_file_directory):
 
 
 def waste_vehicles(current_file_directory, dm_eu_vehicles, years_ots):
-
     dm = get_data_waste_vehicles(current_file_directory)
 
     # make layer 1
@@ -183,7 +181,6 @@ def waste_vehicles(current_file_directory, dm_eu_vehicles, years_ots):
 
 
 def waste_ships(dm):
-
     # source: https://shipbreakingplatform.org/platform-publishes-list-2024/
     # in 2024, 100% of swiss ships being dismantled were dismantled in India or other countries
     # so we will put export 100% and rest to zero
@@ -206,7 +203,6 @@ def waste_ships(dm):
 
 
 def waste_buildings(current_file_directory, dm_eu_bld, years_ots):
-
     # yearly pdfs on déchets spéciaux (probably Déchets minéraux or Déchets de chantier non triés problématiques)
     # layer 1 should be collected or exported
     # layer 2 from pdf
@@ -273,7 +269,6 @@ def waste_buildings(current_file_directory, dm_eu_bld, years_ots):
 
 
 def waste_roads(current_file_directory, dm_eu_roads):
-
     # either like buildings or Matériaux bitumineux de démolition des routes > 20'000 mg/kg HAP
     # note: this is polluted waste from road demolition, so possibly the numbers will be a bit different for overall
     # waste from road demolition. We consider it as an approximation (probably higher bound)
@@ -328,7 +323,6 @@ def waste_roads(current_file_directory, dm_eu_roads):
 
 
 def waste_appliances(dm_eu):
-
     # electronics
     # from here: https://www.bafu.admin.ch/bafu/en/home/topics/waste/guide-to-waste-a-z/electrical-and-electronic-equipment.html
     # "The dismantling and separation of equipment into fractions is mainly carried out in Switzerland.
@@ -422,7 +416,6 @@ def waste_appliances(dm_eu):
 
 
 def waste_pack_glass(dm_eu):
-
     # for glass:
     # https://aureverre.ch/faits-et-chiffres
     # https://www.vetroswiss.ch/fr/vetroswiss/rapport-annuel/
@@ -465,7 +458,6 @@ def waste_pack_glass(dm_eu):
 
 
 def waste_pack_plastic(dm_eu):
-
     # plastic pack
 
     # for plastic packaging waste management, we will need to see if to consider the PET data (which is only one share of plastic)
@@ -571,7 +563,6 @@ def waste_pack_plastic(dm_eu):
 
 
 def waste_pack_aluminium(dm_eu):
-
     # note: Switzerland does not have facilities for the recycling of aluminium (https://alu-recycling.ch/fr/le-circuit-de-lalu/ and https://www.bafu.admin.ch/bafu/en/home/topics/waste/guide-to-waste-a-z/electrical-and-electronic-equipment.html)
 
     dm = dm_eu.filter({"Country": ["EU27"], "Variables": ["aluminium-pack"]})
@@ -592,7 +583,6 @@ def waste_pack_aluminium(dm_eu):
 
 
 def waste_pack_paper(dm_eu):
-
     # note: in theory the recyclable ones are paper pack and paper print, paper san goes all to water / not recyclable
 
     # https://spkf.ch/wp-content/uploads/2024/06/bk-240521-statistischer-Jahresbericht-RPK-2023.pdf
@@ -687,7 +677,6 @@ def waste_pack_paper(dm_eu):
 
 
 def run(years_ots):
-
     # directories
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
 

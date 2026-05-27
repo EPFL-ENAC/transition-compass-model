@@ -4,7 +4,7 @@ import plotly.io as pio
 pio.renderers.default = "browser"
 import os
 
-from _database.pre_processing.industry.Switzerland.get_data_functions.data_energy import (
+from get_data_functions.data_energy import (
     data_energy as get_energy_data,
 )
 
@@ -12,7 +12,6 @@ from transition_compass_model.model.common.auxiliary_functions import create_yea
 
 
 def energy_calib(current_working_directory, years_ots, years_fts):
-
     dm = get_energy_data(current_working_directory)
 
     # make shares to build missing on those, and then reconvert at the end
@@ -72,7 +71,6 @@ def energy_calib(current_working_directory, years_ots, years_fts):
 
 
 def run(years_ots, years_fts):
-
     # directories
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
 

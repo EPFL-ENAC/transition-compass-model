@@ -7,3 +7,5 @@
 *.pickle
 *.xls
 *.ipynb
+*/data
+plot_helper.py

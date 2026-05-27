@@ -5,8 +5,8 @@ Local setup, dev workflow, and release process for `transition-compass-model`.
 ## Prerequisites
 
 - Python 3.12+
-- [`uv`](https://docs.astral.sh/uv/) — `pip install uv`
-- git
+- [`uv`](https://docs.astral.sh/uv/) — `pip install uv` (on macOS: `brew install uv`)
+- git + [git-lfs](https://git-lfs.com/) (on macOS: `brew install git-lfs`)
 
 ## Standalone install
 
@@ -17,6 +17,8 @@ make install
 ```
 
 This creates a `.venv`, installs all dependencies (including dev tools), and registers pre-commit hooks. You can then run scripts directly with `uv run python ...`.
+
+> **macOS note:** uv-created venvs do not include `pip` by default. If you need it (e.g. for Spyder kernels), run `uv pip install pip` once after `make install`.
 
 ## Running the model locally
 
@@ -64,12 +66,15 @@ pip install spyder
 spyder
 ```
 
+> **macOS note:** this may fail with `ModuleNotFoundError: No module named 'distutils'` due to a known incompatibility between Spyder and uv-created venvs on macOS. Use Option B instead.
+
 **Option B — use an existing Spyder installation with a custom kernel:**
 
-1. With the venv activated, install `spyder-kernels`:
+1. With the venv activated, install `spyder-kernels` — pin the version to match your Spyder installation (check the required range in **Spyder → About Spyder**):
    ```bash
-   pip install spyder-kernels
+   python -m pip install "spyder-kernels>=3.1.0,<3.2.0"
    ```
+   Installing without a pin may pull in a version incompatible with your Spyder.
 2. In Spyder → **Preferences → Python interpreter → Use the following interpreter** → browse to `.venv/bin/python`.
 3. Restart the kernel.
 

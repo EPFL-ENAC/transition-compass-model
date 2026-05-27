@@ -14,7 +14,7 @@ from transition_compass_model.model.common.data_matrix_class import DataMatrix
 
 pio.renderers.default = "browser"
 
-from _database.pre_processing.industry.Switzerland.get_data_functions.data_product_net_import import (
+from get_data_functions.data_product_net_import import (
     get_import_export_chf,
     get_io_data,
     get_price_data,
@@ -36,7 +36,6 @@ from transition_compass_model.model.common.auxiliary_functions import create_yea
 
 
 def import_export_chf(current_file_directory):
-
     filepath_map = os.path.join(
         current_file_directory,
         "../data/products_materials_mapping/CPA_calc_mapping.xlsx",
@@ -68,14 +67,10 @@ def import_export_chf(current_file_directory):
 
 
 def time_series_chf_over_tonne(df_price, df_price_index):
-
     # fix df_price
     df_price["year"] = "2024"
     df_temp = df_price.loc[df_price["variable-calc"] == "steel, aluminium, copper", :]
     df_temp["variable-calc"] = "aluminium-pack"
-    df_price = pd.concat([df_price, df_temp])
-    df_temp = df_price.loc[df_price["variable-calc"] == "wwp", :]
-    df_temp["variable-calc"] = "paper"
     df_price = pd.concat([df_price, df_temp])
     df_temp = df_price.loc[
         df_price["variable-calc"]
@@ -140,7 +135,6 @@ def time_series_chf_over_tonne(df_price, df_price_index):
 
 
 def make_dm_io(df_map_cpa, df_io, df_imp_exp):
-
     # rename codes wrt to calc name
     df_temp = df_map_cpa.loc[:, ["code-2digit", "variable-calc"]]
     df_temp.rename(columns={"code-2digit": "code"}, inplace=True)
@@ -211,7 +205,6 @@ def make_dm_io(df_map_cpa, df_io, df_imp_exp):
 
 
 def make_net_import_share(current_file_directory, dm_io, years_ots):
-
     # # adjust demand for timber (right now it's constant at 2017 levels)
     # dm_temp = dm_io.filter({"Variables" : ["demand"],"Categories1" : ["timber","wwp"]})
     # # df_temp = dm_temp.write_df()
@@ -408,7 +401,6 @@ def make_net_import_share(current_file_directory, dm_io, years_ots):
 
 
 def make_material_net_import_share(current_file_directory, dm_netimp, years_ots):
-
     # make material net import
     # ['aluminium', 'cement', 'chem', 'copper', 'glass', 'lime', 'other', 'paper', 'steel', 'timber']
     dm_netimp_materials = dm_netimp.filter(
@@ -467,7 +459,6 @@ def make_material_net_import_share(current_file_directory, dm_netimp, years_ots)
 def make_material_production(
     current_file_directory, dm_io, dm_wwp_demand, df_price_ts, years_ots, years_fts
 ):
-
     # # check with material flow data
     # # Direct Material Input (DMI) = Domestic Extraction (DE) + Imports
     # # Domestic Material Consumption (DMC) = Domestic Extraction (DE) + Imports - Exports
@@ -555,7 +546,7 @@ def make_material_production(
 
     # get price in chf/t
     df_temp = df_price_ts.copy()
-    df_temp = df_temp.loc[df_temp["trade-flow"] == "EXP", :]
+    df_temp = df_temp.loc[df_temp["trade-flow"] == "IMP", :]
     df_temp.rename(columns={"year": "Years", "price[chf/t]": "value"}, inplace=True)
     df_temp["Country"] = "Switzerland"
     df_temp = df_temp.loc[:, ["Country", "Years", "variable-calc", "value"]]
@@ -581,7 +572,7 @@ def make_material_production(
     # make individual material with shares from EU27
     filepath = os.path.join(
         current_file_directory,
-        "../../eu/data/datamatrix/calibration_material-production.pickle",
+        "../data/eu-calibration-material-production/calibration_material-production.pickle",  # this is the old eu material production pickle, as prodcom file for material production is no longer available (the new one we made is just nans) this is a temporary solution with the old file
     )
     with open(filepath, "rb") as handle:
         dm_calib_matprod_eu = pickle.load(handle)
@@ -681,7 +672,6 @@ def make_material_production(
 
 
 def run(years_ots, years_fts):
-
     # directories
     current_file_directory = os.path.dirname(os.path.abspath(__file__))
 
