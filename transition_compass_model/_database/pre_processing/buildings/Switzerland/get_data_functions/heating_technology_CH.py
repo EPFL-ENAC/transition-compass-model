@@ -12,6 +12,7 @@ from transition_compass_model._database.pre_processing.api_routines_CH import (
 from transition_compass_model.model.common.auxiliary_functions import (
     dm_add_missing_variables,
     linear_fitting,
+    my_pickle_dump,
     rename_cantons,
     save_url_to_file,
 )
@@ -729,7 +730,7 @@ def compute_heating_efficiency_by_archetype(
 def extract_heating_technologies_EP2050(file_url, zip_name, file_pickle):
     try:
         with open(file_pickle, "rb") as handle:
-            dm = pickle.load(handle)
+            dm_shares = pickle.load(handle)
 
     except OSError:
 
@@ -847,5 +848,10 @@ def extract_heating_technologies_EP2050(file_url, zip_name, file_pickle):
 
         dm_shares = dm_multi
         dm_shares.append(dm_single, dim="Categories1")
+
+        # save pickle
+        current_file_directory = os.path.dirname(os.path.abspath(__file__))
+        f = os.path.join(current_file_directory, file_pickle)
+        my_pickle_dump(dm_shares, f)
 
     return dm_shares

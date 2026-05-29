@@ -100,6 +100,6 @@ print("Add scenarios for floor area/cap")
 DM_buildings = fts_floor_area_run(DM_buildings, years_ots, years_fts)
 
 print("Add scenarios for heating efficiency (heat-pumps)")
-DM_buildings = fts_efficiency_run(DM_buildings, years_fts)
+fts_efficiency_run(DM_buildings, years_fts)
 
 print("Hello")
