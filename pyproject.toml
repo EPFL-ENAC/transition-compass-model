@@ -37,6 +37,7 @@ dependencies = [
     "tqdm>=4.67.3",
     "xlrd>=2.0.2",
     "odfpy>=1.4.1",
+    "highspy>=1.14.0"
 ]
 
 [project.urls]
