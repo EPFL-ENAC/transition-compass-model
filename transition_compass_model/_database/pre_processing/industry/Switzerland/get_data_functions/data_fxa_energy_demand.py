@@ -23,9 +23,11 @@ def _read_sfoe_sheet(filepath, sheet_name, carrier):
     df = df[df["Secteur"] == "Industrie"]
     df = df[
         df["N° de branche"].apply(
-            lambda x: isinstance(x, (int, float))
-            and not isinstance(x, bool)
-            and 1 <= int(x) <= 11
+            lambda x: (
+                isinstance(x, (int, float))
+                and not isinstance(x, bool)
+                and 1 <= int(x) <= 11
+            )
         )
     ]
     year_cols = [
