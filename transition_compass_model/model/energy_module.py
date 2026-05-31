@@ -463,6 +463,11 @@ def create_future_country_production_trend(DM_2050, DM_input, years_ots, years_f
 
     ## Use Capacity to create a Pathway at Country level
     dm_cap_tmp = dm_cap.filter({"Variables": ["pow_capacity"]})
+    missing_cat = list(
+        set(dm_prod_trend.col_labels["Categories1"])
+        - set(dm_cap_tmp.col_labels["Categories1"])
+    )
+    dm_cap_tmp.add(0, dim="Categories1", col_label=missing_cat, dummy=True)
     # Create fts trend by using the pow_cap-fact = production / capacity
     # fake_net_import_cap = dm_prod_hist[:, :, 'pow_production', 'Net-import', np.newaxis]
     # dm_cap_tmp.add(fake_net_import_cap, dummy=True, dim='Categories1', col_label='Net-import')
