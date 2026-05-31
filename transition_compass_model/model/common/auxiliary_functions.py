@@ -1335,18 +1335,14 @@ def my_pickle_dump(
 
         def update_DM(DM_old, DM_new):
             for key in DM_new.keys():
-                if isinstance(DM_new[key], dict):
-                    update_DM(DM_old[key], DM_new[key])
+                if key in DM_old.keys():
+                    if isinstance(DM_new[key], dict):
+                        update_DM(DM_old[key], DM_new[key])
+                    else:
+                        DM_old[key] = update_data(DM_old[key], DM_new[key])
                 else:
-                    try:
-                        if key in DM_old.keys():
-                            DM_old[key] = update_data(DM_old[key], DM_new[key])
-                        else:
-                            DM_old[key] = DM_new[key]
-                    except Exception:
-                        raise RuntimeError(
-                            f"Warning: Error occurred when trying to update {key}, in file {local_pickle_file}"
-                        )
+                    print("Warning: key " + key + " not in old DM, adding it")
+                    DM_old[key] = DM_new[key]
             return
 
         if not refactoring_change:

@@ -428,6 +428,14 @@ class DataMatrix:
         return idx
 
     def overwrite_1cat(self, matrix2):
+        """_summary_
+
+        Args:
+            matrix2 (_type_): _description_
+
+        Raises:
+            Exception: _description_
+        """
         country = matrix2.col_labels["Country"]
         years = matrix2.col_labels["Years"]
         variables = matrix2.col_labels["Variables"]
@@ -447,6 +455,13 @@ class DataMatrix:
             )
 
     def fill_nans(self, dim_to_interp):
+        """
+        It fills the nans in the datamatrix by interpolating over the dimension dim_to_interp (e.g. 'Years').
+        If there are nans outside of the range of the existing values, it fills them with the closest existing value (e.g. if there are nans before the first year with data, it fills them with the value of the first year with data).
+        It does not return a new datamatrix, it modifies self.array in place.
+        Args:
+            dim_to_interp (str): the dimension over which to interpolate the nans (e.g. 'Years')
+        """
         axis_to_interp = self.dim_labels.index(dim_to_interp)
 
         def interpolate_nans(arr, x_values):
